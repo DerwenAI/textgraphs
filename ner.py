@@ -3,7 +3,13 @@
 # Copyright ©2023 Derwen, Inc. All rights reserved.
 
 """
-dev/test driver
+Reproduce examples from:
+
+  * <https://derwen.ai/s/mqqm
+  * <https://github.com/tomaarsen/SpanMarkerNER>
+  * <https://github.com/thunlp/OpenNRE/>
+  * <https://medium.com/@groxli/create-a-spacy-visualizer-with-streamlit-8b9b41b36745>
+  * <https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4>
 """
 
 from collections import OrderedDict
