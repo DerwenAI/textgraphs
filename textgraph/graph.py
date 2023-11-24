@@ -10,6 +10,7 @@ Classes used for graph representation:
 """
 
 from dataclasses import dataclass
+import enum
 import typing
 
 import spacy  # pylint: disable=E0401
@@ -21,12 +22,41 @@ class Node:
 A data class representing one node, i.e., an extracted phrase.
     """
     node_id: int
-    key: str
-    span: typing.Union[ spacy.tokens.span.Span, spacy.tokens.token.Token ]
+    span: spacy.tokens.token.Token
     text: str
+    pos: str
     kind: typing.Optional[ str ] = None
-    count: int = 1
+    count: int = 0
     weight: float = 0.0
+
+    def get_pos (
+        self,
+        ) -> typing.Tuple[ int, int ]:
+        """
+Generate a position span for OpenNRE.
+        """
+        return (self.span.idx, self.span.idx + len(self.text) - 1)
+
+
+class RelEnum (enum.IntEnum):
+    """
+Enumeration for the kinds of edge relations
+    """
+    DEP = 0
+    INFER = 1
+
+    def __str__ (
+        self
+        ) -> str:
+        """
+Codec for representing as a string.
+        """
+        decoder: typing.List[ str ] = [
+            "dependency",
+            "inferred",
+        ]
+
+        return decoder[self.value]
 
 
 @dataclass(order=False, frozen=False)
@@ -36,4 +66,7 @@ A data class representing an edge between two nodes.
     """
     src_node: int
     dst_node: int
+    kind: RelEnum
+    rel: str
+    prob: float
     count: int = 1

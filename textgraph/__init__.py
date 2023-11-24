@@ -6,4 +6,6 @@
 Package definitions.
 """
 
-from .graph import Edge, Node
+from .graph import Edge, Node, RelEnum
+
+from .util import calc_quantile_bins, stripe_column, root_mean_square
