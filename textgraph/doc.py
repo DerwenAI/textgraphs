@@ -3,7 +3,10 @@
 # Copyright ©2023 Derwen, Inc. All rights reserved.
 
 """
-Integrate the reproduced examples from:
+Implementation of an LLM-augmented `textgraph` algorithm for
+constructing a _knowledge graph_ from raw, unstructured text source.
+
+This integrate examples from:
 
   * <https://derwen.ai/s/mqqm>
   * <https://github.com/tomaarsen/SpanMarkerNER>
@@ -15,7 +18,6 @@ Integrate the reproduced examples from:
 
 from collections import OrderedDict
 import itertools
-import sys  # pylint: disable=W0611
 import typing
 
 from icecream import ic  # pylint: disable=E0401
@@ -23,7 +25,7 @@ import networkx as nx  # pylint: disable=E0401
 import opennre  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
-from textgraph import Node, Edge, RelEnum
+from .graph import Node, Edge, RelEnum
 
 
 class TextGraph:
@@ -338,29 +340,3 @@ Note that the phrase ranks should be normalized to sum to 1.0
 
             if node.count > 0:
                 node.weight = rank
-
-
-if __name__ == "__main__":
-    SRC_TEXT: str = """
-Werner Herzog is a remarkable filmmaker and intellectual originally from Germany, the son of Dietrich Herzog.
-    """
-    tg: TextGraph = TextGraph()
-
-    sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
-        SRC_TEXT.strip(),
-        use_llm = False,
-    )
-
-    tg.build_graph_embeddings(
-        sample_doc,
-    )
-
-    tg.infer_relations(
-        SRC_TEXT.strip(),
-    )
-
-    #sys.exit(0)
-    tg.calc_phrase_ranks()
-
-    ic(tg.edges)
-    ic(tg.nodes)
