@@ -42,8 +42,9 @@ class RelEnum (enum.IntEnum):
     """
 Enumeration for the kinds of edge relations
     """
-    DEP = 0
-    INFER = 1
+    DEP = 0  # `spaCy` parse dependency
+    INF = 1  # `OpenNRE` inferred relation
+    SYN = 2  # `sense2vec` inferred synonym
 
     def __str__ (
         self
@@ -52,8 +53,9 @@ Enumeration for the kinds of edge relations
 Codec for representing as a string.
         """
         decoder: typing.List[ str ] = [
-            "dependency",
-            "inferred",
+            "dep",
+            "inf",
+            "syn",
         ]
 
         return decoder[self.value]

@@ -303,7 +303,7 @@ Run NRE to infer relations between pairs of co-occurring entities.
                         edge: Edge = self.make_edge(  # type: ignore
                             src,
                             dst,
-                            RelEnum.INFER,
+                            RelEnum.INF,
                             rel,
                             prob,
                         )
