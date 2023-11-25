@@ -22,10 +22,13 @@ import typing
 
 from icecream import ic  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
+import numpy as np  # pylint: disable=E0401
 import opennre  # pylint: disable=E0401
+import pandas as pd  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
-from .graph import Node, Edge, RelEnum
+from .elem import Node, Edge, RelEnum
+from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 
 class TextGraph:
@@ -36,7 +39,6 @@ extract ranked phrases using a `textgraph` algorithm.
     MAX_SKIP: int = 11
     NER_MODEL: str = "tomaarsen/span-marker-roberta-large-ontonotes5"
     NRE_MODEL: str = "wiki80_cnn_softmax"
-    PR_ALPHA: float = 0.6
     SPACY_MODEL: str = "en_core_web_sm"
 
 
@@ -324,19 +326,89 @@ Run NRE to infer relations between pairs of co-occurring entities.
         ])
 
 
-    def calc_phrase_ranks (
+    def calc_phrase_ranks (  # pylint: disable=R0914
         self,
+        *,
+        pr_alpha: float = 0.85,
+        stack_gap: float = 0.75,
         ) -> None:
         """
-Calculate the weights for each node in the _lemma graph_, which now
-represent ranked phrases.
+Calculate the weights for each node in the _lemma graph_, then
+stack-rank the nodes so that entities have priority over lemmas.
 
-Note that the phrase ranks should be normalized to sum to 1.0
+Phrase ranks are normalized to sum to 1.0 and these now represent
+the ranked entities extracted from the document.
         """
-        n_list: typing.List[ Node ] = list(self.nodes.values())
+        ranks: typing.List[ float ] = list(nx.pagerank(
+            self.lemma_graph,
+            alpha = pr_alpha,
+        ).values())
 
-        for node_id, rank in nx.pagerank(self.lemma_graph, alpha = self.PR_ALPHA).items():
-            node: Node = n_list[node_id]
+        # build a dataframe of node ranks and counts
+        df1: pd.DataFrame = pd.DataFrame.from_dict([
+            {
+                "weight": ranks[node.node_id],
+                "count": node.count,
+            }
+            for node in self.nodes.values()
+        ])
 
-            if node.count > 0:
-                node.weight = rank
+        df1.loc[df1["count"] < 1, "weight"] = 0
+
+        # normalize by column and calculate quantiles
+        df2: pd.DataFrame = df1.apply(lambda x: x / x.max(), axis = 0)
+        bins: np.ndarray = calc_quantile_bins(len(df2.index))
+
+        # stripe each columns
+        df3: pd.DataFrame = pd.DataFrame([
+            stripe_column(values, bins)
+            for _, values in df2.items()
+        ]).T
+
+        # renormalize the ranks
+        df1["rank"] = df3.apply(root_mean_square, axis=1)
+        df1.loc[df1["count"] < 1, "rank"] = 0
+
+        rank_col: np.ndarray = df1["rank"].to_numpy()
+        rank_col /= sum(rank_col)
+
+        # prepare to stack entities atop lemmas
+        df1["E"] = df1["rank"]
+        df1["L"] = df1["rank"]
+        df1["entity"] = [ node.kind is not None for node in self.nodes.values() ]
+        df1.loc[~df1["entity"], "E"] = 0
+        df1.loc[df1["entity"], "L"] = 0
+
+        E: typing.List[ float ] = [  # pylint: disable=C0103
+            rank
+            for rank in df1["E"].to_numpy()
+            if rank > 0.0
+        ]
+
+        L: typing.List[ float ] = [  # pylint: disable=C0103
+            rank
+            for rank in df1["L"].to_numpy()
+            if rank > 0.0
+        ]
+
+        # configure a system of linear equations
+        sum_e = sum(E)
+        sum_l = sum(L)
+
+        A: np.array = np.array([  # pylint: disable=C0103
+            [ sum_e, sum_l ],
+            [ min(E) / sum_e,  -max(L) / sum_l ],
+        ])
+
+        B: np.array = np.array([  # pylint: disable=C0103
+            1,
+            stack_gap / (len(E) + len(L)),
+        ])
+
+        # update the nodes with restacked weights
+        coef: np.ndarray = np.linalg.solve(A, B)
+        df1["stacked"] = df1["E"] * coef[0] + df1["L"] * coef[1]
+        stacked: np.ndarray = df1["stacked"].to_numpy()
+
+        for i, node in enumerate(self.nodes.values()):
+            node.weight = stacked[i]
