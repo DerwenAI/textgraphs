@@ -7,12 +7,11 @@ Sample application to demo the `textgraph` library.
 """
 
 import sys  # pylint: disable=W0611
-import typing
 
 from icecream import ic  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
-from textgraph import Node, TextGraph
+from textgraph import TextGraph
 
 
 if __name__ == "__main__":
@@ -42,14 +41,5 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     ic(tg.nodes)
 
     # print the resulting entities extracted from the document
-    results: typing.List[ Node ] = sorted(
-        [
-            node
-            for node in tg.nodes.values()
-            if node.weight > 0
-        ],
-        key = lambda n: n.weight,
-        reverse = True,
-    )
-
-    ic(results)
+    for node in tg.get_phrases():
+        ic(node)

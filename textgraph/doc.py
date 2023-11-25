@@ -412,3 +412,21 @@ the ranked entities extracted from the document.
 
         for i, node in enumerate(self.nodes.values()):
             node.weight = stacked[i]
+
+
+    def get_phrases (
+        self,
+        ) -> typing.Iterator[ Node ]:
+        """
+Return the entities extracted from the document.
+        """
+        for node in sorted(
+                [
+                    node
+                    for node in self.nodes.values()
+                    if node.weight > 0
+                ],
+                key = lambda n: n.weight,
+                reverse = True,
+        ):
+            yield node
