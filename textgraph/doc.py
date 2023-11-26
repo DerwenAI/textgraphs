@@ -430,3 +430,22 @@ Return the entities extracted from the document.
                 reverse = True,
         ):
             yield node
+
+
+    def get_phrases_as_df (
+        self,
+        ) -> pd.DataFrame:
+        """
+Return the ranked extracted entities as a `pandas.DataFrame`
+        """
+        return pd.DataFrame.from_dict([
+            {
+                "node_id": node.node_id,
+                "text": node.text,
+                "pos": node.pos,
+                "kind": node.kind,
+                "count": node.count,
+                "weight": node.weight,
+            }
+            for node in self.get_phrases()
+        ])
