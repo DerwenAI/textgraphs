@@ -31,7 +31,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         st.session_state.disabled = False
 
     with st.container():
-        st.title("demo: TextGraph + LLMs</h2>")
+        st.title("demo: TextGraph + LLMs")
 
         blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
 
@@ -153,7 +153,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             st.components.v1.html(
                 pyvis_html.read_text(encoding = "utf-8"),
-                height = 1500,
+                height = 1300,
                 scrolling = True,
             )
 
