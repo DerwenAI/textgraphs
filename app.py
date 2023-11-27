@@ -6,6 +6,7 @@
 HuggingFace Spaces demo of `textgraph` using Streamlit
 """
 
+import pathlib
 import time
 
 import pandas as pd  # pylint: disable=E0401
@@ -29,38 +30,10 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         st.session_state.disabled = False
 
     with st.container():
-        intro_html: str = """
-<h5>demo: TextGraph + LLMs</h5>
-<details>
-<summary><strong>details</strong></summary>
-<p>
-Use <code>spaCy</code> + <code>SpanMarkerNER</code> to construct a
-<em>lemma graph</em>, as a prelude to inferring the nodes, edges,
-properties, and probabilities for building a knowledge graph from
-a raw unstructured text source.
-</p>
-<ol>
-<li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
-<li>build a _lemma graph_ in <code>NetworkX</code> from the parse results</li>
-<li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
-<li>use <code>OpenNRE</code> to infer relations among entities</li>
-<li>approximate a pareto archive (hypervolume) to re-rank extracted entities</li>
-<li>visualize the interactive graph in <code>PyVis</code></li>
-<li>apply topological transforms to enhance embeddings (in progress)</li>
-<li>run graph representation learning on the <em>graph of relations</em> (in progress)</li>
-</ol>
-<p>
-...
-</p>
-<ol start="9">
-<li>PROFIT!</li>
-</ol>
-</details>
-<hr/>
-        """
+        blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
 
         st.markdown(
-            intro_html,
+            blurb_1.read_text(encoding = "utf-8"),
             unsafe_allow_html = True,
         )
 
@@ -75,6 +48,7 @@ a raw unstructured text source.
 
             sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
                 text_input,
+                ner_model = None,
             )
 
             duration: float = round(time.time() - start_time, 3)

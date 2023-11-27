@@ -1,0 +1,91 @@
+<h5>demo: TextGraph + LLMs</h5>
+
+<details>
+  <summary><strong>TL;DR: what's this?</strong></summary>
+  <p>
+    Use <code>spaCy</code> + <code>SpanMarkerNER</code> to construct a
+    <em>lemma graph</em>, as a prelude to inferring the nodes, edges,
+    properties, and probabilities for building a knowledge graph from
+    a raw unstructured text source.
+  </p>
+  <ol>
+    <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
+    <li>build a _lemma graph_ in <code>NetworkX</code> from the parse results</li>
+    <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
+    <li>use <code>OpenNRE</code> to infer relations among entities</li>
+    <li>approximate a pareto archive (hypervolume) to re-rank extracted entities</li>
+    <li>visualize the interactive graph in <code>PyVis</code></li>
+    <li>apply topological transforms to enhance embeddings (in progress)</li>
+    <li>run graph representation learning on the <em>graph of relations</em> (in progress)</li>
+  </ol>
+  <p>
+    ...
+  </p>
+  <ol start="11">
+    <li>PROFIT!</li>
+  </ol>
+</details>
+
+<details>
+  <summary><strong>More Details</strong></summary>
+  <p>
+    Implementation of an LLM-augmented <code>textgraph</code> algorithm for
+    constructing a <em>knowledge graph</em> from raw, unstructured text source.
+  </p>
+  <p>
+    The <code>textgraph</code> library is based on work developed by
+    <a href="https://derwen.ai/graph" target="_blank">Derwen</a>
+    in 2023 Q2 for customer sample apps and also in our
+    <a href="https://derwen.ai/cysoni" target="_blank">Cysoni</a>
+    product.
+    This demo integrates code from:
+  </p>
+  <ul>
+    <li>
+      <a href="https://github.com/tomaarsen/SpanMarkerNER/" target="_blank"><code>SpanMarkerNER</code></a>
+    </li>
+    <li>
+      <a href="https://github.com/thunlp/OpenNRE/" target="_blank"><code>OpenNRE</code></a>
+    </li>
+    <li>
+      <a href="https://github.com/DerwenAI/pytextrank/" target="_blank"><code>PyTextRank</code></a>
+    </li>
+    <li>
+      <a href="https://medium.com/@groxli/create-a-spacy-visualizer-with-streamlit-8b9b41b36745" target="_blank"><em>Create a spaCy Visualizer with Streamlit</em></a>
+    </li>
+  </ul>
+
+  <p>
+    For more details about this approach, see these talks:
+  </p>
+  <ul>
+    <li>
+      <a href="https://derwen.ai/s/mqqm" target="_blank">"Language, Graphs, and AI in Industry"</a>
+      <br/>
+      <strong>Paco Nathan</strong>, K1st World (2023-10-11)
+    </li>
+    <li>
+      <a href="https://derwen.ai/s/rhvg" target="_blank">"Language Tools for Creators"</a>
+      <br/>
+      <strong>Paco Nathan</strong>, FOSSY (2023-07-13)
+    </li>
+  </ul>
+
+  <p>
+    Other good tutorials in 2023 which include related material:
+  </p>
+  <ul>
+    <li>
+      <a href="https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4" target="_blank">"Natural Intelligence is All You Need™"</a>
+      <br/>
+      <strong>Vincent Warmerdam</strong>, PyData Amsterdam (2023-09-15)
+    </li>
+    <li>
+      <a href="https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a" target="_blank">"How to Convert Any Text Into a Graph of Concepts"</a>
+      <br/>
+      <strong>Rahul Nayak</strong>, <em>Towards Data Science</em> (2023-11-09)
+    </li>
+  </ul>
+</details>
+
+<hr/>
