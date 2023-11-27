@@ -2,7 +2,7 @@
 title: TextGraph
 emoji: ✴
 colorFrom: green
-colorTo: brown
+colorTo: gray
 sdk: streamlit
 sdk_version: 1.28.2
 app_file: app.py
