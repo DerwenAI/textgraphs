@@ -8,6 +8,7 @@ HuggingFace Spaces demo of `textgraph` using Streamlit
 
 import time
 
+import pandas as pd  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import streamlit as st  # pylint: disable=E0401
 
@@ -27,9 +28,42 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         st.session_state.visibility = "visible"
         st.session_state.disabled = False
 
-    col1, col2 = st.columns(2)
+    with st.container():
+        intro_html: str = """
+<h5>demo: TextGraph + LLMs</h5>
+<details>
+<summary><strong>details</strong></summary>
+<p>
+Use <code>spaCy</code> + <code>SpanMarkerNER</code> to construct a
+<em>lemma graph</em>, as a prelude to inferring the nodes, edges,
+properties, and probabilities for building a knowledge graph from
+a raw unstructured text source.
+</p>
+<ol>
+<li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
+<li>build a _lemma graph_ in <code>NetworkX</code> from the parse results</li>
+<li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
+<li>use <code>OpenNRE</code> to infer relations among entities</li>
+<li>approximate a pareto archive (hypervolume) to re-rank extracted entities</li>
+<li>visualize the interactive graph in <code>PyVis</code></li>
+<li>apply topological transforms to enhance embeddings (in progress)</li>
+<li>run graph representation learning on the <em>graph of relations</em> (in progress)</li>
+</ol>
+<p>
+...
+</p>
+<ol start="9">
+<li>PROFIT!</li>
+</ol>
+</details>
+<hr/>
+        """
 
-    with col1:
+        st.markdown(
+            intro_html,
+            unsafe_allow_html = True,
+        )
+
         text_input: str = st.text_area(
             "Source Text:",
             value = SRC_TEXT.strip(),
@@ -41,11 +75,10 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
                 text_input,
-                use_llm = False,
             )
 
             duration: float = round(time.time() - start_time, 3)
-            st.write(f"parse: {duration} sec, {len(text_input)} char")
+            st.write(f"parse: {round(duration, 3)} sec, {len(text_input)} characters")
 
             # render the entity html
             ent_html: str = spacy.displacy.render(
@@ -87,9 +120,11 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             )
 
             tg.calc_phrase_ranks()
+            df: pd.DataFrame = tg.get_phrases_as_df()
 
             duration = round(time.time() - start_time, 3)
-            st.write(f"extract: {duration} sec")
+            st.write(f"extract: {round(duration, 3)} sec, {len(df)} entities")
 
-            st.dataframe(tg.get_phrases_as_df())
-            #df.style.highlight_max(axis=0)
+            st.dataframe(df)
+
+            st.write("(WIP)")

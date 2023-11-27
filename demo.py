@@ -22,7 +22,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
     sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
         SRC_TEXT.strip(),
-        use_llm = False,
     )
 
     #sys.exit(0)

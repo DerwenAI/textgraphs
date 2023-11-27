@@ -58,7 +58,8 @@ Constructor.
         self,
         text_input: str,
         *,
-        use_llm: bool = False,
+        spacy_model: str = SPACY_MODEL,
+        ner_model: typing.Optional[ str ] = NER_MODEL,
         ) -> spacy.tokens.doc.Doc:
         """
 Instantiate a `spaCy` pipeline and return a document which parses
@@ -66,23 +67,23 @@ the given text input.
         """
         exclude: typing.List[ str ] = []
 
-        if use_llm:
+        if ner_model is not None:
             exclude.append("ner")
 
         nlp = spacy.load(
-            self.SPACY_MODEL,
+            spacy_model,
             exclude = exclude,
         )
 
-        nlp.add_pipe("merge_entities")
-
-        if use_llm:
+        if ner_model is not None:
             nlp.add_pipe(
                 "span_marker",
                 config = {
-                    "model": self.NER_MODEL,
+                    "model": ner_model,
                 },
             )
+
+        nlp.add_pipe("merge_entities")
 
         return nlp(text_input)
 
