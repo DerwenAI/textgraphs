@@ -327,24 +327,15 @@ Run NRE to infer relations between pairs of co-occurring entities.
         ])
 
 
-    def calc_phrase_ranks (  # pylint: disable=R0914
+    def restack_ranks (  # pylint: disable=R0914
         self,
+        ranks: typing.List[ float ],
         *,
-        pr_alpha: float = 0.85,
         stack_gap: float = 0.75,
-        ) -> None:
+        ) -> typing.List[ float ]:
         """
-Calculate the weights for each node in the _lemma graph_, then
-stack-rank the nodes so that entities have priority over lemmas.
-
-Phrase ranks are normalized to sum to 1.0 and these now represent
-the ranked entities extracted from the document.
+Stack-rank the nodes so that entities have priority over lemmas.
         """
-        ranks: typing.List[ float ] = list(nx.pagerank(
-            self.lemma_graph,
-            alpha = pr_alpha,
-        ).values())
-
         # build a dataframe of node ranks and counts
         df1: pd.DataFrame = pd.DataFrame.from_dict([
             {
@@ -376,6 +367,7 @@ the ranked entities extracted from the document.
         # prepare to stack entities atop lemmas
         df1["E"] = df1["rank"]
         df1["L"] = df1["rank"]
+
         df1["entity"] = [ node.kind is not None for node in self.nodes.values() ]
         df1.loc[~df1["entity"], "E"] = 0
         df1.loc[df1["entity"], "L"] = 0
@@ -392,6 +384,10 @@ the ranked entities extracted from the document.
             if rank > 0.0
         ]
 
+        # error-check for null entity lists
+        if len(E) < 1 or len(L) < 1:
+            return ranks
+
         # configure a system of linear equations
         sum_e = sum(E)
         sum_l = sum(L)
@@ -406,13 +402,34 @@ the ranked entities extracted from the document.
             stack_gap / (len(E) + len(L)),
         ])
 
-        # update the nodes with restacked weights
+        # return the restacked ranks
         coef: np.ndarray = np.linalg.solve(A, B)
         df1["stacked"] = df1["E"] * coef[0] + df1["L"] * coef[1]
-        stacked: np.ndarray = df1["stacked"].to_numpy()
 
+        return list(df1["stacked"].to_numpy())
+
+
+    def calc_phrase_ranks (
+        self,
+        *,
+        pr_alpha: float = 0.85,
+        ) -> None:
+        """
+Calculate the weights for each node in the _lemma graph_, then
+stack-rank the nodes so that entities have priority over lemmas.
+
+Phrase ranks are normalized to sum to 1.0 and these now represent
+the ranked entities extracted from the document.
+        """
+        ranks: typing.List[ float ] = self.restack_ranks(
+            list(nx.pagerank(
+                self.lemma_graph,
+                alpha = pr_alpha,
+            ).values()))
+
+        # update the node weights
         for i, node in enumerate(self.nodes.values()):
-            node.weight = stacked[i]
+            node.weight = ranks[i]
 
 
     def get_phrases (

@@ -30,6 +30,11 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         st.session_state.disabled = False
 
     with st.container():
+        st.markdown(
+            "<h2>demo: TextGraph + LLMs</h2>",
+            unsafe_allow_html = True,
+        )
+
         blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
 
         st.markdown(
@@ -42,13 +47,23 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             value = SRC_TEXT.strip(),
         )
 
-        if text_input:
+        llm_ner = st.checkbox(
+            "use SpanMarker to enhance spaCy NER",
+            value = True,
+        )
+
+        llm_nre = st.checkbox(
+            "use OpenNER for relation extraction",
+            value = True,
+        )
+
+        if text_input or llm_ner or llm_nre:
             # parse the document
             start_time: float = time.time()
 
             sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
                 text_input,
-                ner_model = None,
+                ner_model = TextGraph.NER_MODEL if llm_ner else None,
             )
 
             duration: float = round(time.time() - start_time, 3)
@@ -88,10 +103,11 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 debug = False,
             )
 
-            tg.infer_relations(
-                SRC_TEXT.strip(),
-                debug = False,
-            )
+            if llm_nre:
+                tg.infer_relations(
+                    SRC_TEXT.strip(),
+                    debug = False,
+                )
 
             tg.calc_phrase_ranks()
             df: pd.DataFrame = tg.get_phrases_as_df()

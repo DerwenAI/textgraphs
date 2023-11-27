@@ -1,14 +1,14 @@
 TODO:
 
-  * debug len(E) == 0
   * debug multiple sentences
   * why aren't there multiple relaions in the lemma graph?
-  * make rel infer optional
   * refactor: structure in lemma graph, style in `pyvis`
   * StrEnum for node categories
   * defined styles for `pyvis`
   * add `nx.neighbors()` to hypervolume df
   * render graph in Streamlit
+  * link `sense2vec` synonyms
+  * eval `spaCy` co-reference
 
   * `pytest` unit tests
   * setup/config for PyPi

@@ -1,20 +1,18 @@
-<h5>demo: TextGraph + LLMs</h5>
-
 <details>
-  <summary><strong>TL;DR: what's this?</strong></summary>
+  <summary><strong>TL;DR: What's this?</strong></summary>
   <p>
     Use <code>spaCy</code> + <code>SpanMarkerNER</code> to construct a
-    <em>lemma graph</em>, as a prelude to inferring the nodes, edges,
-    properties, and probabilities for building a knowledge graph from
-    a raw unstructured text source.
+    <em>lemma graph</em>. This is a prelude to inferring the nodes, edges,
+    properties, and probabilities for building a knowledge graph from raw
+    unstructured text source.
   </p>
   <ol>
     <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
-    <li>build a _lemma graph_ in <code>NetworkX</code> from the parse results</li>
+    <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
-    <li>use <code>OpenNRE</code> to infer relations among entities</li>
-    <li>approximate a pareto archive (hypervolume) to re-rank extracted entities</li>
-    <li>visualize the interactive graph in <code>PyVis</code></li>
+    <li>use <code>OpenNRE</code> to infer relations among entities (optional)</li>
+    <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities</li>
+    <li>visualize the <em>lemma graph</em> interactively in <code>PyVis</code></li>
     <li>apply topological transforms to enhance embeddings (in progress)</li>
     <li>run graph representation learning on the <em>graph of relations</em> (in progress)</li>
   </ol>
@@ -27,7 +25,7 @@
 </details>
 
 <details>
-  <summary><strong>More Details</strong></summary>
+  <summary><strong>More details...</strong></summary>
   <p>
     Implementation of an LLM-augmented <code>textgraph</code> algorithm for
     constructing a <em>knowledge graph</em> from raw, unstructured text source.
@@ -72,7 +70,7 @@
   </ul>
 
   <p>
-    Other good tutorials in 2023 which include related material:
+    Other good tutorials (during 2023) which include related material:
   </p>
   <ul>
     <li>
