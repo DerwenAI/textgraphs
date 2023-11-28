@@ -28,6 +28,7 @@ A data class representing one node, i.e., an extracted phrase.
     sents: typing.Set[ int ]
     kind: typing.Optional[ str ] = None
     count: int = 0
+    neighbors: int = 0
     weight: float = 0.0
 
     def get_pos (
@@ -37,6 +38,29 @@ A data class representing one node, i.e., an extracted phrase.
 Generate a position span for OpenNRE.
         """
         return (self.span.idx, self.span.idx + len(self.text) - 1)
+
+
+class NodeKind (enum.IntEnum):
+    """
+Enumeration for the kinds of node categories
+    """
+    DEP = 0  # `spaCy` parse dependency
+    LEM = 1  # lemmatized token
+    ENT = 2  # named entity
+
+    def __str__ (
+        self
+        ) -> str:
+        """
+Codec for representing as a string.
+        """
+        decoder: typing.List[ str ] = [
+            "dep",
+            "lem",
+            "ent",
+        ]
+
+        return decoder[self.value]
 
 
 class RelEnum (enum.IntEnum):

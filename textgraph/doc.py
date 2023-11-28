@@ -27,7 +27,7 @@ import opennre  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
-from .elem import Node, Edge, RelEnum
+from .elem import Edge, Node, RelEnum
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 
@@ -277,6 +277,7 @@ document.
         self,
         text_input: str,
         *,
+        max_skip: int = MAX_SKIP,
         debug: bool = True,
         ) -> None:
         """
@@ -307,7 +308,7 @@ Run NRE to infer relations between pairs of co-occurring entities.
                     if debug:
                         ic(src.node_id, dst.node_id, path)
 
-                    if len(path) <= self.MAX_SKIP:
+                    if len(path) <= max_skip:
                         rel, prob = self.nre.infer({
                             "text": text_input,
                             "h": { "pos": src.get_pos() },
@@ -358,6 +359,7 @@ Stack-rank the nodes so that entities have priority over lemmas.
             {
                 "weight": ranks[node.node_id],
                 "count": node.count,
+                "neighbors": node.neighbors,
             }
             for node in self.nodes.values()
         ])
@@ -454,6 +456,19 @@ stack-rank the nodes so that entities have priority over lemmas.
 Phrase ranks are normalized to sum to 1.0 and these now represent
 the ranked entities extracted from the document.
         """
+        for node in self.nodes.values():
+            nx_node = self.lemma_graph.nodes[node.node_id]
+            neighbors: int = 0
+
+            try:
+                neighbors = len(list(nx.neighbors(self.lemma_graph, node.node_id)))
+            except Exception:  # pylint: disable=W0718
+                pass
+            finally:
+                node.neighbors = neighbors
+                nx_node["neighbors"] = neighbors
+
+        # restack
         ranks: typing.List[ float ] = self.restack_ranks(
             list(nx.pagerank(
                 self.lemma_graph,

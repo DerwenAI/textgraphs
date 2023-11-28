@@ -123,6 +123,11 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 """
                 what you get at this stage is a relatively noisy,
                 low-level detailed graph of the parsed text
+
+                the most interesting parts will probably be:
+
+                  * the src node of an `nsubj` edge
+                  * the dst node of a `pobj` edge
                 """
             )
 
@@ -132,11 +137,11 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 tg.lemma_graph,
             )
 
-            vis_graph: pyvis.network.Network = render.build_lemma_graph(
+            pv_graph: pyvis.network.Network = render.build_lemma_graph(
                 debug = False,
             )
 
-            vis_graph.force_atlas_2based(
+            pv_graph.force_atlas_2based(
                 gravity = -38,
                 central_gravity = 0.01,
                 spring_length = 231,
@@ -145,14 +150,14 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 overlap = 0,
             )
 
-            vis_graph.show_buttons(filter_ = [ "physics" ])
-            vis_graph.toggle_physics(True)
+            pv_graph.show_buttons(filter_ = [ "physics" ])
+            pv_graph.toggle_physics(True)
 
-            pyvis_html: pathlib.Path = pathlib.Path("vis.html")
-            vis_graph.save_graph(pyvis_html.as_posix())
+            py_html: pathlib.Path = pathlib.Path("vis.html")
+            pv_graph.save_graph(py_html.as_posix())
 
             st.components.v1.html(
-                pyvis_html.read_text(encoding = "utf-8"),
+                py_html.read_text(encoding = "utf-8"),
                 height = 1300,
                 scrolling = True,
             )

@@ -1,17 +1,11 @@
 TODO:
 
+  * add src of `nsubj` or dst of `pobj` to hypervolume
+
   * `pytest` unit tests
-  * bibliography in `docs/`
+  * why aren't there multiple relations in the lemma graph?
 
-  * refactor: structure in _lemma graph_ and style in `pyvis`
-  * StrEnum for node categories
-  * defined styles for `pyvis`
-  * DIM style when weight == 0
-
-  * why aren't there multiple relaions in the lemma graph?
-
-  * add `nx.neighbors()` to hypervolume df
-  * build a _graph of relations_
+  * build a _graph of relations_ topology transform
 
   * link `sense2vec` synonyms
   * eval `spaCy` co-reference

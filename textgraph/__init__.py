@@ -8,7 +8,7 @@ Package definitions.
 
 from .doc import TextGraph
 
-from .elem import Edge, Node, RelEnum
+from .elem import Edge, Node, NodeKind, RelEnum
 
 from .util import calc_quantile_bins, stripe_column, root_mean_square
 
