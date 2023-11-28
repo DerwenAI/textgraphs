@@ -10,6 +10,10 @@ pinned: false
 license: mit
 ---
 
+## project info:
+
+see <https://huggingface.co/spaces/DerwenAI/textgraph>
+
 
 ## install locally:
 

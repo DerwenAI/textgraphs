@@ -30,7 +30,7 @@ repos:
     rev: v2.2.4
     hooks:
     -   id: codespell # spell-check source code
-        args: ["-L", "textgraph"] # comma separated stop words
-        exclude: ^README.md|^NOTES.md
+        args: ["-L", "textgraph,udo"] # comma separated stop words
+        exclude: ^README.md|^NOTES.md|^demo.ipynb
         language: python
         types: [text]

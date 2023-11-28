@@ -106,12 +106,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 debug = False,
             )
 
-            if llm_nre:
-                tg.infer_relations(
-                    SRC_TEXT.strip(),
-                    debug = False,
-                )
-
 
             # extract ranked entities from the document
             tg.calc_phrase_ranks(debug = False)
@@ -125,6 +119,12 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             ## visualize the lemma graph
             st.subheader("visualize the lemma graph", divider = "rainbow")
+            st.markdown(
+                """
+                what you get at this stage is a relatively noisy,
+                low-level detailed graph of the parsed text
+                """
+            )
 
             render: RenderPyVis = RenderPyVis(
                 tg.nodes,
@@ -156,6 +156,14 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 height = 1300,
                 scrolling = True,
             )
+
+
+            # infer relations
+            if llm_nre:
+                tg.infer_relations(
+                    SRC_TEXT.strip(),
+                    debug = False,
+                )
 
 
             ## WIP
