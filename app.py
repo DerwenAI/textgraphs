@@ -114,7 +114,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
 
             # extract ranked entities from the document
-            tg.calc_phrase_ranks()
+            tg.calc_phrase_ranks(debug = False)
             df: pd.DataFrame = tg.get_phrases_as_df()
 
             duration = round(time.time() - start_time, 3)

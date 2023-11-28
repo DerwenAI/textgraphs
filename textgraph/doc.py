@@ -92,6 +92,7 @@ the given text input.
         self,
         key: str,
         span: spacy.tokens.token.Token,
+        sent_id: int,
         *,
         kind: typing.Optional[ str ] = None,
         condense: bool = True,
@@ -103,25 +104,28 @@ Lookup and return a `Node` object:
     * instantiate a new node if it does not exist already
         """
         if not condense:
-            # placeholder node (stopwords)
+            # construct a placeholder node (stopwords)
             self.nodes[key] = Node(
                 len(self.nodes),
                 span,
                 span.text,
                 span.pos_,
+                set([ sent_id ]),
             )
 
         elif key in self.nodes:
             # link to previously constructed entity node
             self.nodes[key].count += 1
+            self.nodes[key].sents.add(sent_id)
 
-        # construct a new entity node
+        # construct a new node for entity or lemma
         else:
             self.nodes[key] = Node(
                 len(self.nodes),
                 span,
                 span.text,
                 span.pos_,
+                set([ sent_id ]),
                 kind = kind,
                 count = 1,
             )
@@ -131,6 +135,7 @@ Lookup and return a `Node` object:
 
     def extract_phrases (
         self,
+        sent_id: int,
         sent,
         *,
         debug: bool = False,
@@ -163,17 +168,17 @@ _lemma graph_, while giving priority to:
                 # link a named entity
                 ent = ent_seq.pop(0)
                 lemma_key: str = ".".join([ token.lemma_.strip().lower(), token.pos_ ])
-                yield self.make_node(lemma_key, token, kind = ent.label_)
+                yield self.make_node(lemma_key, token, sent_id, kind = ent.label_)
 
             elif token.pos_ in [ "NOUN", "PROPN", "VERB" ]:
                 # link a lemmatized entity
                 lemma_key = ".".join([ token.lemma_.strip().lower(), token.pos_ ])
-                yield self.make_node(lemma_key, token)
+                yield self.make_node(lemma_key, token, sent_id)
 
             else:
                 # fall-through case: use token as a placeholder in the lemma graph
                 lemma_key = ".".join([ str(token.i), token.lower_, token.pos_ ])
-                yield self.make_node(lemma_key, token, condense = False)
+                yield self.make_node(lemma_key, token, sent_id, condense = False)
 
 
     def make_edge (  # pylint: disable=R0913
@@ -224,16 +229,27 @@ algorithm, as a directed graph in `NetworkX`.
 In other words, this represents "reverse embeddings" from the parsed
 document.
         """
-        for sent in doc.sents:
+        for sent_id, sent in enumerate(doc.sents):
             if debug:
-                ic(sent)
+                ic(sent_id, sent, sent.start)
 
-            sent_nodes: typing.List[ Node ] = list(self.extract_phrases(sent))
+            sent_nodes: typing.List[ Node ] = list(self.extract_phrases(sent_id, sent))
+
+            if debug:
+                ic(sent_nodes)
 
             for node in sent_nodes:
+                head_idx: int = node.span.head.i
+
+                if head_idx >= len(sent_nodes):
+                    head_idx -= sent.start
+
+                if debug:
+                    ic(node, len(sent_nodes), node.span.head.i, node.span.head.text, head_idx)
+
                 self.make_edge(
                     node,
-                    sent_nodes[node.span.head.i],
+                    sent_nodes[head_idx],
                     RelEnum.DEP,
                     node.span.dep_,
                     1.0,
@@ -332,6 +348,7 @@ Run NRE to infer relations between pairs of co-occurring entities.
         ranks: typing.List[ float ],
         *,
         stack_gap: float = 0.75,
+        debug: bool = False,
         ) -> typing.List[ float ]:
         """
 Stack-rank the nodes so that entities have priority over lemmas.
@@ -368,9 +385,24 @@ Stack-rank the nodes so that entities have priority over lemmas.
         df1["E"] = df1["rank"]
         df1["L"] = df1["rank"]
 
-        df1["entity"] = [ node.kind is not None for node in self.nodes.values() ]
+        df1["pos"] = [
+            node.pos
+            for node in self.nodes.values()
+        ]
+
+        df1["entity"] = [
+            node.kind is not None
+            for node in self.nodes.values()
+        ]
+
+        df1.loc[df1["pos"] == "VERB", "E"] = 0
+        df1.loc[df1["pos"] == "VERB", "L"] = 0
+
         df1.loc[~df1["entity"], "E"] = 0
         df1.loc[df1["entity"], "L"] = 0
+
+        if debug:
+            ic(df1)
 
         E: typing.List[ float ] = [  # pylint: disable=C0103
             rank
@@ -413,6 +445,7 @@ Stack-rank the nodes so that entities have priority over lemmas.
         self,
         *,
         pr_alpha: float = 0.85,
+        debug: bool = False,
         ) -> None:
         """
 Calculate the weights for each node in the _lemma graph_, then
@@ -425,7 +458,9 @@ the ranked entities extracted from the document.
             list(nx.pagerank(
                 self.lemma_graph,
                 alpha = pr_alpha,
-            ).values()))
+            ).values()),
+            debug = debug,
+        )
 
         # update the node weights
         for i, node in enumerate(self.nodes.values()):

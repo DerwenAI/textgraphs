@@ -17,7 +17,7 @@ import spacy  # pylint: disable=E0401
 
 
 @dataclass(order=False, frozen=False)
-class Node:
+class Node:  # pylint: disable=R0902
     """
 A data class representing one node, i.e., an extracted phrase.
     """
@@ -25,6 +25,7 @@ A data class representing one node, i.e., an extracted phrase.
     span: spacy.tokens.token.Token
     text: str
     pos: str
+    sents: typing.Set[ int ]
     kind: typing.Optional[ str ] = None
     count: int = 0
     weight: float = 0.0

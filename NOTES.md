@@ -6,8 +6,8 @@ TODO:
   * refactor: structure in _lemma graph_ and style in `pyvis`
   * StrEnum for node categories
   * defined styles for `pyvis`
+  * DIM style when weight == 0
 
-  * debug multiple sentences
   * why aren't there multiple relaions in the lemma graph?
 
   * add `nx.neighbors()` to hypervolume df
