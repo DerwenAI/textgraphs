@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Copyright ©2023 Derwen, Inc. All rights reserved.
+# pylint: disable=C0301
 
 """
 HuggingFace Spaces demo of `textgraph` using Streamlit
@@ -9,6 +10,7 @@ HuggingFace Spaces demo of `textgraph` using Streamlit
 import pathlib
 import time
 
+import matplotlib.pyplot as plt  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 import pyvis  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
@@ -163,7 +165,31 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             )
 
 
-            # infer relations
+            ## cluster the communities
+            st.subheader("cluster the communities", divider = "rainbow")
+            st.markdown(
+                """
+In the tutorial
+<a href="https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a" target="_blank">"How to Convert Any Text Into a Graph of Concepts"</a>,
+Rahul Nayak uses the
+<a href="https://en.wikipedia.org/wiki/Girvan%E2%80%93Newman_algorithm"><em>girvan-newman</em></a>
+algorithm to split the graph into communities, then clusters on those communities.
+His approach works well for unsupervised clustering of key phrases which have been extracted from a collection of many documents.
+In contrast, Nayak was working with entities extracted from "chunks" of text, not with a text graph.
+                """,
+                unsafe_allow_html = True,
+            )
+
+            fig, ax = plt.subplots()
+
+            render.draw_communities(
+                spring_distance = 1.2,
+            )
+
+            st.pyplot(fig)
+
+
+            ## infer relations
             if llm_nre:
                 tg.infer_relations(
                     SRC_TEXT.strip(),

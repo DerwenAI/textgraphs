@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import typing
 
 from icecream import ic  # pylint: disable=E0401
+import matplotlib.colors as mcolors  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
 import pyvis  # pylint: disable=E0401
 
@@ -118,3 +119,63 @@ and returning a `PyVis` network to render.
                 pv_edge["width"] = 0  # type: ignore
 
         return pv_graph
+
+
+    def draw_communities (
+        self,
+        *,
+        spring_distance: float = 1.4,
+        debug: bool = False,
+        ) -> typing.Dict[ int, int ]:
+        """
+Cluster the communities in the _lemma graph_, then draw a
+`NetworkX` graph of the notes with a specific color for each
+community.
+        """
+        # cluster the communities, using girvan-newman
+        comm_iter: typing.Generator = nx.community.girvan_newman(
+            self.lemma_graph,
+        )
+
+        _ = next(comm_iter)
+        next_level = next(comm_iter)
+        communities: list = sorted(map(sorted, next_level))
+
+        if debug:
+            ic(communities)
+
+        comm_map: typing.Dict[ int, int ] = {
+            node_id: i
+            for i, comm in enumerate(communities)
+            for node_id in comm
+        }
+
+        # map from community => color
+        xkcd_colors: typing.List[ str ] = list(mcolors.XKCD_COLORS.values())
+
+        colors: typing.List[ str ] = [
+            xkcd_colors[comm_map[n]]
+            for n in list(self.lemma_graph.nodes())
+        ]
+
+        # prep the labels
+        labels: typing.Dict[ int, str ] = {
+            node.node_id: node.text
+            for node in self.nodes.values()
+        }
+
+        # ¡dibuja, hombre!
+        nx.draw_networkx(
+            self.lemma_graph,
+            pos = nx.spring_layout(
+                self.lemma_graph,
+                k = spring_distance / len(communities),
+            ),
+            labels = labels,
+            node_color = colors,
+            edge_color = "#bbb",
+            with_labels = True,
+            font_size = 9,
+        )
+
+        return comm_map

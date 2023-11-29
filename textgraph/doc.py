@@ -6,12 +6,11 @@
 Implementation of an LLM-augmented `textgraph` algorithm for
 constructing a _knowledge graph_ from raw, unstructured text source.
 
-This integrate examples from:
+This integrates examples from:
 
   * <https://derwen.ai/s/mqqm>
   * <https://github.com/tomaarsen/SpanMarkerNER>
   * <https://github.com/thunlp/OpenNRE/>
-  * <https://medium.com/@groxli/create-a-spacy-visualizer-with-streamlit-8b9b41b36745>
   * <https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4>
   * <https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a>
 """
