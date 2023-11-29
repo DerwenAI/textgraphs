@@ -6,12 +6,18 @@
     properties, and probabilities for building a knowledge graph from raw
     unstructured text source.
   </p>
+  <p>
+    This project provides code for a library used in production, and also a
+    playground to prototype and evaluate abstractions based on
+    <a href="https://blog.derwen.ai/graph-levels-of-detail-ea4226abba55" target="_blank">"Graph Levels Of Detail"</a>.
+  </p>
   <ol>
     <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
     <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
     <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities</li>
     <li>visualize the <em>lemma graph</em> interactively in <code>PyVis</code></li>
+    <li>cluster communities within the <em>lemma graph</em>
     <li>use <code>OpenNRE</code> to infer relations among entities (optional)</li>
     <li>apply topological transforms to enhance embeddings (in progress)</li>
     <li>run graph representation learning on the <em>graph of relations</em> (in progress)</li>

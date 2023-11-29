@@ -22,6 +22,7 @@ class Node:  # pylint: disable=R0902
 A data class representing one node, i.e., an extracted phrase.
     """
     node_id: int
+    key: str
     span: spacy.tokens.token.Token
     text: str
     pos: str

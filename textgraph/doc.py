@@ -107,6 +107,7 @@ Lookup and return a `Node` object:
             # construct a placeholder node (stopwords)
             self.nodes[key] = Node(
                 len(self.nodes),
+                key,
                 span,
                 span.text,
                 span.pos_,
@@ -122,6 +123,7 @@ Lookup and return a `Node` object:
         else:
             self.nodes[key] = Node(
                 len(self.nodes),
+                key,
                 span,
                 span.text,
                 span.pos_,
@@ -144,8 +146,9 @@ Lookup and return a `Node` object:
 Extract phrases from the parsed document to build nodes in the
 _lemma graph_, while giving priority to:
 
-  * NER entities+labels
-  * lemmatized nouns and verbs
+  1. NER entities+labels
+  2. lemmatized nouns and verbs
+  3. noun chunks intersecting with entities
         """
         # extract entities using NER
         ent_seq: typing.List[ spacy.tokens.span.Span ] = list(sent.ents)

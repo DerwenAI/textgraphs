@@ -15,6 +15,11 @@ license: mit
 see <https://huggingface.co/spaces/DerwenAI/textgraph>
 
 
+## requirements:
+
+  * Python 3.9+
+
+
 ## install locally:
 
 ```bash
@@ -25,6 +30,13 @@ python3 -m pip install -U pip wheel setuptools
 python3 -m pip install -r requirements.txt
 
 pre-commit install --hook-type pre-commit
+```
+
+
+## test locally:
+
+```bash
+python3 -m pytest
 ```
 
 
