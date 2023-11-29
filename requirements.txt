@@ -5,6 +5,7 @@ https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-
 
 icecream >= 2.1
 jupyterlab >= 4.0
+matplotlib >= 3.8
 networkx >= 3.2
 pre-commit >= 3.5
 pytest >= 7.4
