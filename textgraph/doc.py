@@ -18,6 +18,8 @@ This integrate examples from:
 
 from collections import OrderedDict
 import itertools
+import json
+import pathlib
 import typing
 
 from icecream import ic  # pylint: disable=E0401
@@ -37,6 +39,7 @@ Construct a _lemma graph_ from the unstructured text source, then
 extract ranked phrases using a `textgraph` algorithm.
     """
     MAX_SKIP: int = 11
+    NER_MAP: str = "dat/ner_map.json"
     NER_MODEL: str = "tomaarsen/span-marker-roberta-large-ontonotes5"
     NRE_MODEL: str = "wiki80_cnn_softmax"
     SPACY_MODEL: str = "en_core_web_sm"
@@ -223,6 +226,7 @@ and increment the count if it does.
         self,
         doc: spacy.tokens.doc.Doc,
         *,
+        ner_map_path: pathlib.Path = pathlib.Path(NER_MAP),
         debug: bool = True,
         ) -> None:
         """
@@ -231,7 +235,15 @@ algorithm, as a directed graph in `NetworkX`.
 
 In other words, this represents "reverse embeddings" from the parsed
 document.
+
+    ner_map_path: maps from OntoTypes4 to an IRI; defaults to local file `dat/ner_map.json`
         """
+        # load the NER map
+        ner_map: typing.Dict[ str, dict ] = OrderedDict(
+            json.loads(ner_map_path.read_text(encoding = "utf-8"))
+        )
+
+        # parse each sentence
         for sent_id, sent in enumerate(doc.sents):
             if debug:
                 ic(sent_id, sent, sent.start)
@@ -242,6 +254,18 @@ document.
                 ic(sent_nodes)
 
             for node in sent_nodes:
+                # remap the OntoTypes4 value to an IRI
+                if node.kind is not None:
+                    iri: typing.Optional[ dict ] = ner_map.get(node.kind)
+
+                    try:
+                        if iri is not None:
+                            node.kind = iri["iri"]
+                    except TypeError as ex:
+                        ic(ex)
+                        print(f"unknown OntoTypes4: {node.kind}")
+
+                # link parse elements, based on the token's head
                 head_idx: int = node.span.head.i
 
                 if head_idx >= len(sent_nodes):

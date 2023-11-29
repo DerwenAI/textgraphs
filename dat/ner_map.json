@@ -1,0 +1,74 @@
+{
+    "CARDINAL": {
+        "iri": "dbr:Cardinal_number",
+        "definition": "Numerals that do not fall under another type"
+    },
+    "DATE": {
+        "iri": "dbo:date",
+        "definition": "Absolute or relative dates or periods"
+    },
+    "EVENT": {
+        "iri": "dbo:Event",
+        "definition": "Named hurricanes, battles, wars, sports events, etc."
+    },
+    "FAC": {
+        "iri": "dbo:Infrastructure",
+        "definition": "Buildings, airports, highways, bridges, etc."
+    },
+    "GPE": {
+        "iri": "dbo:Country",
+        "definition": "Countries, cities, states"
+    },
+    "LANGUAGE": {
+        "iri": "dbo:Language",
+        "definition": "Any named language"
+    },
+    "LAW": {
+        "iri": "dbo:Law",
+        "definition": "Named documents made into laws "
+    },
+    "LOC": {
+        "iri": "dbo:Place",
+        "definition": "Non-GPE locations, mountain ranges, bodies of water"
+    },
+    "MONEY": {
+        "iri": "dbr:Money",
+        "definition": "Monetary values, including unit"
+    },
+    "NORP": {
+        "iri": "dbo:nationality",
+        "definition": "Nationalities or religious or political groups"
+    },
+    "ORDINAL": {
+        "iri": "dbr:Ordinal_number",
+        "definition": "Ordinal number, i.e., first, second, etc."
+    },
+    "ORG": {
+        "iri": "dbo:Organisation",
+        "definition": "Companies, agencies, institutions, etc."
+    },
+    "PERCENT": {
+        "iri": "dbr:Percentage",
+        "definition": "Percentage"
+    },
+    "PERSON": {
+        "iri": "dbo:Person",
+        "definition": "People, including fictional"
+    },
+    "PRODUCT": {
+        "iri": "dbo:product",
+        "definition": "Vehicles, weapons, foods, etc. (Not services)"
+    },
+    "QUANTITY": {
+        "iri": "dbr:Quantity",
+        "definition": "Measurements, as of weight or distance"
+    },
+    "TIME": {
+        "iri": "dbo:time",
+        "definition": "Times smaller than a day"
+    },
+    "WORK OF ART": {
+        "iri": "dbr:Work_of_art",
+        "definition": "Titles of books, songs, etc."
+    }
+}
