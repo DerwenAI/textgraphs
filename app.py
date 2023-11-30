@@ -200,3 +200,8 @@ In contrast, Nayak was working with entities extracted from "chunks" of text, no
             ## WIP
             st.divider()
             st.write("(WIP)")
+
+            st.toast(
+                "Demo completed! Thank you for running a Derwen space",
+                icon ="😍",
+            )
