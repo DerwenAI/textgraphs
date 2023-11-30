@@ -201,7 +201,11 @@ In contrast, Nayak was working with entities extracted from "chunks" of text, no
             st.divider()
             st.write("(WIP)")
 
+            thanks: str = """
+This demo has completed, and thank you for running a Derwen space!
+            """
+
             st.toast(
-                "Demo completed! Thank you for running a Derwen space",
+                thanks,
                 icon ="😍",
             )
