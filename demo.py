@@ -10,9 +10,8 @@ import sys  # pylint: disable=W0611
 import time
 
 from icecream import ic  # pylint: disable=E0401
-import spacy  # pylint: disable=E0401
 
-from textgraph import TextGraph
+from textgraph import Pipeline, PipelineFactory, TextGraph
 
 
 if __name__ == "__main__":
@@ -24,15 +23,18 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
     tg: TextGraph = TextGraph()
 
+    fabrica: PipelineFactory = PipelineFactory(
+        ner_model = None,
+    )
+
     duration: float = round(time.time() - start_time, 3)
-    print(f"start: {round(duration, 3)} sec")
+    print(f"set up: {round(duration, 3)} sec")
 
 
     start_time = time.time()
 
-    sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
+    pipe: Pipeline = fabrica.build_pipeline(
         SRC_TEXT.strip(),
-        ner_model = None,
     )
 
     duration = round(time.time() - start_time, 3)
@@ -44,7 +46,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     start_time = time.time()
 
     tg.build_graph_embeddings(
-        sample_doc,
+        pipe,
     )
 
     duration = round(time.time() - start_time, 3)
@@ -54,7 +56,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     start_time = time.time()
 
     tg.infer_relations(
-        SRC_TEXT.strip(),
+        pipe,
     )
 
     duration = round(time.time() - start_time, 3)

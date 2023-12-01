@@ -10,6 +10,8 @@ from .doc import TextGraph
 
 from .elem import Edge, Node, NodeKind, RelEnum
 
-from .util import calc_quantile_bins, stripe_column, root_mean_square
+from .pipe import Pipeline, PipelineFactory
+
+from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 from .vis import RenderPyVis

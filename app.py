@@ -16,7 +16,7 @@ import pyvis  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import streamlit as st  # pylint: disable=E0401
 
-from textgraph import RenderPyVis, TextGraph
+from textgraph import Pipeline, PipelineFactory, RenderPyVis, TextGraph
 
 
 if __name__ == "__main__":
@@ -44,7 +44,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
         # collect input + config
         text_input: str = st.text_area(
-            "Source Text:",
+            "Source Text: (this library is intended for processing a stream of paragraphs)",
             value = SRC_TEXT.strip(),
         )
 
@@ -64,9 +64,12 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             start_time: float = time.time()
 
-            sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
-                text_input,
-                ner_model = TextGraph.NER_MODEL if llm_ner else None,
+            fabrica: PipelineFactory = PipelineFactory(
+                ner_model = PipelineFactory.NER_MODEL if llm_ner else None,
+            )
+
+            pipe: Pipeline = fabrica.build_pipeline(
+                text_input.strip(),
             )
 
             duration: float = round(time.time() - start_time, 3)
@@ -74,7 +77,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             # render the entity html
             ent_html: str = spacy.displacy.render(
-                sample_doc,
+                pipe.ent_doc,
                 style = "ent",
                 jupyter = False,
             )
@@ -86,7 +89,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             # generate dependencies as an SVG
             dep_svg = spacy.displacy.render(
-                sample_doc,
+                pipe.ent_doc,
                 style = "dep",
                 jupyter = False,
             )
@@ -104,7 +107,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             start_time = time.time()
 
             tg.build_graph_embeddings(
-                sample_doc,
+                pipe,
                 debug = False,
             )
 
@@ -192,7 +195,7 @@ In contrast, Nayak was working with entities extracted from "chunks" of text, no
             ## infer relations
             if llm_nre:
                 tg.infer_relations(
-                    SRC_TEXT.strip(),
+                    pipe,
                     debug = False,
                 )
 

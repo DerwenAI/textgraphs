@@ -12,10 +12,8 @@ from os.path import abspath, dirname
 import pathlib
 import sys
 
-import spacy  # pylint: disable=E0401
-
 sys.path.insert(0, str(pathlib.Path(dirname(dirname(abspath(__file__))))))
-from textgraph import TextGraph  # pylint: disable=C0413
+from textgraph import Pipeline, PipelineFactory, TextGraph  # pylint: disable=C0413
 
 
 def test_extract_herzog ():
@@ -27,13 +25,16 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     """
     tg: TextGraph = TextGraph()  # pylint: disable=C0103
 
-    sample_doc: spacy.tokens.doc.Doc = tg.build_doc(
-        text.strip(),
+    fabrica: PipelineFactory = PipelineFactory(
         ner_model = None,
     )
 
+    pipe: Pipeline = fabrica.build_pipeline(
+        text.strip(),
+    )
+
     tg.build_graph_embeddings(
-        sample_doc,
+        pipe,
         debug = False,
     )
 

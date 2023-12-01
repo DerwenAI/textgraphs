@@ -29,6 +29,7 @@ import pandas as pd  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
 from .elem import Edge, Node, RelEnum
+from .pipe import Pipeline
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 
@@ -39,9 +40,7 @@ extract ranked phrases using a `textgraph` algorithm.
     """
     MAX_SKIP: int = 11
     NER_MAP: str = "dat/ner_map.json"
-    NER_MODEL: str = "tomaarsen/span-marker-roberta-large-ontonotes5"
     NRE_MODEL: str = "wiki80_cnn_softmax"
-    SPACY_MODEL: str = "en_core_web_sm"
 
 
     def __init__ (
@@ -56,56 +55,31 @@ Constructor.
         self.nre: opennre.model.softmax_nn.SoftmaxNN = opennre.get_model(self.NRE_MODEL)
 
 
-    def build_doc (
-        self,
-        text_input: str,
-        *,
-        spacy_model: str = SPACY_MODEL,
-        ner_model: typing.Optional[ str ] = NER_MODEL,
-        ) -> spacy.tokens.doc.Doc:
-        """
-Instantiate a `spaCy` pipeline and return a document which parses
-the given text input.
-        """
-        exclude: typing.List[ str ] = []
-
-        if ner_model is not None:
-            exclude.append("ner")
-
-        nlp = spacy.load(
-            spacy_model,
-            exclude = exclude,
-        )
-
-        if ner_model is not None:
-            nlp.add_pipe(
-                "span_marker",
-                config = {
-                    "model": ner_model,
-                },
-            )
-
-        nlp.add_pipe("merge_entities")
-
-        return nlp(text_input)
-
-
-    def make_node (
+    def make_node (  # pylint: disable=R0913
         self,
         key: str,
         span: spacy.tokens.token.Token,
+        text_id: int,
+        para_id: int,
         sent_id: int,
         *,
         kind: typing.Optional[ str ] = None,
-        condense: bool = True,
+        linked: bool = True,
         ) -> Node:
         """
 Lookup and return a `Node` object:
 
-    * default: condense matching keys into the same node
+    * default: link matching keys into the same node
     * instantiate a new node if it does not exist already
         """
-        if not condense:
+        location: typing.Tuple[ int ] = (  # type: ignore
+            text_id,
+            para_id,
+            sent_id,
+            span.i,
+        )
+
+        if not linked:
             # construct a placeholder node (stopwords)
             self.nodes[key] = Node(
                 len(self.nodes),
@@ -113,13 +87,13 @@ Lookup and return a `Node` object:
                 span,
                 span.text,
                 span.pos_,
-                set([ sent_id ]),
+                [ location ],
             )
 
         elif key in self.nodes:
             # link to previously constructed entity node
+            self.nodes[key].loc.append(location)
             self.nodes[key].count += 1
-            self.nodes[key].sents.add(sent_id)
 
         # construct a new node for entity or lemma
         else:
@@ -129,7 +103,7 @@ Lookup and return a `Node` object:
                 span,
                 span.text,
                 span.pos_,
-                set([ sent_id ]),
+                [ location ],
                 kind = kind,
                 count = 1,
             )
@@ -140,7 +114,9 @@ Lookup and return a `Node` object:
     def extract_phrases (
         self,
         sent_id: int,
-        sent,
+        sent: spacy.tokens.span.Span,
+        text_id: int,
+        para_id: int,
         *,
         debug: bool = False,
         ) -> typing.Iterator[ Node ]:
@@ -173,17 +149,40 @@ _lemma graph_, while giving priority to:
                 # link a named entity
                 ent = ent_seq.pop(0)
                 lemma_key: str = ".".join([ token.lemma_.strip().lower(), token.pos_ ])
-                yield self.make_node(lemma_key, token, sent_id, kind = ent.label_)
+
+                yield self.make_node(
+                    lemma_key,
+                    token,
+                    text_id,
+                    para_id,
+                    sent_id,
+                    kind = ent.label_,
+                )
 
             elif token.pos_ in [ "NOUN", "PROPN", "VERB" ]:
                 # link a lemmatized entity
                 lemma_key = ".".join([ token.lemma_.strip().lower(), token.pos_ ])
-                yield self.make_node(lemma_key, token, sent_id)
+
+                yield self.make_node(
+                    lemma_key,
+                    token,
+                    text_id,
+                    para_id,
+                    sent_id,
+                )
 
             else:
                 # fall-through case: use token as a placeholder in the lemma graph
                 lemma_key = ".".join([ str(token.i), token.lower_, token.pos_ ])
-                yield self.make_node(lemma_key, token, sent_id, condense = False)
+
+                yield self.make_node(
+                    lemma_key,
+                    token,
+                    text_id,
+                    para_id,
+                    sent_id,
+                    linked = False,
+                )
 
 
     def make_edge (  # pylint: disable=R0913
@@ -223,9 +222,11 @@ and increment the count if it does.
 
     def build_graph_embeddings (
         self,
-        doc: spacy.tokens.doc.Doc,
+        pipe: Pipeline,
         *,
         ner_map_path: pathlib.Path = pathlib.Path(NER_MAP),
+        text_id: int = 0,
+        para_id: int = 0,
         debug: bool = True,
         ) -> None:
         """
@@ -243,11 +244,16 @@ document.
         )
 
         # parse each sentence
-        for sent_id, sent in enumerate(doc.sents):
+        for sent_id, sent in enumerate(pipe.ent_doc.sents):
             if debug:
                 ic(sent_id, sent, sent.start)
 
-            sent_nodes: typing.List[ Node ] = list(self.extract_phrases(sent_id, sent))
+            sent_nodes: typing.List[ Node ] = list(self.extract_phrases(
+                sent_id,
+                sent,
+                text_id,
+                para_id,
+            ))
 
             if debug:
                 ic(sent_nodes)
@@ -301,7 +307,7 @@ document.
 
     def infer_relations (
         self,
-        text_input: str,
+        pipe: Pipeline,
         *,
         max_skip: int = MAX_SKIP,
         debug: bool = True,
@@ -336,7 +342,7 @@ Run NRE to infer relations between pairs of co-occurring entities.
 
                     if len(path) <= max_skip:
                         rel, prob = self.nre.infer({
-                            "text": text_input,
+                            "text": pipe.text,
                             "h": { "pos": src.get_pos() },
                             "t": { "pos": dst.get_pos() },
                         })

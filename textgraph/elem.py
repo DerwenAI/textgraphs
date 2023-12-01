@@ -26,7 +26,7 @@ A data class representing one node, i.e., an extracted phrase.
     span: spacy.tokens.token.Token
     text: str
     pos: str
-    sents: typing.Set[ int ]
+    loc: typing.List[ typing.Tuple[ int ] ]
     kind: typing.Optional[ str ] = None
     count: int = 0
     neighbors: int = 0
