@@ -111,12 +111,13 @@ Lookup and return a `Node` object:
         return self.nodes.get(key)  # type: ignore
 
 
-    def extract_phrases (
+    def extract_phrases (  # pylint: disable=R0913
         self,
         sent_id: int,
         sent: spacy.tokens.span.Span,
         text_id: int,
         para_id: int,
+        lemma_iter: typing.Iterator[ str ],
         *,
         debug: bool = False,
         ) -> typing.Iterator[ Node ]:
@@ -148,10 +149,9 @@ _lemma graph_, while giving priority to:
             if len(ent_seq) > 0 and ent_seq[0].start == token.i:
                 # link a named entity
                 ent = ent_seq.pop(0)
-                lemma_key: str = ".".join([ token.lemma_.strip().lower(), token.pos_ ])
 
                 yield self.make_node(
-                    lemma_key,
+                    next(lemma_iter),  # pylint: disable=R1708
                     token,
                     text_id,
                     para_id,
@@ -161,10 +161,8 @@ _lemma graph_, while giving priority to:
 
             elif token.pos_ in [ "NOUN", "PROPN", "VERB" ]:
                 # link a lemmatized entity
-                lemma_key = ".".join([ token.lemma_.strip().lower(), token.pos_ ])
-
                 yield self.make_node(
-                    lemma_key,
+                    Pipeline.get_lemma_key(token),
                     token,
                     text_id,
                     para_id,
@@ -173,10 +171,8 @@ _lemma graph_, while giving priority to:
 
             else:
                 # fall-through case: use token as a placeholder in the lemma graph
-                lemma_key = ".".join([ str(token.i), token.lower_, token.pos_ ])
-
                 yield self.make_node(
-                    lemma_key,
+                    Pipeline.get_lemma_key(token, placeholder = True),
                     token,
                     text_id,
                     para_id,
@@ -244,6 +240,8 @@ document.
         )
 
         # parse each sentence
+        lemma_iter: typing.Iterator[ str ] = pipe.get_ent_lemma_keys()
+
         for sent_id, sent in enumerate(pipe.ent_doc.sents):
             if debug:
                 ic(sent_id, sent, sent.start)
@@ -253,6 +251,7 @@ document.
                 sent,
                 text_id,
                 para_id,
+                lemma_iter,
             ))
 
             if debug:

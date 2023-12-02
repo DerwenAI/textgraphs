@@ -41,8 +41,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     print(f"parse: {round(duration, 3)} sec")
 
 
-    #sys.exit(0)
-
     start_time = time.time()
 
     tg.build_graph_embeddings(

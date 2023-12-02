@@ -6,6 +6,8 @@
 NLP pipeline factory builder pattern.
 """
 
+import functools
+import operator
 import typing
 
 from icecream import ic  # pylint: disable=E0401,W0611
@@ -29,6 +31,46 @@ Constructor.
         self.text: str = text_input
         self.tok_doc: spacy.tokens.Doc = tok_pipe(self.text)
         self.ent_doc: spacy.tokens.Doc = ent_pipe(self.text)
+
+
+    @classmethod
+    def get_lemma_key (
+        cls,
+        token: spacy.tokens.token.Token,
+        *,
+        placeholder: bool = False,
+        ) -> str:
+        """
+Compose a unique, invariant lemma key for the given span.
+        """
+        terms: typing.List[ str ] = [
+            token.lemma_.strip().lower(),
+            token.pos_,
+        ]
+
+        if placeholder:
+            terms.insert(0, str(token.i))
+
+        return ".".join(terms)
+
+
+    def get_ent_lemma_keys (
+        self,
+        ) -> typing.Iterator[ str ]:
+        """
+Iterate through the fully qualified lemma keys for an extracted entity.
+        """
+        for ent in self.tok_doc.ents:
+            yield ".".join(
+                functools.reduce(
+                    operator.iconcat,
+                    [
+                        [ tok.lemma_.strip().lower(), tok.pos_, ]
+                        for tok in ent
+                    ],
+                    [],
+                )
+            )
 
 
 class PipelineFactory:  # pylint: disable=R0903
