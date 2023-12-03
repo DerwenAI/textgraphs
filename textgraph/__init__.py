@@ -8,9 +8,9 @@ Package definitions.
 
 from .doc import TextGraph
 
-from .elem import Edge, Node, NodeKind, RelEnum
+from .elem import Edge, Node, NodeEnum, RelEnum
 
-from .pipe import Pipeline, PipelineFactory
+from .pipe import NounChunk, Pipeline, PipelineFactory
 
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 

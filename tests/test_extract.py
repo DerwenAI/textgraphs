@@ -47,8 +47,8 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         for _, row in tg.get_phrases_as_df().iterrows()
     ]
 
-    # top-k, k=3
-    results = results[:3]
+    # top-k, k=4
+    results = results[:4]
 
     expects: list = [
         ("Germany", "PROPN"),

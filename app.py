@@ -129,10 +129,8 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 what you get at this stage is a relatively noisy,
                 low-level detailed graph of the parsed text
 
-                the most interesting parts will probably be:
-
-                  * the src node of an `nsubj` edge
-                  * the dst node of a `pobj` edge
+                the most interesting nodes will probably be either
+                subjects (`nsubj`) or direct objects (`pobj`)
                 """
             )
 

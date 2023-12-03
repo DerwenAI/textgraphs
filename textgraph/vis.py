@@ -14,7 +14,7 @@ import matplotlib.colors as mcolors  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
 import pyvis  # pylint: disable=E0401
 
-from .elem import Edge, Node, NodeKind, RelEnum
+from .elem import Edge, Node, NodeEnum, RelEnum
 
 
 @dataclass(order=False, frozen=True)
@@ -22,25 +22,30 @@ class NodeStyle:  # pylint: disable=R0902
     """
 Dataclass used for styling PyVis nodes.
     """
-    kind: NodeKind
+    label: NodeEnum
     shape: str
     color: str
 
 NODE_STYLES: typing.List[ NodeStyle ] = [
     NodeStyle(
-        kind = NodeKind.DEP,
+        label = NodeEnum.DEP,
         shape = "star",
         color = "hsla(72, 19%, 90%, 0.4)",
     ),
     NodeStyle(
-        kind = NodeKind.LEM,
+        label = NodeEnum.LEM,
         shape = "square",
         color = "hsl(306, 45%, 57%)",
     ),
     NodeStyle(
-        kind = NodeKind.ENT,
+        label = NodeEnum.ENT,
         shape = "circle",
         color = "hsl(65, 46%, 58%)",
+    ),
+    NodeStyle(
+        label = NodeEnum.CHU,
+        shape = "triangle",
+        color = "hsla(72, 19%, 90%, 0.9)",
     ),
 ]
 
@@ -76,24 +81,20 @@ and returning a `PyVis` network to render.
         for node_key, node in self.nodes.items():
             nx_node = self.lemma_graph.nodes[node.node_id]
 
-            if node.weight == 0.0:
-                node_kind: NodeKind = NodeKind.DEP
-                nx_node["label"] = ""
-
-            elif node.kind is None:
-                node_kind = NodeKind.LEM
-                nx_node["label"] = node.text
-
-            else:
-                node_kind = NodeKind.ENT
-                nx_node["label"] = node.text
-
-            nx_node["kind"] = node_kind
             nx_node["title"] = node_key
             nx_node["value"] = node.weight
             nx_node["size"] = node.count
-            nx_node["shape"] = NODE_STYLES[node_kind].shape
-            nx_node["color"] = NODE_STYLES[node_kind].color
+            nx_node["shape"] = NODE_STYLES[node.kind].shape
+            nx_node["color"] = NODE_STYLES[node.kind].color
+
+            if node.kind == NodeEnum.DEP:
+                nx_node["label"] = ""
+
+            else:
+                nx_node["label"] = node.text
+
+            if node.kind == NodeEnum.CHU:
+                nx_node["value"] = 0.0
 
             if debug:
                 ic(node.count, node, nx_node)

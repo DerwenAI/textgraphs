@@ -1,15 +1,16 @@
 TODO:
 
-  * sequence noun chunks in parallel to entities (candidates)
+  * generate a word cloud
 
   * use DBPedia Spotlight
   https://www.dbpedia-spotlight.org/api/en
   https://lookup.dbpedia.org/api/search?query=Austin,+Texas
 
   * use community detection to condense nodes
-  * add src of `nsubj` or dst of `pobj` to hypervolume
 
   * build a _graph of relations_ topology transform
+    * transformed graph
+    * calculate affinities
 
   * download ZIP: KuzuDB node-link
   https://docs.streamlit.io/library/api-reference/widgets/st.download_button
@@ -20,6 +21,6 @@ TODO:
   * eval use of DBPedia models for relation extraction on HF -- or fine-tune one?
   * link `sense2vec` synonyms
 
-  * setup/config for PyPi based on pyproject.toml
-  * add to conda
+  * add conda packaging
+  * publish on PyPi and Conda
   * `mkrefs` docs

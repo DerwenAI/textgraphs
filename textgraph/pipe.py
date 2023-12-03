@@ -6,12 +6,27 @@
 NLP pipeline factory builder pattern.
 """
 
+from dataclasses import dataclass
 import functools
 import operator
 import typing
 
 from icecream import ic  # pylint: disable=E0401,W0611
 import spacy  # pylint: disable=E0401
+
+
+@dataclass(order=False, frozen=False)
+class NounChunk:  # pylint: disable=R0902
+    """
+A data class representing one noun chunk, i.e., a candidate as an extracted phrase.
+    """
+    span: spacy.tokens.span.Span
+    text: str
+    length: int
+    lemma_key: str
+    unseen: bool
+    sent_id: int
+    start: int = 0
 
 
 class Pipeline:  # pylint: disable=R0903
@@ -36,20 +51,31 @@ Constructor.
     @classmethod
     def get_lemma_key (
         cls,
-        token: spacy.tokens.token.Token,
+        span: typing.Union[ spacy.tokens.span.Span, spacy.tokens.token.Token ],
         *,
         placeholder: bool = False,
         ) -> str:
         """
 Compose a unique, invariant lemma key for the given span.
         """
-        terms: typing.List[ str ] = [
-            token.lemma_.strip().lower(),
-            token.pos_,
-        ]
+        if isinstance(span, spacy.tokens.token.Token):
+            terms: typing.List[ str ] = [
+                span.lemma_.strip().lower(),
+                span.pos_,
+            ]
 
-        if placeholder:
-            terms.insert(0, str(token.i))
+            if placeholder:
+                terms.insert(0, str(span.i))
+
+        else:
+            terms = functools.reduce(
+                operator.iconcat,
+                [
+                    [ token.lemma_.strip().lower(), token.pos_, ]
+                    for token in span
+                ],
+                [],
+            )
 
         return ".".join(terms)
 
@@ -61,16 +87,48 @@ Compose a unique, invariant lemma key for the given span.
 Iterate through the fully qualified lemma keys for an extracted entity.
         """
         for ent in self.tok_doc.ents:
-            yield ".".join(
-                functools.reduce(
-                    operator.iconcat,
-                    [
-                        [ tok.lemma_.strip().lower(), tok.pos_, ]
-                        for tok in ent
-                    ],
-                    [],
+            yield self.get_lemma_key(ent)
+
+
+    def link_noun_chunks (
+        self,
+        nodes: dict,
+        tokens: list,
+        *,
+        debug: bool = False,
+        ) -> typing.List[ NounChunk ]:
+        """
+Link any noun chunks which are not already subsumed by named entities.
+        """
+        chunks: typing.List[ NounChunk ] = []
+
+        # first pass: note the available noun chunks
+        for sent_id, sent in enumerate(self.tok_doc.sents):
+            for span in sent.noun_chunks:
+                lemma_key: str = self.get_lemma_key(span)
+
+                chunks.append(
+                    NounChunk(
+                        span,
+                        span.text,
+                        len(span),
+                        lemma_key,
+                        lemma_key not in nodes,
+                        sent_id,
+                    )
                 )
-            )
+
+        # second pass: remap span indices to the merged entities pipeline
+        for i, span in enumerate(self.ent_doc.noun_chunks):
+            if span.text == tokens[span.start].text:
+                chunks[i].unseen = False
+            elif chunks[i].unseen:
+                chunks[i].start = span.start
+
+                if debug:
+                    ic(chunks[i])
+
+        return chunks
 
 
 class PipelineFactory:  # pylint: disable=R0903
