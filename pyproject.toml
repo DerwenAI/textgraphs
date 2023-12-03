@@ -61,14 +61,11 @@ dependencies = [
     "en_core_web_sm @ https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-none-any.whl",
 
     "icecream >= 2.1",
-    "jupyterlab >= 4.0",
     "matplotlib >= 3.8",
     "networkx >= 3.2",
     "pyvis >= 0.3",
     "pulp >= 2.7",
-    "sense2vec >= 2.0",
     "span_marker >= 1.5",
-    "streamlit >= 1.28",
     "wordcloud >= 1.9",
 ]
 
@@ -81,4 +78,10 @@ dev = [
 
 test = [
     "pytest >= 7.4",
+]
+
+demo = [
+    "jupyterlab >= 4.0",
+    "sense2vec >= 2.0",
+    "streamlit < 1.29",
 ]
