@@ -297,18 +297,12 @@ dependencies, lemmas, entities, and noun chunks.
             for node in self.nodes.values()
         ])
 
-        # populate the node properties
+        # populate the minimum required node properties
         for node_key, node in self.nodes.items():
             nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["name"] = node.text
-            nx_node["kind"] = str(node.kind)
-            nx_node["value"] = node.weight
-            nx_node["iri"] = node.label
             nx_node["title"] = node_key
             nx_node["size"] = node.count
-            nx_node["subobj"] = node.sub_obj
-            nx_node["pos"] = node.pos
-            nx_node["loc"] = str(node.loc)
+            nx_node["value"] = node.weight
 
         # add the edges and their properties
         self.lemma_graph.add_edges_from([
@@ -703,6 +697,16 @@ Dump the _lemma graph_ as a JSON string in _node-link_ format,
 suitable for serialization and subsequent use in JavaScript,
 Neo4j, Graphistry, etc.
         """
+        # populate the optional node properties
+        for node in self.nodes.values():
+            nx_node = self.lemma_graph.nodes[node.node_id]
+            nx_node["name"] = node.text
+            nx_node["kind"] = str(node.kind)
+            nx_node["iri"] = node.label
+            nx_node["subobj"] = node.sub_obj
+            nx_node["pos"] = node.pos
+            nx_node["loc"] = str(node.loc)
+
         return json.dumps(
             nx.node_link_data(self.lemma_graph),
             sort_keys = True,
