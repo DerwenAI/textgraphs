@@ -297,16 +297,33 @@ dependencies, lemmas, entities, and noun chunks.
             for node in self.nodes.values()
         ])
 
-        # add the edges
+        # populate the node properties
+        for node_key, node in self.nodes.items():
+            nx_node = self.lemma_graph.nodes[node.node_id]
+            nx_node["name"] = node.text
+            nx_node["kind"] = str(node.kind)
+            nx_node["value"] = node.weight
+            nx_node["iri"] = node.label
+            nx_node["title"] = node_key
+            nx_node["size"] = node.count
+            nx_node["subobj"] = node.sub_obj
+            nx_node["pos"] = node.pos
+            nx_node["loc"] = str(node.loc)
+
+        # add the edges and their properties
         self.lemma_graph.add_edges_from([
             (
                 edge.src_node,
                 edge.dst_node,
                 {
+                    "kind": str(edge.kind),
+                    "title": edge.rel,
                     "weight": float(edge.count),
+                    "prob": edge.prob,
+                    "count": edge.count,
                 },
             )
-            for edge in self.edges.values()
+            for edge_key, edge in self.edges.items()
         ])
 
 
@@ -676,3 +693,19 @@ Return the ranked extracted entities as a `pandas.DataFrame`
             }
             for node in self.get_phrases()
         ])
+
+
+    def dump_lemma_graph (
+        self,
+        ) -> str:
+        """
+Dump the _lemma graph_ as a JSON string in _node-link_ format,
+suitable for serialization and subsequent use in JavaScript,
+Neo4j, Graphistry, etc.
+        """
+        return json.dumps(
+            nx.node_link_data(self.lemma_graph),
+            sort_keys = True,
+            indent =  2,
+            separators = ( ",", ":" ),
+        )

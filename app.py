@@ -11,10 +11,12 @@ import pathlib
 import time
 
 import matplotlib.pyplot as plt  # pylint: disable=E0401
+import numpy as np  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 import pyvis  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import streamlit as st  # pylint: disable=E0401
+import wordcloud  # pylint: disable=E0401
 
 from textgraph import Pipeline, PipelineFactory, RenderPyVis, TextGraph
 
@@ -164,6 +166,14 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 height = 1300,
                 scrolling = True,
             )
+
+
+            ## generate a word cloud
+            st.subheader("generate a word cloud", divider = "rainbow")
+
+            cloud: wordcloud.WordCloud = render.generate_wordcloud()
+            img_array: np.array = np.array(cloud.to_image())
+            st.image(img_array)
 
 
             ## cluster the communities

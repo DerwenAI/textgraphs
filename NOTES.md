@@ -1,7 +1,5 @@
 TODO:
 
-  * generate a word cloud
-
   * use DBPedia Spotlight
   https://www.dbpedia-spotlight.org/api/en
   https://lookup.dbpedia.org/api/search?query=Austin,+Texas

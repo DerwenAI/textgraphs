@@ -13,6 +13,7 @@ from icecream import ic  # pylint: disable=E0401
 import matplotlib.colors as mcolors  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
 import pyvis  # pylint: disable=E0401
+import wordcloud  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
 
@@ -78,12 +79,8 @@ Constructor.
 Prepare the structure of the `NetworkX` graph to use for building
 and returning a `PyVis` network to render.
         """
-        for node_key, node in self.nodes.items():
+        for node in self.nodes.values():
             nx_node = self.lemma_graph.nodes[node.node_id]
-
-            nx_node["title"] = node_key
-            nx_node["value"] = node.weight
-            nx_node["size"] = node.count
             nx_node["shape"] = NODE_STYLES[node.kind].shape
             nx_node["color"] = NODE_STYLES[node.kind].color
 
@@ -180,3 +177,32 @@ community.
         )
 
         return comm_map
+
+
+    def generate_wordcloud (
+        self,
+        *,
+        background: str = "black",
+        ) -> wordcloud.WordCloud:
+        """
+Generate a tag cloud from the given phrases.
+        """
+        terms: dict = {}
+        max_weight: float = 0.0
+
+        for node in self.nodes.values():
+            if node.weight > 0.0:
+                phrase: str = node.text.replace(" ", "_")
+                max_weight = max(max_weight, node.weight)
+                terms[phrase] = node.weight
+
+        freq: dict = {
+            phrase: round(weight / max_weight * 1000.0)
+            for phrase, weight in terms.items()
+        }
+
+        cloud: wordcloud.WordCloud = wordcloud.WordCloud(
+            background_color = background,
+        )
+
+        return cloud.generate_from_frequencies(freq)

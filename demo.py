@@ -83,3 +83,6 @@ After the war, Werner fled to America to become famous.
 
     duration = round(time.time() - start_time, 3)
     print(f"infer rel: {round(duration, 3)} sec")
+
+
+    #print(tg.dump_lemma_graph())
