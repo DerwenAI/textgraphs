@@ -56,11 +56,10 @@ classifiers = [
 ]
 
 dependencies = [
-    "open-nre @ git+https://github.com/thunlp/OpenNRE",
-
     "spacy >= 3.7",
     "en_core_web_sm @ https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-none-any.whl",
 
+    "open-nre @ git+https://github.com/thunlp/OpenNRE",
     "icecream >= 2.1",
     "matplotlib >= 3.8",
     "networkx >= 3.2",
@@ -85,5 +84,6 @@ demo = [
     "jupyterlab >= 4.0",
     "ipywidgets >= 8.1",
     "sense2vec >= 2.0",
+    "spacy-entity-linker >= 1.0",
     "streamlit < 1.29",
 ]

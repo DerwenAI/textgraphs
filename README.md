@@ -28,10 +28,15 @@ source venv/bin/activate
 
 python3 -m pip install -U pip wheel setuptools
 python3 -m pip install -r requirements.txt
-
-pre-commit install --hook-type pre-commit
 ```
 
+if you want to run the Streamlit or JupyterLab demos,
+or work on development/testing of this repo:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+pre-commit install --hook-type pre-commit
+```
 
 ## test locally:
 

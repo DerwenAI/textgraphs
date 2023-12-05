@@ -1,19 +1,12 @@
-streamlit < 1.29
-
-git+https://github.com/thunlp/OpenNRE
-
 spacy >= 3.7
 https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-none-any.whl
 
+git+https://github.com/thunlp/OpenNRE
+
 icecream >= 2.1
-ipywidgets >= 8.1
-jupyterlab >= 4.0
 matplotlib >= 3.8
 networkx >= 3.2
-pre-commit >= 3.5
-pytest >= 7.4
 pyvis >= 0.3
 pulp >= 2.7
-sense2vec >= 2.0
 span_marker >= 1.5
 wordcloud >= 1.9
