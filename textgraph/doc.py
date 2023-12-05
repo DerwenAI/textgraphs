@@ -19,6 +19,7 @@ from collections import OrderedDict
 import itertools
 import json
 import pathlib
+import sys
 import typing
 
 from icecream import ic  # pylint: disable=E0401
@@ -32,6 +33,13 @@ import spacy  # pylint: disable=E0401
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .pipe import Pipeline
 from .util import calc_quantile_bins, root_mean_square, stripe_column
+
+# determine whether this is loading into a Jupyter notebook
+# to allow for progress bars
+if 'ipykernel' in sys.modules:
+    from tqdm.notebook import tqdm  # pylint: disable=E0401,W0611
+else:
+    from tqdm import tqdm  # pylint: disable=E0401
 
 
 class TextGraph:

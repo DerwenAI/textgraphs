@@ -26,3 +26,5 @@ TODO:
   * add conda packaging
   * publish on PyPi and Conda
   * `mkrefs` docs
+
+see license https://github.com/DerwenAI/textgraph#license-and-copyright

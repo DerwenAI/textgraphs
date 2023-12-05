@@ -28,8 +28,9 @@ authors = [
     { name = "derwen.ai", email = "info@derwen.ai" },
 ]
 
-description = "Using textgraph + LLM + graph ML for entity extraction, ranking, and linking"
+description = "Using textgraph + LLM + graph ML for entity extraction, linking, and ranking"
 readme = "README.md"
+license = { file = "LICENSE" }
 
 requires-python = ">=3.9"
 
@@ -82,6 +83,7 @@ test = [
 
 demo = [
     "jupyterlab >= 4.0",
+    "ipywidgets >= 8.1",
     "sense2vec >= 2.0",
     "streamlit < 1.29",
 ]
