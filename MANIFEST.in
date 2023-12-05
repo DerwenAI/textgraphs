@@ -1,0 +1,15 @@
+include LICENSE
+include README.md
+include dat/*.json
+include pyproject.toml
+include requirements.txt
+include setup.py
+include tests/*.py
+include textgraph/*.py
+prune .ipynb_checkpoints
+prune .mypy_cache
+prune .pre-commit-config.yaml
+prune docs
+prune lib
+prune s2v_old
+prune venv
