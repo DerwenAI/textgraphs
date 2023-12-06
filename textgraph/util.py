@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright ©2023 Derwen, Inc. All rights reserved.
 
 """
 Utility functions.
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
 
 import math

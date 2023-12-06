@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright ©2023 Derwen, Inc. All rights reserved.
 # pylint: disable=C0301
 
 """
 HuggingFace Spaces demo of `textgraph` using Streamlit
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
 
 import pathlib

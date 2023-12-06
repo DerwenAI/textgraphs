@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright ©2023 Derwen, Inc. All rights reserved.
 
 """
 Implementation of an LLM-augmented `textgraph` algorithm for
@@ -14,6 +13,8 @@ This integrates examples from:
   * <https://github.com/thunlp/OpenNRE/>
   * <https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4>
   * <https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a>
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
 
 from collections import OrderedDict

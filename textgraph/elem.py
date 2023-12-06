@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright ©2023 Derwen, Inc. All rights reserved.
 
 """
 Classes used for graph representation:
 
   * superset of openCypher, adding support for a probabilitic graph
   * IRI discipline also guarantees export to RDF, e.g., for transitive closure
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
 
 from dataclasses import dataclass, field
