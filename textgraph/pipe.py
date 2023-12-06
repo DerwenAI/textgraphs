@@ -38,6 +38,7 @@ class Pipeline:  # pylint: disable=R0903
         self,
         text_input: str,
         tok_pipe: spacy.Language,
+        dbp_pipe: spacy.Language,
         ent_pipe: spacy.Language,
         ) -> None:
         """
@@ -45,6 +46,7 @@ Constructor.
         """
         self.text: str = text_input
         self.tok_doc: spacy.tokens.Doc = tok_pipe(self.text)
+        self.dbp_doc: spacy.tokens.Doc = dbp_pipe(self.text)
         self.ent_doc: spacy.tokens.Doc = ent_pipe(self.text)
 
 
@@ -150,6 +152,7 @@ expensive operations with `spaCy`
 Constructor which instantiates two `spaCy` pipeline:
 
   * `tok_pipe` -- regular generator for parsed tokens
+  * `dbp_pipe` -- DBPedia entity linking
   * `ent_pipe` -- with entities merged
         """
         # determine the NER model to be used
@@ -158,8 +161,13 @@ Constructor which instantiates two `spaCy` pipeline:
         if ner_model is not None:
             exclude.append("ner")
 
-        # build both pipelines
+        # build the pipelines
         self.tok_pipe = spacy.load(
+            spacy_model,
+            exclude = exclude,
+        )
+
+        self.dbp_pipe = spacy.load(
             spacy_model,
             exclude = exclude,
         )
@@ -178,6 +186,13 @@ Constructor which instantiates two `spaCy` pipeline:
                 },
             )
 
+            self.dbp_pipe.add_pipe(
+                "span_marker",
+                config = {
+                    "model": ner_model,
+                },
+            )
+
             self.ent_pipe.add_pipe(
                 "span_marker",
                 config = {
@@ -185,7 +200,10 @@ Constructor which instantiates two `spaCy` pipeline:
                 },
             )
 
-        # merge entities on one pipe only
+        # `dbp_pipe` only: DBPedia entity linking
+        self.dbp_pipe.add_pipe("dbpedia_spotlight")
+
+        # `ent_pipe` only: merge entities
         self.ent_pipe.add_pipe("merge_entities")
 
 
@@ -199,5 +217,6 @@ return document pipelines to parse the given text input.
         return Pipeline(
             text_input,
             self.tok_pipe,
+            self.dbp_pipe,
             self.ent_pipe,
         )
