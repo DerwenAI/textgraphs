@@ -121,6 +121,10 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.write(f"extract: {round(duration, 3)} sec, {len(df)} entities")
 
             st.dataframe(df)
+            #st.markdown(
+            #    df.to_html(render_links = True),
+            #    unsafe_allow_html = True,
+            #)
 
 
             ## visualize the lemma graph
