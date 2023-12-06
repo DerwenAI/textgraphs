@@ -14,8 +14,8 @@
   <ol>
     <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
     <li>add noun chunks in parallel to entities, as "candidate" phrases for subsequent HITL</li>
-    <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>use <code>DBPedia Spotlight</code> to perform <em>entity linking</em> and some graph inference (in progress)</li>
+    <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>use <code>OpenNRE</code> to infer relations among entities (optional)</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
     <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities</li>
@@ -49,6 +49,9 @@
   <ul>
     <li>
       <a href="https://github.com/tomaarsen/SpanMarkerNER/" target="_blank"><code>SpanMarkerNER</code></a>
+    </li>
+    <li>
+      <a href="https://github.com/MartinoMensio/spacy-dbpedia-spotlight" target="_blank"><code>spaCy-DBpedia-Spotlight</code></a>
     </li>
     <li>
       <a href="https://github.com/thunlp/OpenNRE/" target="_blank"><code>OpenNRE</code></a>
@@ -88,6 +91,11 @@
       <br/>
       <strong>Rahul Nayak</strong>, <em>Towards Data Science</em> (2023-11-09)
     </li>
+    <li>
+      <a href="https://medium.com/@nizami_muhammad/extracting-relation-from-sentence-using-llm-597d0c0310a8" target="_blank">"Extracting Relation from Sentence using LLM"</a>
+      <br/>
+      <strong>Muhammad Nizami</strong> <em>Medium</em> (2023-11-15)
+    <li>
   </ul>
 </details>
 

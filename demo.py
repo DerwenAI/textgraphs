@@ -17,8 +17,9 @@ from textgraph import Pipeline, PipelineFactory, TextGraph
 if __name__ == "__main__":
     SRC_TEXT: str = """
 Werner Herzog is a remarkable filmmaker and an intellectual originally from Germany, the son of Dietrich Herzog.
-After the war, Werner fled to America to become famous.
 """
+
+    #After the war, Werner fled to America to become famous.
 
     # set up
     start_time: float = time.time()
@@ -49,7 +50,7 @@ After the war, Werner fled to America to become famous.
 
     tg.build_graph_embeddings(
         pipe,
-        debug = True,
+        debug = False,
     )
 
     duration = round(time.time() - start_time, 3)
@@ -60,7 +61,7 @@ After the war, Werner fled to America to become famous.
     start_time = time.time()
 
     tg.calc_phrase_ranks(
-        debug = True,
+        debug = False,
     )
 
     duration = round(time.time() - start_time, 3)
@@ -69,10 +70,11 @@ After the war, Werner fled to America to become famous.
     # print the resulting entities extracted from the document
     ic(tg.get_phrases_as_df())
 
-    #sys.exit(0)
+    sys.exit(0)
 
-    ic(tg.edges)
+    ic(tg.edges)  # pylint: disable=W0101
     ic(tg.nodes)
+
 
     # infer relations
     start_time = time.time()

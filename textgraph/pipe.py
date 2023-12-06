@@ -6,7 +6,6 @@
 NLP pipeline factory builder pattern.
 """
 
-from dataclasses import dataclass
 import functools
 import operator
 import typing
@@ -14,25 +13,15 @@ import typing
 from icecream import ic  # pylint: disable=E0401,W0611
 import spacy  # pylint: disable=E0401
 
-
-@dataclass(order=False, frozen=False)
-class NounChunk:  # pylint: disable=R0902
-    """
-A data class representing one noun chunk, i.e., a candidate as an extracted phrase.
-    """
-    span: spacy.tokens.span.Span
-    text: str
-    length: int
-    lemma_key: str
-    unseen: bool
-    sent_id: int
-    start: int = 0
+from .elem import LinkedEntity, NounChunk
 
 
 class Pipeline:  # pylint: disable=R0903
     """
  Manage parsing the two documents, which are assumed to be paragraph-sized.
     """
+    MIN_DBPEDIA_SIM: float = 0.9
+
 
     def __init__ (
         self,
@@ -84,12 +73,12 @@ Compose a unique, invariant lemma key for the given span.
 
     def get_ent_lemma_keys (
         self,
-        ) -> typing.Iterator[ str ]:
+        ) -> typing.Iterator[ typing.Tuple[ str, int ]]:
         """
 Iterate through the fully qualified lemma keys for an extracted entity.
         """
         for ent in self.tok_doc.ents:
-            yield self.get_lemma_key(ent)
+            yield self.get_lemma_key(ent), len(ent)
 
 
     def link_noun_chunks (
@@ -131,6 +120,68 @@ Link any noun chunks which are not already subsumed by named entities.
                     ic(chunks[i])
 
         return chunks
+
+
+    def link_dbpedia_entities (
+        self,
+        tokens: list,
+        *,
+        min_similarity: float = MIN_DBPEDIA_SIM,
+        debug: bool = False,
+        ) -> typing.Iterator[ LinkedEntity ]:
+        """
+Iterator for the results of DBPedia Spotlight entity linking.
+        """
+        ents: typing.List[ spacy.tokens.span.Span ] = list(self.dbp_doc.ents)
+
+        if debug:
+            ic(ents)
+
+        ent_idx: int = 0
+        tok_idx: int = 0
+
+        for i, tok in enumerate(tokens):
+            if debug:
+                print()
+                ic(tok_idx, tok.text, tok.pos)
+                ic(ent_idx, len(ents))
+
+            if ent_idx < len(ents):
+                ent = ents[ent_idx]
+
+                if debug:
+                    ic(ent.start, tok_idx)
+
+                if ent.start == tok_idx:
+                    if debug:
+                        ic(ent.text, ent.start, len(ent))
+                        ic(ent.kb_id_, ent._.dbpedia_raw_result["@similarityScore"])
+                        ic(ent._.dbpedia_raw_result)
+
+                    prob: float = float(ent._.dbpedia_raw_result["@similarityScore"])
+                    count: int = int(ent._.dbpedia_raw_result["@support"])
+
+                    if tok.pos == "PROPN" and prob >= min_similarity:
+                        iri: str = ent.kb_id_
+
+                        dbp_link = LinkedEntity(
+                            ent,
+                            iri,
+                            len(ent),
+                            "dbpedia",
+                            prob,
+                            count,
+                            i,
+                        )
+
+                        if debug:
+                            ic("found", dbp_link)
+
+                        yield dbp_link
+
+                    ent_idx += 1
+
+            tok_idx += tok.length
 
 
 class PipelineFactory:  # pylint: disable=R0903

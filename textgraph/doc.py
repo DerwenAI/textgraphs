@@ -21,6 +21,7 @@ import itertools
 import json
 import pathlib
 import sys
+import traceback
 import typing
 
 from icecream import ic  # pylint: disable=E0401
@@ -34,6 +35,7 @@ import spacy  # pylint: disable=E0401
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .pipe import Pipeline
 from .util import calc_quantile_bins, root_mean_square, stripe_column
+
 
 # determine whether this is loading into a Jupyter notebook
 # to allow for progress bars
@@ -51,6 +53,7 @@ extract ranked phrases using a `textgraph` algorithm.
     MAX_SKIP: int = 11
     NER_MAP: str = "dat/ner_map.json"
     NRE_MODEL: str = "wiki80_cnn_softmax"
+    PAGERANK_ALPHA: float = 0.85
 
 
     def __init__ (
@@ -76,6 +79,7 @@ Constructor.
         sent_id: int,
         *,
         label: typing.Optional[ str ] = None,
+        length: int = 1,
         linked: bool = True,
         ) -> Node:
         """
@@ -100,7 +104,8 @@ Lookup and return a `Node` object:
                 span.text,
                 span.pos_,
                 kind,
-                [ location ],
+                loc = [ location ],
+                length = length,
             )
 
         elif key in self.nodes:
@@ -117,8 +122,9 @@ Lookup and return a `Node` object:
                 span.text,
                 span.pos_,
                 kind,
-                [ location ],
+                loc = [ location ],
                 label = label,
+                length = length,
                 count = 1,
             )
 
@@ -171,7 +177,7 @@ and increment the count if it does.
         sent: spacy.tokens.span.Span,
         text_id: int,
         para_id: int,
-        lemma_iter: typing.Iterator[ str ],
+        lemma_iter: typing.Iterator[ typing.Tuple[ str, int ]],
         *,
         debug: bool = False,
         ) -> typing.Iterator[ Node ]:
@@ -203,15 +209,17 @@ _lemma graph_, while giving priority to:
             if len(ent_seq) > 0 and ent_seq[0].start == token.i:
                 # link a named entity
                 ent = ent_seq.pop(0)
+                lemma_key, span_len = next(lemma_iter)  # pylint: disable=R1708
 
                 yield self._make_node(
-                    next(lemma_iter),  # pylint: disable=R1708
+                    lemma_key,
                     token,
                     NodeEnum.ENT,
                     text_id,
                     para_id,
                     sent_id,
                     label = ent.label_,
+                    length = span_len,
                 )
 
             elif token.pos_ in [ "NOUN", "PROPN", "VERB" ]:
@@ -272,7 +280,8 @@ entities and lemmas that have already been linked in the lemma graph.
                         chunk.text,
                         "noun_chunk",
                         NodeEnum.CHU,
-                        [ location ],
+                        loc = [ location ],
+                        length = chunk.length,
                         count = 1,
                     )
 
@@ -291,6 +300,55 @@ entities and lemmas that have already been linked in the lemma graph.
                         "noun_chunk",
                         1.0,
                     )
+
+
+    def _link_entities (
+        self,
+        pipe: Pipeline,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Run _entity linking_ based on `DBPedia Spotlight` and other services.
+        """
+        for link in pipe.link_dbpedia_entities(self.tokens, debug = debug):
+            if debug:
+                ic(link)
+
+            # link to previously constructed entity node,
+            # otherwise construct a new node for the linked entity
+            if link.iri in self.nodes:
+                self.nodes[link.iri].count += 1
+
+            else:
+                self.nodes[link.iri] = Node(
+                    len(self.nodes),
+                    link.iri,
+                    link.span,
+                    link.iri,
+                    "dbpedia",
+                    NodeEnum.IRI,
+                    label = link.iri,
+                    length = link.length,
+                    count = 1,
+                )
+
+            node: Node = self.nodes.get(link.iri)  # type: ignore
+
+            if debug:
+                ic(node)
+
+            # back-link, to avoid having to search later
+            self.tokens[link.token_id].entity = link
+
+            # construct an edge for this linked entity
+            self._make_edge(
+                self.tokens[link.token_id],
+                node,
+                RelEnum.IRI,
+                "dbpedia",
+                link.prob,
+            )
 
 
     def _build_lemma_graph (
@@ -337,7 +395,7 @@ dependencies, lemmas, entities, and noun chunks.
         text_id: int = 0,
         para_id: int = 0,
         ner_map_path: pathlib.Path = pathlib.Path(NER_MAP),
-        debug: bool = True,
+        debug: bool = False,
         ) -> None:
         """
 Construct a _lemma graph_ from the results of running the `textgraph`
@@ -355,7 +413,7 @@ document.
         )
 
         # parse each sentence
-        lemma_iter: typing.Iterator[ str ] = pipe.get_ent_lemma_keys()
+        lemma_iter: typing.Iterator[ typing.Tuple[ str, int ]] = pipe.get_ent_lemma_keys()
 
         for sent_id, sent in enumerate(pipe.ent_doc.sents):
             if debug:
@@ -413,6 +471,12 @@ document.
             debug = debug,
         )
 
+        # run entity linking
+        self._link_entities(
+            pipe,
+            debug = debug,
+        )
+
         # build the _lemma graph_ used for analysis
         self._build_lemma_graph()
 
@@ -432,7 +496,7 @@ Run NRE to infer relations between pairs of co-occurring entities.
         ent_list: typing.List[ Node ] = [
             node
             for node in self.nodes.values()
-            if node.label is not None
+            if node.kind in [ NodeEnum.ENT ]
         ]
 
         for pair in itertools.product(ent_list, repeat = 2):
@@ -473,7 +537,8 @@ Run NRE to infer relations between pairs of co-occurring entities.
                         inferred_edges.append(edge)
                 except Exception as ex:  # pylint: disable=W0718
                     ic(ex)
-                    ic(src, dst)
+                    ic("ERROR", src, dst)
+                    traceback.print_exc()
 
         # add edges from the inferred relations
         self.lemma_graph.add_edges_from([
@@ -496,7 +561,7 @@ Run NRE to infer relations between pairs of co-occurring entities.
         min_e: float,
         max_l: float,
         *,
-        debug: bool = True,
+        debug: bool = False,
         ) -> typing.Tuple[ float, float ]:
         """
 Solve for the rank coefficients using a `pulp` linear programming model.
@@ -530,7 +595,7 @@ Solve for the rank coefficients using a `pulp` linear programming model.
         self,
         ranks: typing.List[ float ],
         *,
-        debug: bool = True,  # False
+        debug: bool = False,
         ) -> typing.List[ float ]:
         """
 Stack-rank the nodes so that entities have priority over lemmas.
@@ -539,7 +604,7 @@ Stack-rank the nodes so that entities have priority over lemmas.
         df1: pd.DataFrame = pd.DataFrame.from_dict([
             {
                 "weight": ranks[node.node_id],
-                "count": node.count,
+                "count": node.get_stacked_count(),
                 "neighbors": node.neighbors,
                 "subobj": int(node.sub_obj),
             }
@@ -577,18 +642,10 @@ Stack-rank the nodes so that entities have priority over lemmas.
         df1.loc[~df1["entity"], "E"] = 0
         df1.loc[df1["entity"], "L"] = 0
 
-        # knock out the verbs
-        df1["pos"] = [
-            node.pos
-            for node in self.nodes.values()
-        ]
-
-        df1.loc[df1["pos"] == "VERB", "E"] = 0
-        df1.loc[df1["pos"] == "VERB", "L"] = 0
-
         if debug:
             ic(df1)
 
+        # partition the lists to be stacked
         E: typing.List[ float ] = [  # pylint: disable=C0103
             rank
             for rank in df1["E"].to_numpy()
@@ -625,7 +682,7 @@ Stack-rank the nodes so that entities have priority over lemmas.
     def calc_phrase_ranks (
         self,
         *,
-        pr_alpha: float = 0.85,
+        pr_alpha: float = PAGERANK_ALPHA,
         debug: bool = False,
         ) -> None:
         """
@@ -675,7 +732,7 @@ Return the entities extracted from the document.
                 ],
                 key = lambda n: n.weight,
                 reverse = True,
-        ):
+            ):
             yield node
 
 
@@ -690,7 +747,7 @@ Return the ranked extracted entities as a `pandas.DataFrame`
                 "node_id": node.node_id,
                 "text": node.text,
                 "pos": node.pos,
-                "label": node.label,
+                "label": node.get_linked_label(),
                 "count": node.count,
                 "weight": node.weight,
             }

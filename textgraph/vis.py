@@ -48,7 +48,14 @@ NODE_STYLES: typing.List[ NodeStyle ] = [
         shape = "triangle",
         color = "hsla(72, 19%, 90%, 0.9)",
     ),
+    NodeStyle(
+        label = NodeEnum.IRI,
+        shape = "diamond",
+        color = "hsla(55, 17%, 49%, 0.5)",
+    ),
 ]
+
+# shapes: image, circularImage, diamond, dot, star, triangle, triangleDown, square, icon
 
 
 class RenderPyVis:  # pylint: disable=R0903
@@ -90,7 +97,7 @@ and returning a `PyVis` network to render.
             else:
                 nx_node["label"] = node.text
 
-            if node.kind == NodeEnum.CHU:
+            if node.kind in [ NodeEnum.CHU, NodeEnum.IRI ]:
                 nx_node["value"] = 0.0
 
             if debug:

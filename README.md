@@ -58,3 +58,16 @@ python3 demo.py
 ```bash
 streamlit run app.py
 ```
+
+
+## administrivia
+
+<details>
+  <summary>License and Copyright</summary>
+
+Source code for **textgraph** plus its logo, documentation, and examples
+have an [MIT license](https://spdx.org/licenses/MIT.html) which is
+succinct and simplifies use in commercial applications.
+
+All materials herein are Copyright &copy; 2023 Derwen, Inc.
+</details>
