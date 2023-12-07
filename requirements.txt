@@ -10,4 +10,5 @@ pyvis >= 0.3
 pulp >= 2.7
 spacy-dbpedia-spotlight >= 0.2.6
 span_marker >= 1.5
+transformers >= 4.35
 wordcloud >= 1.9

@@ -19,10 +19,10 @@
   <ol>
     <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
     <li>add noun chunks in parallel to entities, as "candidate" phrases for subsequent HITL</li>
-    <li>use <code>DBPedia Spotlight</code> to perform <em>entity linking</em> and some graph inference (in progress)</li>
+    <li>use <code>DBPedia Spotlight</code> to perform <em>entity linking</em>, plus some graph inference</li>
     <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
-    <li>use <code>OpenNRE</code> to infer relations among entities (optional)</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
+    <li>use <code>REBEL</code> and <code>OpenNRE</code> to infer relations among entities (optional)</li>
     <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities</li>
     <li>visualize the <em>lemma graph</em> interactively in <code>PyVis</code></li>
     <li>cluster communities within the <em>lemma graph</em>
@@ -57,6 +57,9 @@
     </li>
     <li>
       <a href="https://github.com/MartinoMensio/spacy-dbpedia-spotlight" target="_blank"><code>spaCy-DBpedia-Spotlight</code></a>
+    </li>
+    <li>
+      <a href="https://github.com/Babelscape/rebel" target="_blank"><code>REBEL</code></a>
     </li>
     <li>
       <a href="https://github.com/thunlp/OpenNRE/" target="_blank"><code>OpenNRE</code></a>
@@ -132,6 +135,19 @@
   </p>
   <blockquote>
     A brief but comprehensive introduction to graph representation learning, including methods for embedding graph data, graph neural networks, and deep generative models of graphs.
+  </blockquote>
+
+  <p>
+    "RED<sup>FM</sup>: a Filtered and Multilingual Relation Extraction Dataset"
+    <br/>
+    <strong>Pere-Lluís Huguet Cabot</strong>, <strong>Simone Tedeschi</strong>, <strong>Axel-Cyrille Ngonga Ngomo</strong>, <strong>Roberto Navigli</strong>
+    <br/>
+    <em>ACL<em> (2023-06-19)
+    <br/>
+    <a href="https://arxiv.org/abs/2306.09802" target="_blank">https://arxiv.org/abs/2306.09802</a>
+  </p>
+  <blockquote>
+    Relation Extraction (RE) is a task that identifies relationships between entities in a text, enabling the acquisition of relational facts and bridging the gap between natural language and structured knowledge. However, current RE models often rely on small datasets with low coverage of relation types, particularly when working with languages other than English. In this paper, we address the above issue and provide two new resources that enable the training and evaluation of multilingual RE systems.
   </blockquote>
 
   <p>
