@@ -1,12 +1,7 @@
 TODO:
 
-  * use DBPedia Spotlight
-  https://www.dbpedia-spotlight.org/api/en
+  * compare results: DBPedia Spotlight vs. Wikidata
   https://lookup.dbpedia.org/api/search?query=Austin,+Texas
-
-  * Notus prompt via API
-  https://replicate.com/titocosta/notus-7b-v1
-  Nvidia A40 (Large) GPU hardware
 
   * use community detection to condense nodes
   k-medoids? https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
@@ -30,5 +25,3 @@ TODO:
   * add conda packaging
   * publish on PyPi and Conda
   * `mkrefs` docs
-
-see license https://github.com/DerwenAI/textgraph#license-and-copyright

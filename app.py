@@ -103,7 +103,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
 
             ## build the lemma graph
-            st.subheader("build the lemma graph and extract entities", divider = "rainbow")
+            st.subheader("build the lemma graph, extracting and linking entities", divider = "rainbow")
 
             start_time = time.time()
 
