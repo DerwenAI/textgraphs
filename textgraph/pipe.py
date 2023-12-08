@@ -13,6 +13,7 @@ import typing
 
 from icecream import ic  # pylint: disable=E0401,W0611
 import spacy  # pylint: disable=E0401
+import spacy_dbpedia_spotlight  # pylint: disable=E0401
 
 from .elem import LinkedEntity, NounChunk
 
@@ -21,8 +22,7 @@ class Pipeline:  # pylint: disable=R0903
     """
  Manage parsing the two documents, which are assumed to be paragraph-sized.
     """
-    MIN_DBPEDIA_SIM: float = 0.9
-
+    DBPEDIA_MIN_SIM: float = 0.9
 
     def __init__ (
         self,
@@ -127,7 +127,7 @@ Link any noun chunks which are not already subsumed by named entities.
         self,
         tokens: list,
         *,
-        min_similarity: float = MIN_DBPEDIA_SIM,
+        min_similarity: float = DBPEDIA_MIN_SIM,
         debug: bool = False,
         ) -> typing.Iterator[ LinkedEntity ]:
         """
@@ -190,6 +190,7 @@ class PipelineFactory:  # pylint: disable=R0903
 Factory pattern for building a pipeline, which is one of the more
 expensive operations with `spaCy`
     """
+    DBPEDIA_API: str = f"{spacy_dbpedia_spotlight.EntityLinker.base_url}/en"
     NER_MODEL: str = "tomaarsen/span-marker-roberta-large-ontonotes5"
     SPACY_MODEL: str = "en_core_web_sm"
 
@@ -198,6 +199,7 @@ expensive operations with `spaCy`
         self,
         *,
         spacy_model: str = SPACY_MODEL,
+        dbpedia_api: str = DBPEDIA_API,
         ner_model: typing.Optional[ str ] = NER_MODEL,
         ) -> None:
         """
@@ -253,10 +255,17 @@ Constructor which instantiates two `spaCy` pipeline:
             )
 
         # `dbp_pipe` only: DBPedia entity linking
-        self.dbp_pipe.add_pipe("dbpedia_spotlight")
+        self.dbp_pipe.add_pipe(
+            "dbpedia_spotlight",
+            config = {
+                "dbpedia_rest_endpoint": dbpedia_api,
+            },
+        )
 
         # `ent_pipe` only: merge entities
-        self.ent_pipe.add_pipe("merge_entities")
+        self.ent_pipe.add_pipe(
+            "merge_entities",
+        )
 
 
     def build_pipeline (

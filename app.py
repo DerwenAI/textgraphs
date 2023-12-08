@@ -66,6 +66,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             start_time: float = time.time()
 
             fabrica: PipelineFactory = PipelineFactory(
+                dbpedia_api = PipelineFactory.DBPEDIA_API,
                 ner_model = PipelineFactory.NER_MODEL if llm_ner else None,
             )
 

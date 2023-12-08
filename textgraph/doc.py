@@ -5,15 +5,6 @@
 Implementation of an LLM-augmented `textgraph` algorithm for
 constructing a _knowledge graph_ from raw, unstructured text source.
 
-This integrates examples from:
-
-  * <https://derwen.ai/s/mqqm>
-  * <https://github.com/tomaarsen/SpanMarkerNER>
-  * <https://github.com/MartinoMensio/spacy-dbpedia-spotlight>
-  * <https://github.com/thunlp/OpenNRE/>
-  * <https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4>
-  * <https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a>
-
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
 

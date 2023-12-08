@@ -18,9 +18,8 @@ from textgraph import Pipeline, PipelineFactory, TextGraph
 if __name__ == "__main__":
     SRC_TEXT: str = """
 Werner Herzog is a remarkable filmmaker and an intellectual originally from Germany, the son of Dietrich Herzog.
+After the war, Werner fled to America to become famous.
 """
-
-    #After the war, Werner fled to America to become famous.
 
     # set up
     start_time: float = time.time()
@@ -28,6 +27,7 @@ Werner Herzog is a remarkable filmmaker and an intellectual originally from Germ
     tg: TextGraph = TextGraph()
 
     fabrica: PipelineFactory = PipelineFactory(
+        dbpedia_api = PipelineFactory.DBPEDIA_API,
         ner_model = None,
     )
 
