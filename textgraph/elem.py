@@ -27,8 +27,8 @@ A data class representing one noun chunk, i.e., a candidate as an extracted phra
     length: int
     rel: str
     prob: float
-    count: int
     token_id: int
+    count: int = 1
 
 
 @dataclass(order=False, frozen=False)
@@ -90,7 +90,7 @@ A data class representing one node, i.e., an extracted phrase.
     count: int = 0
     neighbors: int = 0
     weight: float = 0.0
-    entity: typing.Optional[ LinkedEntity ] = None
+    entity: typing.List[ LinkedEntity ] = field(default_factory = lambda: [])
 
 
     def get_linked_label (
@@ -100,8 +100,8 @@ A data class representing one node, i.e., an extracted phrase.
 When this node has a linked entity, return that IRI.
 Otherwise return is `label` value.
         """
-        if self.entity is not None:
-            return self.entity.iri
+        if len(self.entity) > 0:
+            return self.entity[0].iri
 
         return self.label
 
@@ -135,9 +135,9 @@ Enumeration for the kinds of edge relations
     """
     DEP = 0  # `spaCy` parse dependency
     CHU = 1  # `spaCy` noun chunk
-    INF = 2  # `OpenNRE` inferred relation
+    INF = 2  # `REBEL` or `OpenNRE` inferred relation
     SYN = 3  # `sense2vec` inferred synonym
-    IRI = 4  # `DBPedia` linked entity
+    IRI = 4  # `DBPedia` or `Wikipdata` linked entity
 
     def __str__ (
         self

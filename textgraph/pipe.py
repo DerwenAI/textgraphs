@@ -171,8 +171,8 @@ Iterator for the results of DBPedia Spotlight entity linking.
                             len(ent),
                             "dbpedia",
                             prob,
-                            count,
                             i,
+                            count = count,
                         )
 
                         if debug:

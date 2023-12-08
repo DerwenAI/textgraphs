@@ -331,8 +331,8 @@ Run _entity linking_ based on `DBPedia Spotlight` and other services.
             if debug:
                 ic(node)
 
-            # back-link, to avoid having to search later
-            self.tokens[link.token_id].entity = link
+            # back-link to entity object
+            self.tokens[link.token_id].entity.append(link)
 
             # construct an edge for this linked entity
             self._make_edge(
