@@ -54,12 +54,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             value = False,
         )
 
-        llm_nre = st.checkbox(
-            "use OpenNER for relation extraction",
-            value = False,
-        )
-
-        if text_input or llm_ner or llm_nre:
+        if text_input or llm_ner:
             ## parse the document
             st.subheader("parse the raw text", divider = "rainbow")
 
@@ -187,16 +182,29 @@ In contrast, Nayak was working with entities extracted from "chunks" of text, no
                 unsafe_allow_html = True,
             )
 
-            fig, ax = plt.subplots()
-
-            render.draw_communities(
-                spring_distance = 1.2,
+            spring_dist_val = st.slider(
+                "spring distance for NetworkX clusters",
+                min_value = 0.0,
+                max_value = 10.0,
+                value = 1.2,
             )
 
-            st.pyplot(fig)
+            if spring_dist_val:
+                fig, ax = plt.subplots()
+
+                render.draw_communities(
+                    spring_distance = spring_dist_val,
+                )
+
+                st.pyplot(fig)
 
 
             ## infer relations
+            llm_nre = st.checkbox(
+                "use OpenNER for relation extraction",
+                value = False,
+            )
+
             if llm_nre:
                 tg.infer_relations(
                     pipe,
