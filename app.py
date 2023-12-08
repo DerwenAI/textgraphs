@@ -35,6 +35,9 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
     with st.container():
         st.title("demo: TextGraph + LLMs")
+        st.markdown(
+            "the _TextGraph_ library is intended for processing a stream of paragraphs",
+        )
 
         blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
 
@@ -45,7 +48,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
         # collect input + config
         text_input: str = st.text_area(
-            "Source Text: (this library is intended for processing a stream of paragraphs)",
+            "Source Text:",
             value = SRC_TEXT.strip(),
         )
 
@@ -54,7 +57,12 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             value = False,
         )
 
-        if text_input or llm_ner:
+        infer_rel = st.checkbox(
+            "use REBEL and OpenNRE to infer relations",
+            value = False,
+        )
+
+        if text_input or llm_ner or infer_rel:
             ## parse the document
             st.subheader("parse the raw text", divider = "rainbow")
             start_time: float = time.time()
@@ -111,14 +119,8 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
 
             ## infer relations
-            st.subheader("infer relations", divider = "rainbow")
-
-            infer_rel = st.checkbox(
-                "use REBEL and OpenNRE to infer relations",
-                value = False,
-            )
-
             if infer_rel:
+                st.subheader("infer relations", divider = "rainbow")
                 start_time = time.time()
 
                 inferred_edges: list = tg.infer_relations(
@@ -235,6 +237,24 @@ In contrast, Nayak was working with entities extracted from "chunks" of text, no
 
                 duration = round(time.time() - start_time, 3)
                 st.write(f"cluster: {round(duration, 3)} sec, {max(comm_map.values()) + 1} clusters")
+
+
+            ## download lemma graph
+            st.subheader("download the lemma graph", divider = "rainbow")
+            st.markdown(
+                """
+Download a serialized <em>lemma graph</em> in
+<a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a> format.
+                """,
+                unsafe_allow_html = True,
+            )
+
+            st.download_button(
+                label = "download",
+                data = tg.dump_lemma_graph(),
+                file_name = "lemma_graph.json",
+                mime = "application/json",
+            )
 
 
             ## WIP

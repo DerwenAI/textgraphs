@@ -1,14 +1,11 @@
 TODO:
 
-  * cache Streamlit functions?
-
   * non-linked entities use lookup?
 
   * compare results: DBPedia Spotlight vs. Wikidata
   https://lookup.dbpedia.org/api/search?query=Austin,+Texas
 
   * download ZIP: KuzuDB node-link
-  https://docs.streamlit.io/library/api-reference/widgets/st.download_button
   https://neo4j.com/docs/getting-started/data-import/csv-import/
 
   * use community detection to condense nodes
