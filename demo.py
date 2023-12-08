@@ -58,6 +58,18 @@ After the war, Werner fled to America to become famous.
     print(f"build graph: {round(duration, 3)} sec")
 
 
+    # infer relations
+    start_time = time.time()
+
+    inferred_edges: list = tg.infer_relations(
+        pipe,
+        debug = True,
+    )
+
+    duration = round(time.time() - start_time, 3)
+    print(f"infer rel: {round(duration, 3)} sec, {len(inferred_edges)} edges")
+
+
     # rank phrases
     start_time = time.time()
 
@@ -71,21 +83,13 @@ After the war, Werner fled to America to become famous.
     # print the resulting entities extracted from the document
     ic(tg.get_phrases_as_df())
 
-    sys.exit(0)
+    #sys.exit(0)
 
     ic(tg.edges)  # pylint: disable=W0101
     ic(tg.nodes)
 
 
-    # infer relations
-    start_time = time.time()
-
-    tg.infer_relations(
-        pipe,
-    )
-
-    duration = round(time.time() - start_time, 3)
-    print(f"infer rel: {round(duration, 3)} sec")
-
+    # EXPERIMENT
+    #sys.exit(0)
 
     #print(tg.dump_lemma_graph())

@@ -57,7 +57,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         if text_input or llm_ner:
             ## parse the document
             st.subheader("parse the raw text", divider = "rainbow")
-
             start_time: float = time.time()
 
             fabrica: PipelineFactory = PipelineFactory(
@@ -100,7 +99,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             ## build the lemma graph
             st.subheader("build the lemma graph, extracting and linking entities", divider = "rainbow")
-
             start_time = time.time()
 
             tg.build_graph_embeddings(
@@ -108,19 +106,55 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 debug = False,
             )
 
+            duration = round(time.time() - start_time, 3)
+            st.write(f"lemma graph: {round(duration, 3)} sec, {len(tg.nodes)} nodes, {len(tg.edges)} edges")
 
-            # extract ranked entities from the document
+
+            ## infer relations
+            st.subheader("infer relations", divider = "rainbow")
+
+            infer_rel = st.checkbox(
+                "use REBEL and OpenNRE to infer relations",
+                value = False,
+            )
+
+            if infer_rel:
+                start_time = time.time()
+
+                inferred_edges: list = tg.infer_relations(
+                    pipe,
+                    debug = False,
+                )
+
+                duration = round(time.time() - start_time, 3)
+
+                n_list: list = list(tg.nodes.values())
+
+                df_rel: pd.DataFrame = pd.DataFrame.from_dict([
+                    {
+                        "src": n_list[edge.src_node].text,
+                        "dst": n_list[edge.dst_node].text,
+                        "rel": edge.rel,
+                        "weight": edge.prob,
+                    }
+                    for edge in inferred_edges
+                ])
+
+                st.dataframe(df_rel)
+                st.write(f"infer rel: {round(duration, 3)} sec, {len(df_rel)} edges")
+
+
+            ## rank the extracted entities
+            st.subheader("rank the extracted entities", divider = "rainbow")
+            start_time = time.time()
+
             tg.calc_phrase_ranks(debug = False)
-            df: pd.DataFrame = tg.get_phrases_as_df()
+            df_ent: pd.DataFrame = tg.get_phrases_as_df()
 
             duration = round(time.time() - start_time, 3)
-            st.write(f"extract: {round(duration, 3)} sec, {len(df)} entities")
+            st.write(f"extract: {round(duration, 3)} sec, {len(df_ent)} entities")
 
-            st.dataframe(df)
-            #st.markdown(
-            #    df.to_html(render_links = True),
-            #    unsafe_allow_html = True,
-            #)
+            st.dataframe(df_ent)
 
 
             ## visualize the lemma graph
@@ -190,26 +224,17 @@ In contrast, Nayak was working with entities extracted from "chunks" of text, no
             )
 
             if spring_dist_val:
+                start_time = time.time()
                 fig, ax = plt.subplots()
 
-                render.draw_communities(
+                comm_map: dict = render.draw_communities(
                     spring_distance = spring_dist_val,
                 )
 
                 st.pyplot(fig)
 
-
-            ## infer relations
-            llm_nre = st.checkbox(
-                "use OpenNER for relation extraction",
-                value = False,
-            )
-
-            if llm_nre:
-                tg.infer_relations(
-                    pipe,
-                    debug = False,
-                )
+                duration = round(time.time() - start_time, 3)
+                st.write(f"cluster: {round(duration, 3)} sec, {max(comm_map.values()) + 1} clusters")
 
 
             ## WIP

@@ -2,7 +2,8 @@
   <summary><strong>TL;DR: What's this?</strong></summary>
   <p>
     Use
-    <code>spaCy</code>, <code>transformers</code>, <code>SpanMarkerNER</code>, <code>spaCy-DBpedia-Spotlight</code>, <code>REBEL</code>,
+    <code>spaCy</code>, <code>transformers</code>, <code>SpanMarkerNER</code>,
+    <code>spaCy-DBpedia-Spotlight</code>, <code>REBEL</code>, <code>OpenNRE</code>,
     to construct a <em>lemma graph</em>.
     This is a prelude step before leveraging
     <em>topological transforms</em>, <em>large language models</em>, <em>graph representation learning</em>,
@@ -12,17 +13,18 @@
     raw unstructured text sources.
   </p>
   <p>
-    This project provides code for a library used in production, and also a
-    provides playground to prototype and evaluate abstractions based on
+    In addition to being a library for production use cases,
+    the <code>TextGraph</code> project provides a playground in which
+    to prototype and evaluate abstractions based on
     <a href="https://blog.derwen.ai/graph-levels-of-detail-ea4226abba55" target="_blank">"Graph Levels Of Detail"</a>.
   </p>
   <ol>
     <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
     <li>add noun chunks in parallel to entities, as "candidate" phrases for subsequent HITL</li>
     <li>use <code>DBPedia Spotlight</code> to perform <em>entity linking</em>, plus some graph inference</li>
+    <li>use <code>REBEL</code> and <code>OpenNRE</code> to infer relations among entities</li>
     <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
-    <li>use <code>REBEL</code> and <code>OpenNRE</code> to infer relations among entities (optional)</li>
     <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities</li>
     <li>visualize the <em>lemma graph</em> interactively in <code>PyVis</code></li>
     <li>cluster communities within the <em>lemma graph</em>
@@ -47,7 +49,7 @@
   <p>
     The <code>textgraph</code> library is based on work developed by
     <a href="https://derwen.ai/graph" target="_blank">Derwen</a>
-    in 2023 Q2 for customer sample apps and in our <code>Cysoni</code>
+    in 2023 Q2 for customer apps and used in our <code>Cysoni</code>
     product.
     This demo integrates code from:
   </p>

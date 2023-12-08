@@ -27,11 +27,11 @@ import spacy  # pylint: disable=E0401
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .pipe import Pipeline
 from .util import calc_quantile_bins, root_mean_square, stripe_column
+from .rebel import tokenize_sent, extract_triplets_typed
 
-
-# determine whether this is loading into a Jupyter notebook
-# to allow for progress bars
-if 'ipykernel' in sys.modules:
+# determine whether this is loading into a Jupyter notebook,
+# to allow for `tqdm` progress bars
+if "ipykernel" in sys.modules:
     from tqdm.notebook import tqdm  # pylint: disable=E0401,W0611
 else:
     from tqdm import tqdm  # pylint: disable=E0401
@@ -39,12 +39,13 @@ else:
 
 class TextGraph:
     """
-Construct a _lemma graph_ from the unstructured text source, then
-extract ranked phrases using a `textgraph` algorithm.
+Construct a _lemma graph_ from the unstructured text source,
+then extract ranked phrases using a `textgraph` algorithm.
     """
     MAX_SKIP: int = 11
     NER_MAP: str = "dat/ner_map.json"
     NRE_MODEL: str = "wiki80_cnn_softmax"
+    OPENNRE_MIN_PROB: float = 0.9
     PAGERANK_ALPHA: float = 0.85
 
 
@@ -473,18 +474,15 @@ document.
         self._build_lemma_graph()
 
 
-    def infer_relations (
+    def _iter_entity_pairs (
         self,
-        pipe: Pipeline,
+        max_skip: int,
         *,
-        max_skip: int = MAX_SKIP,
         debug: bool = True,
-        ) -> None:
+        ) -> typing.Iterator[ typing.Tuple[ Node, Node ]]:
         """
-Run NRE to infer relations between pairs of co-occurring entities.
+Iterator for entity pairs for which the algorithm infers relations.
         """
-        inferred_edges: typing.List[ Edge ] = []
-
         ent_list: typing.List[ Node ] = [
             node
             for node in self.nodes.values()
@@ -509,40 +507,137 @@ Run NRE to infer relations between pairs of co-occurring entities.
                         ic(src.node_id, dst.node_id, path)
 
                     if len(path) <= max_skip:
-                        rel, prob = self.nre.infer({
-                            "text": pipe.text,
-                            "h": { "pos": src.get_pos() },
-                            "t": { "pos": dst.get_pos() },
-                        })
-
-                        if debug:
-                            ic(rel, prob)
-
-                        edge: Edge = self._make_edge(  # type: ignore
-                            src,
-                            dst,
-                            RelEnum.INF,
-                            rel,
-                            prob,
-                        )
-
-                        inferred_edges.append(edge)
+                        yield ( src, dst, )
+                except nx.NetworkXNoPath:
+                    pass
                 except Exception as ex:  # pylint: disable=W0718
                     ic(ex)
                     ic("ERROR", src, dst)
                     traceback.print_exc()
 
-        # add edges from the inferred relations
+
+    def _iter_rel_opennre (
+        self,
+        pipe: Pipeline,
+        max_skip: int,
+        opennre_min_prob: float,
+        *,
+        debug: bool = True,
+        ) -> typing.Iterator[ Edge ]:
+        """
+Iterate on entity pairs to drive `OpenNRE`, to infer relations
+        """
+        for src, dst in self._iter_entity_pairs(max_skip, debug = debug):
+            rel, prob = self.nre.infer({
+                "text": pipe.text,
+                "h": { "pos": src.get_pos() },
+                "t": { "pos": dst.get_pos() },
+            })
+
+            if prob >= opennre_min_prob:
+                if debug:
+                    ic(src.text, dst.text)
+                    ic(rel, prob)
+
+                fq_rel: str = "opennre:" + rel.replace(" ", "_")
+
+                edge: Edge = self._make_edge(  # type: ignore
+                    src,
+                    dst,
+                    RelEnum.INF,
+                    fq_rel,
+                    prob,
+                )
+
+                yield edge  # type: ignore
+
+
+    def _iter_rel_rebel (
+        self,
+        pipe: Pipeline,
+        *,
+        debug: bool = True,
+        ) -> typing.Iterator[ Edge ]:
+        """
+Iterate on sentences to drive `REBEL`, yielding inferred relations.
+        """
+        for sent in pipe.ent_doc.sents:
+            extract: str = tokenize_sent(str(sent).strip())
+            triples: typing.List[ dict ] = extract_triplets_typed(extract)
+
+            tok_map: dict = {
+                token.text: self.tokens[token.i]
+                for token in sent
+            }
+
+            if debug:
+                ic(tok_map, extract, triples)
+
+            for triple in triples:
+                src: typing.Optional[ Node ] = tok_map.get(triple["head"])
+                dst: typing.Optional[ Node ] = tok_map.get(triple["tail"])
+                rel: str = triple["rel"]
+
+                if src is not None and dst is not None:
+                    if debug:
+                        ic(src, dst, rel)
+
+                    fq_rel: str = "mrebel:" + rel.replace(" ", "_")
+
+                    edge = self._make_edge(  # type: ignore
+                        src,
+                        dst,
+                        RelEnum.INF,
+                        fq_rel,
+                        1.0,
+                    )
+
+                    yield edge  # type: ignore
+
+
+    def infer_relations (
+        self,
+        pipe: Pipeline,
+        *,
+        max_skip: int = MAX_SKIP,
+        opennre_min_prob: float = OPENNRE_MIN_PROB,
+        debug: bool = True,
+        ) -> typing.List[ Edge ]:
+        """
+Multiple approaches infer relations among co-occurring entities:
+
+  * `OpenNRE`
+  * `REBEL`
+        """
+        inferred_edges: typing.List[ Edge ] = list(
+            itertools.chain(
+                self._iter_rel_opennre(
+                    pipe,
+                    max_skip,
+                    opennre_min_prob,
+                    debug = debug,
+                ),
+                self._iter_rel_rebel(
+                    pipe,
+                    debug = debug,
+                ),
+            )
+        )
+
+        # add edges from inferred relations
         self.lemma_graph.add_edges_from([
             (
                 edge.src_node,
                 edge.dst_node,
                 {
                     "weight": edge.prob,
+                    "title": edge.rel,
                 },
             )
             for edge in inferred_edges
         ])
+
+        return inferred_edges
 
 
     @classmethod
