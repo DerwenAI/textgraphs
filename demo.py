@@ -63,6 +63,8 @@ After the war, Werner fled to America to become famous.
 
     inferred_edges: list = tg.infer_relations(
         pipe,
+        max_skip = TextGraph.MAX_SKIP,
+        opennre_min_prob = TextGraph.OPENNRE_MIN_PROB,
         debug = True,
     )
 

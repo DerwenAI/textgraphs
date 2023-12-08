@@ -27,7 +27,7 @@ import spacy  # pylint: disable=E0401
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .pipe import Pipeline
 from .util import calc_quantile_bins, root_mean_square, stripe_column
-from .rebel import tokenize_sent, extract_triplets_typed
+from .rebel import Rebel
 
 # determine whether this is loading into a Jupyter notebook,
 # to allow for `tqdm` progress bars
@@ -561,9 +561,11 @@ Iterate on entity pairs to drive `OpenNRE`, to infer relations
         """
 Iterate on sentences to drive `REBEL`, yielding inferred relations.
         """
+        rebel: Rebel = Rebel()
+
         for sent in pipe.ent_doc.sents:
-            extract: str = tokenize_sent(str(sent).strip())
-            triples: typing.List[ dict ] = extract_triplets_typed(extract)
+            extract: str = rebel.tokenize_sent(str(sent).strip())
+            triples: typing.List[ dict ] = rebel.extract_triplets_typed(extract)
 
             tok_map: dict = {
                 token.text: self.tokens[token.i]
@@ -571,7 +573,7 @@ Iterate on sentences to drive `REBEL`, yielding inferred relations.
             }
 
             if debug:
-                ic(tok_map, extract, triples)
+                ic(extract, triples)
 
             for triple in triples:
                 src: typing.Optional[ Node ] = tok_map.get(triple["head"])

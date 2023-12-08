@@ -13,7 +13,7 @@ from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum
 
 from .pipe import Pipeline, PipelineFactory
 
-from .rebel import extract_triplets_typed, tokenize_sent
+from .rebel import Rebel
 
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
