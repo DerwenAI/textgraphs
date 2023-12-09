@@ -65,6 +65,7 @@ dependencies = [
     "networkx >= 3.2",
     "pyvis >= 0.3",
     "pulp >= 2.7",
+    "qwikidata >= 0.4",
     "spacy-dbpedia-spotlight >= 0.2.6",
     "spacyfishing >= 0.1.8",
     "span_marker >= 1.5",

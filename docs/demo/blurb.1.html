@@ -1,28 +1,30 @@
 <details>
   <summary><strong>TL;DR: What's this?</strong></summary>
   <p>
-    Use
+    Construct a <em>lemma graph</em>, then perform <em>entity linking</em> based on:
     <code>spaCy</code>, <code>transformers</code>, <code>SpanMarkerNER</code>,
     <code>spaCy-DBpedia-Spotlight</code>, <code>REBEL</code>, <code>OpenNRE</code>,
-    to construct a <em>lemma graph</em>.
+    <code>spaCy fishing</code>, <code>qwikidata</code>
+  </p>
+  <p>
     This is a prelude step before leveraging
     <em>topological transforms</em>, <em>large language models</em>, <em>graph representation learning</em>,
-    plus <em>human-in-the-loop</em> domain expertise
-    to infer the nodes, edges, properties, and probabilities for the
+    plus <em>human-in-the-loop</em> domain expertise to infer
+    the nodes, edges, properties, and probabilities needed for the
     semi-automated construction of a <em>knowledge graph</em> from
     raw unstructured text sources.
   </p>
   <p>
-    In addition to being a library for production use cases,
-    the <code>TextGraph</code> project provides a playground in which
-    to prototype and evaluate abstractions based on
+    In addition to providing a library for production use cases,
+    the <code>TextGraph</code> project creates a "playground" or "gym"
+    in which to prototype and evaluate abstractions based on
     <a href="https://blog.derwen.ai/graph-levels-of-detail-ea4226abba55" target="_blank">"Graph Levels Of Detail"</a>.
   </p>
   <ol>
     <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
     <li>add noun chunks in parallel to entities, as "candidate" phrases for subsequent HITL</li>
-    <li>use <code>DBPedia Spotlight</code> to perform <em>entity linking</em>, plus some graph inference</li>
-    <li>use <code>REBEL</code> and <code>OpenNRE</code> to infer relations among entities</li>
+    <li>perform <em>entity linking</em>: <code>spaCy-DBpedia-Spotlight</code>, <code>spaCy fishing</code></li>
+    <li>infer relations, plus graph inference: <code>REBEL</code>, <code>OpenNRE</code>, <code>qwikidata</code></li>
     <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
     <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities</li>
@@ -44,7 +46,7 @@
   <summary><strong>More details...</strong></summary>
   <p>
     Implementation of an LLM-augmented <code>textgraph</code> algorithm for
-    constructing a <em>knowledge graph</em> from raw, unstructured text source.
+    constructing a <em>lemma graph</em> from raw, unstructured text source.
   </p>
   <p>
     The <code>textgraph</code> library is based on work developed by
@@ -65,6 +67,18 @@
     </li>
     <li>
       <a href="https://github.com/thunlp/OpenNRE/" target="_blank"><code>OpenNRE</code></a>
+    </li>
+    <li>
+      <a href="https://github.com/Lucaterre/spacyfishing" target="_blank"><code>spaCy fishing</code></a>
+    </li>
+    <li>
+      <a href="https://github.com/kensho-technologies/qwikidata" target="_blank"><code>qwikidata</code></a>
+    </li>
+    <li>
+      <a href="https://spacy.io/" target="_blank"><code>spaCy</code></a>
+    </li>
+    <li>
+      <a href="https://huggingface.co/docs/transformers/index" target="_blank"><code>HF transformers</code></a>
     </li>
     <li>
       <a href="https://github.com/DerwenAI/pytextrank/" target="_blank"><code>PyTextRank</code></a>

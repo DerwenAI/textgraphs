@@ -34,7 +34,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         st.session_state.disabled = False
 
     with st.container():
-        st.title("demo: TextGraph + LLMs")
+        st.title("demo: TextGraph + LLMs to construct a 'lemma graph'")
         st.markdown(
             "the _TextGraph_ library is intended for processing a stream of paragraphs",
         )
@@ -53,12 +53,12 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         )
 
         llm_ner = st.checkbox(
-            "use SpanMarker to enhance spaCy NER",
+            "enhance spaCy NER, using SpanMarker",
             value = False,
         )
 
         infer_rel = st.checkbox(
-            "use REBEL and OpenNRE to infer relations",
+            "infer relations, using REBEL, OpenNRE, qwikidata",
             value = False,
         )
 

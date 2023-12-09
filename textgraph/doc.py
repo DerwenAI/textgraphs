@@ -26,8 +26,9 @@ import spacy  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .pipe import Pipeline
-from .util import calc_quantile_bins, root_mean_square, stripe_column
 from .rebel import Rebel
+from .util import calc_quantile_bins, root_mean_square, stripe_column
+from .wiki import WikiDatum
 
 # determine whether this is loading into a Jupyter notebook,
 # to allow for `tqdm` progress bars
@@ -60,6 +61,7 @@ Constructor.
         self.tokens: typing.List[ Node ] = []
         self.lemma_graph: nx.MultiDiGraph = nx.MultiDiGraph()
         self.nre: opennre.model.softmax_nn.SoftmaxNN = opennre.get_model(self.NRE_MODEL)
+        self.wikidatum: WikiDatum = WikiDatum()
 
 
     def _make_node (  # pylint: disable=R0913
@@ -539,13 +541,18 @@ Iterate on entity pairs to drive `OpenNRE`, to infer relations
                     ic(src.text, dst.text)
                     ic(rel, prob)
 
-                fq_rel: str = "opennre:" + rel.replace(" ", "_")
+                # Wikidata lookup
+                iri: typing.Optional[ str ] = self.wikidatum.resolve_iri(rel)
 
+                if iri is None:
+                    iri = "opennre:" + rel.replace(" ", "_")
+
+                # construct an Edge
                 edge: Edge = self._make_edge(  # type: ignore
                     src,
                     dst,
                     RelEnum.INF,
-                    fq_rel,
+                    iri,
                     prob,
                 )
 
@@ -584,13 +591,18 @@ Iterate on sentences to drive `REBEL`, yielding inferred relations.
                     if debug:
                         ic(src, dst, rel)
 
-                    fq_rel: str = "mrebel:" + rel.replace(" ", "_")
+                    # Wikidata lookup
+                    iri: typing.Optional[ str ] = self.wikidatum.resolve_iri(rel)
 
+                    if iri is None:
+                        iri = "mrebel:" + rel.replace(" ", "_")
+
+                    # construct an Edge
                     edge = self._make_edge(  # type: ignore
                         src,
                         dst,
                         RelEnum.INF,
-                        fq_rel,
+                        iri,
                         1.0,
                     )
 

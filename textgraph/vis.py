@@ -119,10 +119,14 @@ and returning a `PyVis` network to render.
             edge_info = edge_labels.get(edge_key)
             pv_edge["title"] = edge_info[1]  # type: ignore
 
-            if edge_info[0] == RelEnum.DEP:  # type: ignore
+            if edge_info[0] in [ RelEnum.DEP ]:  # type: ignore
                 pv_edge["arrows"] = "to" # type: ignore
                 pv_edge["color"] = "ltgray"  # type: ignore
                 pv_edge["width"] = 0  # type: ignore
+            elif edge_info[0] in [ RelEnum.INF ]:  # type: ignore
+                pv_edge["arrows"] = "to" # type: ignore
+                pv_edge["color"] = "hsl(289, 17%, 49%)"  # type: ignore
+                pv_edge["width"] = 3  # type: ignore
 
         return pv_graph
 
