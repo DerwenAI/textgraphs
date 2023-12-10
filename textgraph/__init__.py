@@ -19,7 +19,7 @@ from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 from .vis import RenderPyVis
 
-from .wiki import WikiDatum
+from .wiki import WikiDatum, WikiEntity
 
 
 __title__ = "TextGraph: raw texts, KGs, and LLMs, oh my!"

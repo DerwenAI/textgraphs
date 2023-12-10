@@ -61,7 +61,7 @@ Constructor.
         self.tokens: typing.List[ Node ] = []
         self.lemma_graph: nx.MultiDiGraph = nx.MultiDiGraph()
         self.nre: opennre.model.softmax_nn.SoftmaxNN = opennre.get_model(self.NRE_MODEL)
-        self.wikidatum: WikiDatum = WikiDatum()
+        self.wiki: WikiDatum = WikiDatum()
 
 
     def _make_node (  # pylint: disable=R0913
@@ -542,7 +542,7 @@ Iterate on entity pairs to drive `OpenNRE`, to infer relations
                     ic(rel, prob)
 
                 # Wikidata lookup
-                iri: typing.Optional[ str ] = self.wikidatum.resolve_iri(rel)
+                iri: typing.Optional[ str ] = self.wiki.resolve_wikidata_rel_iri(rel)
 
                 if iri is None:
                     iri = "opennre:" + rel.replace(" ", "_")
@@ -592,7 +592,7 @@ Iterate on sentences to drive `REBEL`, yielding inferred relations.
                         ic(src, dst, rel)
 
                     # Wikidata lookup
-                    iri: typing.Optional[ str ] = self.wikidatum.resolve_iri(rel)
+                    iri: typing.Optional[ str ] = self.wiki.resolve_wikidata_rel_iri(rel)
 
                     if iri is None:
                         iri = "mrebel:" + rel.replace(" ", "_")
