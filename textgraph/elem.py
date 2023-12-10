@@ -18,6 +18,18 @@ import spacy  # pylint: disable=E0401
 
 
 @dataclass(order=False, frozen=False)
+class WikiEntity:  # pylint: disable=R0902
+    """
+A data class representing a hit from a MediaWiki search.
+    """
+    iri: str
+    label: str
+    descrip: str
+    aliases: typing.List[ str ]
+    prob: float
+
+
+@dataclass(order=False, frozen=False)
 class LinkedEntity:  # pylint: disable=R0902
     """
 A data class representing one noun chunk, i.e., a candidate as an extracted phrase.
@@ -28,6 +40,7 @@ A data class representing one noun chunk, i.e., a candidate as an extracted phra
     rel: str
     prob: float
     token_id: int
+    wiki_ent: WikiEntity
     count: int = 1
 
 

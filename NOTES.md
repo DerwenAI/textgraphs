@@ -1,6 +1,9 @@
 TODO:
 
-  * non-linked entities use lookup?
+  * use `wiki_ent.descrip` for title in lemma graph
+  * cross-link the DBPedia/Wikidata equivs
+  * add `fishing` ents
+  * non-linked entities (lemma, ent, noun chunk?) use MediaWiki lookups?
 
   * compare results: DBPedia Spotlight vs. Wikidata
   https://lookup.dbpedia.org/api/search?query=Austin,+Texas

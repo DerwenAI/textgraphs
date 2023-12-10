@@ -9,7 +9,7 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main
 
 from .doc import TextGraph
 
-from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum
+from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum, WikiEntity
 
 from .pipe import Pipeline, PipelineFactory
 
@@ -19,7 +19,7 @@ from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 from .vis import RenderPyVis
 
-from .wiki import WikiDatum, WikiEntity
+from .wiki import WikiDatum
 
 
 __title__ = "TextGraph: raw texts, KGs, and LLMs, oh my!"

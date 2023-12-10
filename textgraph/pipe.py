@@ -15,14 +15,17 @@ from icecream import ic  # pylint: disable=E0401,W0611
 import spacy  # pylint: disable=E0401
 import spacy_dbpedia_spotlight  # pylint: disable=E0401
 
-from .elem import LinkedEntity, NounChunk
+from .elem import LinkedEntity, NounChunk, WikiEntity
+from .wiki import WikiDatum
 
 
 class Pipeline:  # pylint: disable=R0903
     """
  Manage parsing the two documents, which are assumed to be paragraph-sized.
     """
+    DBPEDIA_MIN_ALIAS: float = 0.8
     DBPEDIA_MIN_SIM: float = 0.9
+
 
     def __init__ (
         self,
@@ -123,10 +126,11 @@ Link any noun chunks which are not already subsumed by named entities.
         return chunks
 
 
-    def link_dbpedia_entities (
+    def link_dbpedia_entities (  # pylint: disable=R0914
         self,
         tokens: list,
         *,
+        min_alias: float = DBPEDIA_MIN_ALIAS,
         min_similarity: float = DBPEDIA_MIN_SIM,
         debug: bool = False,
         ) -> typing.Iterator[ LinkedEntity ]:
@@ -141,7 +145,7 @@ Iterator for the results of DBPedia Spotlight entity linking.
         ent_idx: int = 0
         tok_idx: int = 0
 
-        for i, tok in enumerate(tokens):
+        for i, tok in enumerate(tokens):  # pylint: disable=R1702
             if debug:
                 print()
                 ic(tok_idx, tok.text, tok.pos)
@@ -163,22 +167,35 @@ Iterator for the results of DBPedia Spotlight entity linking.
                     count: int = int(ent._.dbpedia_raw_result["@support"])
 
                     if tok.pos == "PROPN" and prob >= min_similarity:
-                        iri: str = ent.kb_id_
+                        wiki: WikiDatum = WikiDatum()
 
-                        dbp_link = LinkedEntity(
-                            ent,
-                            iri,
-                            len(ent),
-                            "dbpedia",
-                            prob,
-                            i,
-                            count = count,
+                        wiki_ent: typing.Optional[ WikiEntity ] = wiki.dbpedia_search_entity(
+                            ent.text,
+                            dbpedia_search_api = WikiDatum.DBPEDIA_SEARCH_API,
+                            debug = debug,
                         )
 
                         if debug:
-                            ic("found", dbp_link)
+                            ic(wiki_ent)
 
-                        yield dbp_link
+                        if wiki_ent is not None and wiki_ent.prob > min_alias:  # type: ignore
+                            iri: str = ent.kb_id_
+
+                            dbp_link = LinkedEntity(
+                                ent,
+                                iri,
+                                len(ent),
+                                "dbpedia",
+                                prob,
+                                i,
+                                wiki_ent,  # type: ignore
+                                count = count,
+                            )
+
+                            if debug:
+                                ic("found", dbp_link)
+
+                            yield dbp_link
 
                     ent_idx += 1
 

@@ -6,7 +6,6 @@ MediaWiki API access.
 """
 
 from collections import OrderedDict
-from dataclasses import dataclass
 from difflib import SequenceMatcher
 import http
 import json
@@ -21,17 +20,7 @@ from qwikidata.linked_data_interface import get_entity_dict_from_api  # pylint: 
 import markdown2  # pylint: disable=E0401
 import requests  # type: ignore  # pylint: disable=E0401
 
-
-@dataclass(order=False, frozen=False)
-class WikiEntity:  # pylint: disable=R0902
-    """
-A data class representing a hit from a MediaWiki search.
-    """
-    iri: str
-    label: str
-    descrip: str
-    aliases: typing.List[ str ]
-    prob: float
+from .elem import WikiEntity
 
 
 class WikiDatum:  # pylint: disable=R0903
