@@ -88,8 +88,9 @@ test = [
 ]
 
 demo = [
-    "jupyterlab >= 4.0",
     "ipywidgets >= 8.1",
+    "jupyterlab_execute_time >= 3.1",
+    "jupyterlab >= 4.0",
     "sense2vec >= 2.0",
     "spacy-entity-linker >= 1.0",
     "streamlit < 1.29",

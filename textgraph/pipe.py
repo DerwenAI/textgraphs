@@ -41,6 +41,7 @@ Constructor.
         self.tok_doc: spacy.tokens.Doc = tok_pipe(self.text)
         self.dbp_doc: spacy.tokens.Doc = dbp_pipe(self.text)
         self.ent_doc: spacy.tokens.Doc = ent_pipe(self.text)
+        self.wiki: WikiDatum = WikiDatum()
 
 
     @classmethod
@@ -167,9 +168,7 @@ Iterator for the results of DBPedia Spotlight entity linking.
                     count: int = int(ent._.dbpedia_raw_result["@support"])
 
                     if tok.pos == "PROPN" and prob >= min_similarity:
-                        wiki: WikiDatum = WikiDatum()
-
-                        wiki_ent: typing.Optional[ WikiEntity ] = wiki.dbpedia_search_entity(
+                        wiki_ent: typing.Optional[ WikiEntity ] = self.wiki.dbpedia_search_entity(
                             ent.text,
                             dbpedia_search_api = WikiDatum.DBPEDIA_SEARCH_API,
                             debug = debug,

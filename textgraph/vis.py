@@ -17,6 +17,7 @@ import pyvis  # pylint: disable=E0401
 import wordcloud  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
+from .wiki import WikiDatum
 
 
 @dataclass(order=False, frozen=True)
@@ -92,9 +93,11 @@ and returning a `PyVis` network to render.
             nx_node["shape"] = NODE_STYLES[node.kind].shape
             nx_node["color"] = NODE_STYLES[node.kind].color
 
-            if node.kind == NodeEnum.DEP:
+            if node.kind in [ NodeEnum.DEP ]:
                 nx_node["label"] = ""
-
+            elif node.kind in [ NodeEnum.IRI ]:
+                nx_node["title"] = node.text
+                nx_node["label"] = WikiDatum.dbpedia_normalize_prefix(node.label)  # type: ignore
             else:
                 nx_node["label"] = node.text
 

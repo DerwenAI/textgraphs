@@ -320,7 +320,7 @@ Run _entity linking_ based on `DBPedia Spotlight` and other services.
                     len(self.nodes),
                     link.iri,
                     link.span,
-                    link.iri,
+                    link.wiki_ent.descrip,
                     "dbpedia",
                     NodeEnum.IRI,
                     label = link.iri,
@@ -821,7 +821,7 @@ the ranked entities extracted from the document.
 
     def get_phrases (
         self,
-        ) -> typing.Iterator[ Node ]:
+        ) -> typing.Iterator[ dict ]:
         """
 Return the entities extracted from the document.
         """
@@ -834,7 +834,17 @@ Return the entities extracted from the document.
                 key = lambda n: n.weight,
                 reverse = True,
             ):
-            yield node
+
+            label: str = WikiDatum.dbpedia_normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
+
+            yield {
+                "node_id": node.node_id,
+                "text": node.text,
+                "pos": node.pos,
+                "label": label,
+                "count": node.count,
+                "weight": node.weight,
+            }
 
 
     def get_phrases_as_df (
@@ -843,17 +853,7 @@ Return the entities extracted from the document.
         """
 Return the ranked extracted entities as a `pandas.DataFrame`
         """
-        return pd.DataFrame.from_dict([
-            {
-                "node_id": node.node_id,
-                "text": node.text,
-                "pos": node.pos,
-                "label": node.get_linked_label(),
-                "count": node.count,
-                "weight": node.weight,
-            }
-            for node in self.get_phrases()
-        ])
+        return pd.DataFrame.from_dict(self.get_phrases())
 
 
     def dump_lemma_graph (
