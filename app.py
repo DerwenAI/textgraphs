@@ -34,7 +34,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     with st.container():
         st.title("demo: TextGraph + LLMs to construct a 'lemma graph'")
         st.markdown(
-            "_TextGraph_ library is intended for iterating through a sequence of paragraphs",
+            "_TextGraph_ library is intended for iterating through a sequence of paragraphs.",
         )
 
         blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
@@ -70,7 +70,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 factory = textgraph.PipelineFactory(
                     spacy_model = textgraph.SPACY_MODEL,
                     ner_model = textgraph.NER_MODEL if llm_ner else None,
-                    nre_model = textgraph.NRE_MODEL,
+                    nre_model = textgraph.NRE_MODEL if infer_rel else None,
                     dbpedia_spotlight_api = textgraph.DBPEDIA_SPOTLIGHT_API,
                 ),
             )

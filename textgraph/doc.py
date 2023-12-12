@@ -440,6 +440,54 @@ with parallel edges.
     ######################################################################
     ## entity linking
 
+    def _make_link (
+        self,
+        link: LinkedEntity,
+        rel: str,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Link to previously constructed entity node;
+otherwise construct a new node for this linked entity.
+        """
+        if debug:
+            ic(link)
+
+        if link.iri in self.nodes:
+            self.nodes[link.iri].count += 1
+
+        else:
+            self.nodes[link.iri] = Node(
+                len(self.nodes),
+                link.iri,
+                link.span,
+                link.wiki_ent.descrip,
+                rel,
+                NodeEnum.IRI,
+                label = link.iri,
+                length = link.length,
+                count = 1,
+            )
+
+        dst_node: Node = self.nodes.get(link.iri)  # type: ignore
+
+        if debug:
+            ic(dst_node)
+
+        # back-link to the parsed entity object
+        self.tokens[link.token_id].entity.append(link)
+
+        # construct a directed edge between them
+        self._make_edge(
+            self.tokens[link.token_id],
+            dst_node,
+            RelEnum.IRI,
+            rel,
+            link.prob,
+        )
+
+
     def perform_entity_linking (
         self,
         pipe: Pipeline,
@@ -461,42 +509,10 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
         )
 
         for link in iter_ents:
-            if debug:
-                ic(link)
-
-            # link to previously constructed entity node,
-            # otherwise construct a new node for the linked entity
-            if link.iri in self.nodes:
-                self.nodes[link.iri].count += 1
-
-            else:
-                self.nodes[link.iri] = Node(
-                    len(self.nodes),
-                    link.iri,
-                    link.span,
-                    link.wiki_ent.descrip,
-                    "dbpedia",
-                    NodeEnum.IRI,
-                    label = link.iri,
-                    length = link.length,
-                    count = 1,
-                )
-
-            node: Node = self.nodes.get(link.iri)  # type: ignore
-
-            if debug:
-                ic(node)
-
-            # back-link to entity object
-            self.tokens[link.token_id].entity.append(link)
-
-            # construct an edge for this linked entity
-            self._make_edge(
-                self.tokens[link.token_id],
-                node,
-                RelEnum.IRI,
+            self._make_link(
+                link,
                 "dbpedia",
-                link.prob,
+                debug = debug,
             )
 
 
