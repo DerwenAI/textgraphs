@@ -17,13 +17,11 @@ import pyvis  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import streamlit as st  # pylint: disable=E0401
 
-from textgraph import Pipeline, PipelineFactory, RenderPyVis, TextGraph
+import textgraph
 
 
 if __name__ == "__main__":
-    tg: TextGraph = TextGraph()
-
-    # sample text
+    # default text input
     SRC_TEXT: str = """
 Werner Herzog is a remarkable filmmaker and intellectual originally from Germany, the son of Dietrich Herzog.
     """
@@ -36,7 +34,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     with st.container():
         st.title("demo: TextGraph + LLMs to construct a 'lemma graph'")
         st.markdown(
-            "the _TextGraph_ library is intended for processing a stream of paragraphs",
+            "_TextGraph_ library is intended for iterating through a sequence of paragraphs",
         )
 
         blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
@@ -67,12 +65,17 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.subheader("parse the raw text", divider = "rainbow")
             start_time: float = time.time()
 
-            fabrica: PipelineFactory = PipelineFactory(
-                dbpedia_api = PipelineFactory.DBPEDIA_API,
-                ner_model = PipelineFactory.NER_MODEL if llm_ner else None,
+            # fine to use factory defaults, although let's demonstrate the settings here
+            tg: textgraph.TextGraph = textgraph.TextGraph(
+                factory = textgraph.PipelineFactory(
+                    spacy_model = textgraph.SPACY_MODEL,
+                    ner_model = textgraph.NER_MODEL if llm_ner else None,
+                    nre_model = textgraph.NRE_MODEL,
+                    dbpedia_spotlight_api = textgraph.DBPEDIA_SPOTLIGHT_API,
+                ),
             )
 
-            pipe: Pipeline = fabrica.build_pipeline(
+            pipe: textgraph.Pipeline = tg.create_pipeline(
                 text_input.strip(),
             )
 
@@ -123,6 +126,9 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             tg.perform_entity_linking(
                 pipe,
+                dbpedia_search_api = textgraph.DBPEDIA_SEARCH_API,
+                min_alias = textgraph.DBPEDIA_MIN_ALIAS,
+                min_similarity = textgraph.DBPEDIA_MIN_SIM,
                 debug = False,
             )
 
@@ -148,6 +154,9 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
                 inferred_edges: list = tg.infer_relations(
                     pipe,
+                    wikidata_api = textgraph.WIKIDATA_API,
+                    max_skip = textgraph.MAX_SKIP,
+                    opennre_min_prob = textgraph.OPENNRE_MIN_PROB,
                     debug = False,
                 )
 
@@ -173,8 +182,12 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.subheader("rank the extracted entities", divider = "rainbow")
             start_time = time.time()
 
-            tg.calc_phrase_ranks(debug = False)
-            df_ent: pd.DataFrame = tg.get_phrases_as_df()
+            tg.calc_phrase_ranks(
+                pr_alpha = textgraph.PAGERANK_ALPHA,
+                debug = False,
+            )
+
+            df_ent: pd.DataFrame = tg.get_phrases_as_df(pipe)
 
             duration = round(time.time() - start_time, 3)
             st.write(f"extract: {round(duration, 3)} sec, {len(df_ent)} entities")
@@ -185,7 +198,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             ## generate a word cloud
             st.subheader("generate a word cloud", divider = "rainbow")
 
-            render: RenderPyVis = RenderPyVis(
+            render: textgraph.RenderPyVis = textgraph.RenderPyVis(
                 tg.nodes,
                 tg.edges,
                 tg.lemma_graph,
@@ -212,7 +225,8 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 """
             )
 
-            pv_graph: pyvis.network.Network = render.build_lemma_graph(
+            pv_graph: pyvis.network.Network = render.render_lemma_graph(
+                pipe,
                 debug = False,
             )
 
@@ -233,7 +247,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             st.components.v1.html(
                 py_html.read_text(encoding = "utf-8"),
-                height = RenderPyVis.HTML_HEIGHT_WITH_CONTROLS,
+                height = render.HTML_HEIGHT_WITH_CONTROLS,
                 scrolling = False,
             )
 

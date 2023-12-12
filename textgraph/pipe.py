@@ -12,9 +12,10 @@ import operator
 import typing
 
 from icecream import ic  # pylint: disable=E0401,W0611
+import opennre  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
-import spacy_dbpedia_spotlight  # pylint: disable=E0401
 
+from .defaults import DBPEDIA_SPOTLIGHT_API, NER_MODEL, NRE_MODEL, SPACY_MODEL
 from .elem import LinkedEntity, NounChunk, WikiEntity
 from .wiki import WikiDatum
 
@@ -23,9 +24,6 @@ class Pipeline:  # pylint: disable=R0903
     """
  Manage parsing the two documents, which are assumed to be paragraph-sized.
     """
-    DBPEDIA_MIN_ALIAS: float = 0.8
-    DBPEDIA_MIN_SIM: float = 0.9
-
 
     def __init__ (
         self,
@@ -130,9 +128,10 @@ Link any noun chunks which are not already subsumed by named entities.
     def link_dbpedia_entities (  # pylint: disable=R0914
         self,
         tokens: list,
+        dbpedia_search_api: str,
+        min_alias: float,
+        min_similarity: float,
         *,
-        min_alias: float = DBPEDIA_MIN_ALIAS,
-        min_similarity: float = DBPEDIA_MIN_SIM,
         debug: bool = False,
         ) -> typing.Iterator[ LinkedEntity ]:
         """
@@ -170,7 +169,7 @@ Iterator for the results of DBPedia Spotlight entity linking.
                     if tok.pos == "PROPN" and prob >= min_similarity:
                         wiki_ent: typing.Optional[ WikiEntity ] = self.wiki.dbpedia_search_entity(
                             ent.text,
-                            dbpedia_search_api = WikiDatum.DBPEDIA_SEARCH_API,
+                            dbpedia_search_api,
                             debug = debug,
                         )
 
@@ -206,25 +205,28 @@ class PipelineFactory:  # pylint: disable=R0903
 Factory pattern for building a pipeline, which is one of the more
 expensive operations with `spaCy`
     """
-    DBPEDIA_API: str = f"{spacy_dbpedia_spotlight.EntityLinker.base_url}/en"
-    NER_MODEL: str = "tomaarsen/span-marker-roberta-large-ontonotes5"
-    SPACY_MODEL: str = "en_core_web_sm"
-
 
     def __init__ (
         self,
         *,
         spacy_model: str = SPACY_MODEL,
-        dbpedia_api: str = DBPEDIA_API,
         ner_model: typing.Optional[ str ] = NER_MODEL,
+        nre_model: typing.Optional[ str ] = NRE_MODEL,
+        dbpedia_spotlight_api: str = DBPEDIA_SPOTLIGHT_API,
         ) -> None:
         """
-Constructor which instantiates two `spaCy` pipeline:
+Constructor which instantiates the `spaCy` pipelines:
 
   * `tok_pipe` -- regular generator for parsed tokens
   * `dbp_pipe` -- DBPedia entity linking
   * `ent_pipe` -- with entities merged
         """
+        # add NRE model, if used
+        self.nre: typing.Optional[ opennre.model.softmax_nn.SoftmaxNN ] = None
+
+        if nre_model is not None:
+            self.nre = opennre.get_model(NRE_MODEL)
+
         # determine the NER model to be used
         exclude: typing.List[ str ] = []
 
@@ -274,7 +276,7 @@ Constructor which instantiates two `spaCy` pipeline:
         self.dbp_pipe.add_pipe(
             "dbpedia_spotlight",
             config = {
-                "dbpedia_rest_endpoint": dbpedia_api,
+                "dbpedia_rest_endpoint": dbpedia_spotlight_api,
             },
         )
 
@@ -284,7 +286,7 @@ Constructor which instantiates two `spaCy` pipeline:
         )
 
 
-    def build_pipeline (
+    def create_pipeline (
         self,
         text_input: str,
         ) -> Pipeline:

@@ -7,6 +7,11 @@ Package definitions.
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
 
+from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
+    DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, DBPEDIA_SPOTLIGHT_API, \
+    MAX_SKIP, NER_MAP, NER_MODEL, NRE_MODEL, OPENNRE_MIN_PROB, \
+    PAGERANK_ALPHA, SPACY_MODEL, WIKIDATA_API
+
 from .doc import TextGraph
 
 from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum, WikiEntity

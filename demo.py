@@ -13,7 +13,7 @@ import time
 from icecream import ic  # pylint: disable=E0401
 from pyinstrument import Profiler  # pylint: disable=E0401
 
-from textgraph import Pipeline, PipelineFactory, TextGraph
+import textgraph
 
 
 if __name__ == "__main__":
@@ -27,26 +27,29 @@ After the war, Werner fled to America to become famous.
     profiler.start()
 
     start_time: float = time.time()
-    tg: TextGraph = TextGraph()
 
-    fabrica: PipelineFactory = PipelineFactory(
-        dbpedia_api = PipelineFactory.DBPEDIA_API,
-        ner_model = None,
+    tg: textgraph.TextGraph = textgraph.TextGraph(
+        factory = textgraph.PipelineFactory(
+            spacy_model = textgraph.SPACY_MODEL,
+            ner_model = None,
+            nre_model = textgraph.NRE_MODEL,
+            dbpedia_spotlight_api = textgraph.DBPEDIA_SPOTLIGHT_API,
+        ),
     )
 
     duration: float = round(time.time() - start_time, 3)
-    print(f"set up: {round(duration, 3)} sec")
+    print(f"{duration:7.3f} sec: set up")
 
 
     ## NLP parse
     start_time = time.time()
 
-    pipe: Pipeline = fabrica.build_pipeline(
+    pipe: textgraph.Pipeline = tg.create_pipeline(
         SRC_TEXT.strip(),
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"parse text: {round(duration, 3)} sec")
+    print(f"{duration:7.3f} sec: parse text")
 
 
     ## collect graph elements from the parse
@@ -58,7 +61,7 @@ After the war, Werner fled to America to become famous.
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"collect elements: {round(duration, 3)} sec")
+    print(f"{duration:7.3f} sec: collect elements")
 
 
     ## perform entity linking
@@ -66,11 +69,14 @@ After the war, Werner fled to America to become famous.
 
     tg.perform_entity_linking(
         pipe,
+        dbpedia_search_api = textgraph.DBPEDIA_SEARCH_API,
+        min_alias = textgraph.DBPEDIA_MIN_ALIAS,
+        min_similarity = textgraph.DBPEDIA_MIN_SIM,
         debug = False,
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"entity linking: {round(duration, 3)} sec")
+    print(f"{duration:7.3f} sec: entity linking")
 
 
     ## construct the _lemma graph_
@@ -81,7 +87,7 @@ After the war, Werner fled to America to become famous.
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"construct graph: {round(duration, 3)} sec")
+    print(f"{duration:7.3f} sec: construct graph")
 
 
     ## perform relation extraction
@@ -89,30 +95,29 @@ After the war, Werner fled to America to become famous.
 
     inferred_edges: list = tg.infer_relations(
         pipe,
-        max_skip = TextGraph.MAX_SKIP,
-        opennre_min_prob = TextGraph.OPENNRE_MIN_PROB,
+        wikidata_api = textgraph.WIKIDATA_API,
+        max_skip = textgraph.MAX_SKIP,
+        opennre_min_prob = textgraph.OPENNRE_MIN_PROB,
         debug = False,
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"relation extraction: {round(duration, 3)} sec, {len(inferred_edges)} edges")
+    print(f"{duration:7.3f} sec: relation extraction, {len(inferred_edges)} edges")
 
 
     ## rank phrases
     start_time = time.time()
 
     tg.calc_phrase_ranks(
+        pr_alpha = textgraph.PAGERANK_ALPHA,
         debug = False,
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"rank phrases: {round(duration, 3)} sec")
+    print(f"{duration:7.3f} sec: rank phrases")
 
     # show the results
-    ic(tg.get_phrases_as_df())
-
-
-    #sys.exit(0)
+    ic(tg.get_phrases_as_df(pipe))
 
     ic(tg.edges)  # pylint: disable=W0101
     ic(tg.nodes)

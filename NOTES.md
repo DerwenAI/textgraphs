@@ -1,6 +1,7 @@
 TODO:
 
   * cross-link the DBPedia/Wikidata equivs
+
   * add `fishing` ents
   * non-linked entities (lemma, ent, noun chunk?) use MediaWiki lookups?
 

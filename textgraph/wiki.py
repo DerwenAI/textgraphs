@@ -20,6 +20,7 @@ from qwikidata.linked_data_interface import get_entity_dict_from_api  # pylint: 
 import markdown2  # pylint: disable=E0401
 import requests  # type: ignore  # pylint: disable=E0401
 
+from .defaults import DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, WIKIDATA_API
 from .elem import WikiEntity
 
 
@@ -40,10 +41,6 @@ Manage access to MediaWiki-related APIs.
         "dbpedia-wikicompany": "http://dbpedia.openlinksw.com/wikicompany/",
         "dbpedia-wikidata": "http://wikidata.dbpedia.org/resource/",
     })
-
-    DBPEDIA_SEARCH_API: str = "https://lookup.dbpedia.org/api/search"
-    DBPEDIA_SPARQL_API: str = "https://dbpedia.org/sparql"
-    WIKIDATA_API: str = "https://www.wikidata.org/w/api.php"
 
 
     def __init__ (
@@ -91,8 +88,8 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
     def resolve_wikidata_rel_iri (
         self,
         rel: str,
+        wikidata_api: str,
         *,
-        wikidata_api: str = WIKIDATA_API,
         lang: str = "en",
         debug: bool = False,
         ) -> typing.Optional[ str ]:
@@ -217,8 +214,8 @@ Find the best-matching aliases for a search term.
     def dbpedia_search_entity (  # pylint: disable=R0914
         self,
         query: str,
+        dbpedia_search_api: str,
         *,
-        dbpedia_search_api: str = DBPEDIA_SEARCH_API,
         lang: str = "en",
         debug: bool = False,
         ) -> typing.Optional[ WikiEntity ]:
@@ -405,6 +402,7 @@ if __name__ == "__main__":
 
         result: typing.Optional[ str ] = wiki.resolve_wikidata_rel_iri(
             test_rel,
+            WIKIDATA_API,
             debug = True,
         )
 
@@ -430,6 +428,7 @@ if __name__ == "__main__":
 
         wiki_ent: WikiEntity = wiki.dbpedia_search_entity(  # type: ignore
             test_query,
+            DBPEDIA_SEARCH_API,
             debug = True,
         )
 

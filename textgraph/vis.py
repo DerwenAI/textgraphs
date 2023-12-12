@@ -17,7 +17,7 @@ import pyvis  # pylint: disable=E0401
 import wordcloud  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
-from .wiki import WikiDatum
+from .pipe import Pipeline
 
 
 @dataclass(order=False, frozen=True)
@@ -80,8 +80,9 @@ Constructor.
         self.lemma_graph: nx.MultiDiGraph = lemma_graph
 
 
-    def build_lemma_graph (
+    def render_lemma_graph (
         self,
+        pipe: Pipeline,
         *,
         debug: bool = True,
         ) -> pyvis.network.Network:
@@ -98,7 +99,7 @@ and returning a `PyVis` network to render.
                 nx_node["label"] = ""
             elif node.kind in [ NodeEnum.IRI ]:
                 nx_node["title"] = node.text
-                nx_node["label"] = WikiDatum.dbpedia_normalize_prefix(node.label)  # type: ignore
+                nx_node["label"] = pipe.wiki.dbpedia_normalize_prefix(node.label)  # type: ignore
             else:
                 nx_node["label"] = node.text
 

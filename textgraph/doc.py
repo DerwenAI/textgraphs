@@ -19,16 +19,16 @@ import typing
 from icecream import ic  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
 import numpy as np  # pylint: disable=E0401
-import opennre  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 import pulp  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
-from .elem import Edge, Node, NodeEnum, RelEnum
-from .pipe import Pipeline
+from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, DBPEDIA_SEARCH_API, \
+    MAX_SKIP, NER_MAP, OPENNRE_MIN_PROB, PAGERANK_ALPHA, WIKIDATA_API
+from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum
+from .pipe import Pipeline, PipelineFactory
 from .rebel import Rebel
 from .util import calc_quantile_bins, root_mean_square, stripe_column
-from .wiki import WikiDatum
 
 # determine whether this is loading into a Jupyter notebook,
 # to allow for `tqdm` progress bars
@@ -43,15 +43,11 @@ class TextGraph:
 Construct a _lemma graph_ from the unstructured text source,
 then extract ranked phrases using a `textgraph` algorithm.
     """
-    MAX_SKIP: int = 11
-    NER_MAP: str = "dat/ner_map.json"
-    NRE_MODEL: str = "wiki80_cnn_softmax"
-    OPENNRE_MIN_PROB: float = 0.9
-    PAGERANK_ALPHA: float = 0.85
-
 
     def __init__ (
         self,
+        *,
+        factory: typing.Optional[ PipelineFactory ] = None,
         ) -> None:
         """
 Constructor.
@@ -60,8 +56,25 @@ Constructor.
         self.edges: typing.Dict[ str, Edge ] = {}
         self.tokens: typing.List[ Node ] = []
         self.lemma_graph: nx.MultiDiGraph = nx.MultiDiGraph()
-        self.nre: opennre.model.softmax_nn.SoftmaxNN = opennre.get_model(self.NRE_MODEL)
-        self.wiki: WikiDatum = WikiDatum()
+
+        # initialize the pipeline factory
+        if factory is not None:
+            self.factory = factory
+        else:
+            self.factory = PipelineFactory()
+
+
+    def create_pipeline (
+        self,
+        text_input: str,
+        ) -> Pipeline:
+        """
+Use the pipeline factory to create a pipeline (e.g., `spaCy.Document`)
+for each text input, which are typically paragraph-length.
+        """
+        return self.factory.create_pipeline(
+            text_input,
+        )
 
 
     ######################################################################
@@ -157,7 +170,7 @@ and increment the count if it does.
             self.edges[key].count += 1
 
         elif src_node.node_id != dst_node.node_id:
-            # no loopback
+            # preclude cycles in the graph
             self.edges[key] = Edge(
                 src_node.node_id,
                 dst_node.node_id,
@@ -431,12 +444,23 @@ with parallel edges.
         self,
         pipe: Pipeline,
         *,
+        dbpedia_search_api: str = DBPEDIA_SEARCH_API,
+        min_alias: float = DBPEDIA_MIN_ALIAS,
+        min_similarity: float = DBPEDIA_MIN_SIM,
         debug: bool = False,
         ) -> None:
         """
 Perform _entity linking_ based on `DBPedia Spotlight` and other services.
         """
-        for link in pipe.link_dbpedia_entities(self.tokens, debug = debug):
+        iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_dbpedia_entities(
+            self.tokens,
+            dbpedia_search_api,
+            min_alias,
+            min_similarity,
+            debug = debug
+        )
+
+        for link in iter_ents:
             if debug:
                 ic(link)
 
@@ -524,6 +548,7 @@ Iterator for entity pairs for which the algorithm infers relations.
     def _iter_rel_opennre (
         self,
         pipe: Pipeline,
+        wikidata_api: str,
         max_skip: int,
         opennre_min_prob: float,
         *,
@@ -532,8 +557,12 @@ Iterator for entity pairs for which the algorithm infers relations.
         """
 Iterate on entity pairs to drive `OpenNRE`, to infer relations
         """
+        # error-check the model config
+        if self.factory.nre is None:
+            return
+
         for src, dst in self._iter_entity_pairs(max_skip, debug = debug):
-            rel, prob = self.nre.infer({
+            rel, prob = self.factory.nre.infer({  # type: ignore
                 "text": pipe.text,
                 "h": { "pos": src.get_pos() },
                 "t": { "pos": dst.get_pos() },
@@ -545,7 +574,10 @@ Iterate on entity pairs to drive `OpenNRE`, to infer relations
                     ic(rel, prob)
 
                 # Wikidata lookup
-                iri: typing.Optional[ str ] = self.wiki.resolve_wikidata_rel_iri(rel)
+                iri: typing.Optional[ str ] = pipe.wiki.resolve_wikidata_rel_iri(
+                    rel,
+                    wikidata_api,
+                )
 
                 if iri is None:
                     iri = "opennre:" + rel.replace(" ", "_")
@@ -565,6 +597,7 @@ Iterate on entity pairs to drive `OpenNRE`, to infer relations
     def _iter_rel_rebel (
         self,
         pipe: Pipeline,
+        wikidata_api: str,
         *,
         debug: bool = True,
         ) -> typing.Iterator[ Edge ]:
@@ -595,7 +628,10 @@ Iterate on sentences to drive `REBEL`, yielding inferred relations.
                         ic(src, dst, rel)
 
                     # Wikidata lookup
-                    iri: typing.Optional[ str ] = self.wiki.resolve_wikidata_rel_iri(rel)
+                    iri: typing.Optional[ str ] = pipe.wiki.resolve_wikidata_rel_iri(
+                        rel,
+                        wikidata_api,
+                    )
 
                     if iri is None:
                         iri = "mrebel:" + rel.replace(" ", "_")
@@ -616,6 +652,7 @@ Iterate on sentences to drive `REBEL`, yielding inferred relations.
         self,
         pipe: Pipeline,
         *,
+        wikidata_api: str = WIKIDATA_API,
         max_skip: int = MAX_SKIP,
         opennre_min_prob: float = OPENNRE_MIN_PROB,
         debug: bool = True,
@@ -630,12 +667,14 @@ Multiple approaches infer relations among co-occurring entities:
             itertools.chain(
                 self._iter_rel_opennre(
                     pipe,
+                    wikidata_api,
                     max_skip,
                     opennre_min_prob,
                     debug = debug,
                 ),
                 self._iter_rel_rebel(
                     pipe,
+                    wikidata_api,
                     debug = debug,
                 ),
             )
@@ -827,6 +866,7 @@ the ranked entities extracted from the document.
 
     def get_phrases (
         self,
+        pipe: Pipeline,
         ) -> typing.Iterator[ dict ]:
         """
 Return the entities extracted from the document.
@@ -841,7 +881,7 @@ Return the entities extracted from the document.
                 reverse = True,
             ):
 
-            label: str = WikiDatum.dbpedia_normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
+            label: str = pipe.wiki.dbpedia_normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
 
             yield {
                 "node_id": node.node_id,
@@ -855,11 +895,12 @@ Return the entities extracted from the document.
 
     def get_phrases_as_df (
         self,
+        pipe: Pipeline,
         ) -> pd.DataFrame:
         """
 Return the ranked extracted entities as a `pandas.DataFrame`
         """
-        return pd.DataFrame.from_dict(self.get_phrases())
+        return pd.DataFrame.from_dict(self.get_phrases(pipe))
 
 
     ######################################################################

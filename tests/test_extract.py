@@ -14,28 +14,39 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(dirname(dirname(abspath(__file__))))))
-from textgraph import Pipeline, PipelineFactory, TextGraph  # pylint: disable=C0413
+import textgraph  # pylint: disable=C0413
 
 
-def test_extract_herzog ():
+def test_extract_herzog (
+    ) -> None:
     """
 Run an extract with the Werner Herzog blurb.
     """
     text: str = """
 Werner Herzog is a remarkable filmmaker and intellectual originally from Germany, the son of Dietrich Herzog.
     """
-    tg: TextGraph = TextGraph()  # pylint: disable=C0103
-
-    fabrica: PipelineFactory = PipelineFactory(
-        ner_model = None,
+    tg: textgraph.TextGraph = textgraph.TextGraph(  # pylint: disable=C0103
+        factory = textgraph.PipelineFactory(
+            ner_model = None,
+            nre_model = None,
+        ),
     )
 
-    pipe: Pipeline = fabrica.build_pipeline(
+    pipe: textgraph.Pipeline = tg.create_pipeline(
         text.strip(),
     )
 
-    tg.build_graph_embeddings(
+    tg.collect_graph_elements(
         pipe,
+        debug = False,
+    )
+
+    tg.perform_entity_linking(
+        pipe,
+        debug = False,
+    )
+
+    tg.construct_lemma_graph(
         debug = False,
     )
 
@@ -45,7 +56,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
     results: list = [
         ( row["text"], row["pos"], )
-        for _, row in tg.get_phrases_as_df().iterrows()
+        for _, row in tg.get_phrases_as_df(pipe).iterrows()
     ]
 
     # top-k, k=4
