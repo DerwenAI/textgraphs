@@ -64,6 +64,7 @@ class RenderPyVis:  # pylint: disable=R0903
     """
 Render the _lemma graph_ as a `PyVis` network.
     """
+    HTML_HEIGHT_WITH_CONTROLS: int = 1200
 
     def __init__ (
         self,

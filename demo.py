@@ -11,6 +11,7 @@ import sys  # pylint: disable=W0611
 import time
 
 from icecream import ic  # pylint: disable=E0401
+from pyinstrument import Profiler  # pylint: disable=E0401
 
 from textgraph import Pipeline, PipelineFactory, TextGraph
 
@@ -21,9 +22,11 @@ Werner Herzog is a remarkable filmmaker and an intellectual originally from Germ
 After the war, Werner fled to America to become famous.
 """
 
-    # set up
-    start_time: float = time.time()
+    ## set up
+    profiler: Profiler = Profiler()
+    profiler.start()
 
+    start_time: float = time.time()
     tg: TextGraph = TextGraph()
 
     fabrica: PipelineFactory = PipelineFactory(
@@ -35,7 +38,7 @@ After the war, Werner fled to America to become famous.
     print(f"set up: {round(duration, 3)} sec")
 
 
-    # NLP parse
+    ## NLP parse
     start_time = time.time()
 
     pipe: Pipeline = fabrica.build_pipeline(
@@ -43,36 +46,59 @@ After the war, Werner fled to America to become famous.
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"parse: {round(duration, 3)} sec")
+    print(f"parse text: {round(duration, 3)} sec")
 
 
-    # build lemma graph
+    ## collect graph elements from the parse
     start_time = time.time()
 
-    tg.build_graph_embeddings(
+    tg.collect_graph_elements(
         pipe,
         debug = False,
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"build graph: {round(duration, 3)} sec")
+    print(f"collect elements: {round(duration, 3)} sec")
 
 
-    # infer relations
+    ## perform entity linking
+    start_time = time.time()
+
+    tg.perform_entity_linking(
+        pipe,
+        debug = False,
+    )
+
+    duration = round(time.time() - start_time, 3)
+    print(f"entity linking: {round(duration, 3)} sec")
+
+
+    ## construct the _lemma graph_
+    start_time = time.time()
+
+    tg.construct_lemma_graph(
+        debug = False,
+    )
+
+    duration = round(time.time() - start_time, 3)
+    print(f"construct graph: {round(duration, 3)} sec")
+
+
+    ## perform relation extraction
     start_time = time.time()
 
     inferred_edges: list = tg.infer_relations(
         pipe,
         max_skip = TextGraph.MAX_SKIP,
         opennre_min_prob = TextGraph.OPENNRE_MIN_PROB,
-        debug = True,
+        debug = False,
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"infer rel: {round(duration, 3)} sec, {len(inferred_edges)} edges")
+    print(f"relation extraction: {round(duration, 3)} sec, {len(inferred_edges)} edges")
 
 
-    # rank phrases
+    ## rank phrases
     start_time = time.time()
 
     tg.calc_phrase_ranks(
@@ -82,8 +108,9 @@ After the war, Werner fled to America to become famous.
     duration = round(time.time() - start_time, 3)
     print(f"rank phrases: {round(duration, 3)} sec")
 
-    # print the resulting entities extracted from the document
+    # show the results
     ic(tg.get_phrases_as_df())
+
 
     #sys.exit(0)
 
@@ -93,5 +120,9 @@ After the war, Werner fled to America to become famous.
 
     # EXPERIMENT
     #sys.exit(0)
+
+    ## stack profiler report
+    profiler.stop()
+    profiler.print()
 
     #print(tg.dump_lemma_graph())

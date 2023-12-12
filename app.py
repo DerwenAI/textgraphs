@@ -77,7 +77,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             )
 
             duration: float = round(time.time() - start_time, 3)
-            st.write(f"parse: {round(duration, 3)} sec, {len(text_input)} characters")
+            st.write(f"parse text: {round(duration, 3)} sec, {len(text_input)} characters")
 
             # render the entity html
             ent_html: str = spacy.displacy.render(
@@ -105,20 +105,43 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             )
 
 
-            ## build the lemma graph
-            st.subheader("build the lemma graph, extracting and linking entities", divider = "rainbow")
+            ## collect graph elements from the parse
+            st.subheader("construct the base level of the lemma graph", divider = "rainbow")
             start_time = time.time()
 
-            tg.build_graph_embeddings(
+            tg.collect_graph_elements(
                 pipe,
                 debug = False,
             )
 
             duration = round(time.time() - start_time, 3)
-            st.write(f"lemma graph: {round(duration, 3)} sec, {len(tg.nodes)} nodes, {len(tg.edges)} edges")
+            st.write(f"collect elements: {round(duration, 3)} sec, {len(tg.nodes)} nodes, {len(tg.edges)} edges")
+
+            ## perform entity linking
+            st.subheader("extract entities and perform entity linking", divider = "rainbow")
+            start_time = time.time()
+
+            tg.perform_entity_linking(
+                pipe,
+                debug = False,
+            )
+
+            duration = round(time.time() - start_time, 3)
+            st.write(f"entity linking: {round(duration, 3)} sec")
 
 
-            ## infer relations
+            ## construct the _lemma graph_
+            start_time = time.time()
+
+            tg.construct_lemma_graph(
+                debug = False,
+            )
+
+            duration = round(time.time() - start_time, 3)
+            st.write(f"construct graph: {round(duration, 3)} sec")
+
+
+            ## perform relation extraction
             if infer_rel:
                 st.subheader("infer relations", divider = "rainbow")
                 start_time = time.time()
@@ -143,7 +166,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 ])
 
                 st.dataframe(df_rel)
-                st.write(f"infer rel: {round(duration, 3)} sec, {len(df_rel)} edges")
+                st.write(f"relation extraction: {round(duration, 3)} sec, {len(df_rel)} edges")
 
 
             ## rank the extracted entities
@@ -159,6 +182,24 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.dataframe(df_ent)
 
 
+            ## generate a word cloud
+            st.subheader("generate a word cloud", divider = "rainbow")
+
+            render: RenderPyVis = RenderPyVis(
+                tg.nodes,
+                tg.edges,
+                tg.lemma_graph,
+            )
+
+            wordcloud = render.generate_wordcloud()
+
+            st.image(
+                wordcloud.to_image(),
+                width = 700,
+                use_column_width = "never",
+            )
+
+
             ## visualize the lemma graph
             st.subheader("visualize the lemma graph", divider = "rainbow")
             st.markdown(
@@ -169,12 +210,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 the most interesting nodes will probably be either
                 subjects (`nsubj`) or direct objects (`pobj`)
                 """
-            )
-
-            render: RenderPyVis = RenderPyVis(
-                tg.nodes,
-                tg.edges,
-                tg.lemma_graph,
             )
 
             pv_graph: pyvis.network.Network = render.build_lemma_graph(
@@ -198,8 +233,8 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             st.components.v1.html(
                 py_html.read_text(encoding = "utf-8"),
-                height = 1300,
-                scrolling = True,
+                height = RenderPyVis.HTML_HEIGHT_WITH_CONTROLS,
+                scrolling = False,
             )
 
 
@@ -207,13 +242,21 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.subheader("cluster the communities", divider = "rainbow")
             st.markdown(
                 """
+<details>
+  <summary><strong>About this clustering...</strong></summary>
+  <p>
 In the tutorial
 <a href="https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a" target="_blank">"How to Convert Any Text Into a Graph of Concepts"</a>,
 Rahul Nayak uses the
 <a href="https://en.wikipedia.org/wiki/Girvan%E2%80%93Newman_algorithm"><em>girvan-newman</em></a>
 algorithm to split the graph into communities, then clusters on those communities.
 His approach works well for unsupervised clustering of key phrases which have been extracted from a collection of many documents.
-In contrast, Nayak was working with entities extracted from "chunks" of text, not with a text graph.
+  </p>
+  <p>
+While Nayak was working with entities extracted from "chunks" of text, not with a text graph per se, this approach is useful for identifying network motifs which can be condensed, e.g., to extract a semantic graph overlay as an <em>abstraction layer</em> atop a lemma graph.
+  </p>
+</details>
+<br/>
                 """,
                 unsafe_allow_html = True,
             )

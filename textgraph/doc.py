@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Implementation of an LLM-augmented `textgraph` algorithm for
-constructing a _knowledge graph_ from raw, unstructured text source.
+Implementation of an LLM-augmented `TextGraph` algorithm for
+constructing a _lemma graph_ from raw, unstructured text source.
 
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
@@ -63,6 +63,9 @@ Constructor.
         self.nre: opennre.model.softmax_nn.SoftmaxNN = opennre.get_model(self.NRE_MODEL)
         self.wiki: WikiDatum = WikiDatum()
 
+
+    ######################################################################
+    ## graph construction
 
     def _make_node (  # pylint: disable=R0913
         self,
@@ -297,93 +300,7 @@ entities and lemmas that have already been linked in the lemma graph.
                     )
 
 
-    def _link_entities (
-        self,
-        pipe: Pipeline,
-        *,
-        debug: bool = False,
-        ) -> None:
-        """
-Run _entity linking_ based on `DBPedia Spotlight` and other services.
-        """
-        for link in pipe.link_dbpedia_entities(self.tokens, debug = debug):
-            if debug:
-                ic(link)
-
-            # link to previously constructed entity node,
-            # otherwise construct a new node for the linked entity
-            if link.iri in self.nodes:
-                self.nodes[link.iri].count += 1
-
-            else:
-                self.nodes[link.iri] = Node(
-                    len(self.nodes),
-                    link.iri,
-                    link.span,
-                    link.wiki_ent.descrip,
-                    "dbpedia",
-                    NodeEnum.IRI,
-                    label = link.iri,
-                    length = link.length,
-                    count = 1,
-                )
-
-            node: Node = self.nodes.get(link.iri)  # type: ignore
-
-            if debug:
-                ic(node)
-
-            # back-link to entity object
-            self.tokens[link.token_id].entity.append(link)
-
-            # construct an edge for this linked entity
-            self._make_edge(
-                self.tokens[link.token_id],
-                node,
-                RelEnum.IRI,
-                "dbpedia",
-                link.prob,
-            )
-
-
-    def _build_lemma_graph (
-        self,
-        ) -> None:
-        """
-Construct the _lemma graph_ from the collected elements: parse
-dependencies, lemmas, entities, and noun chunks.
-        """
-        # add the nodes
-        self.lemma_graph.add_nodes_from([
-            node.node_id
-            for node in self.nodes.values()
-        ])
-
-        # populate the minimum required node properties
-        for node_key, node in self.nodes.items():
-            nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["title"] = node_key
-            nx_node["size"] = node.count
-            nx_node["value"] = node.weight
-
-        # add the edges and their properties
-        self.lemma_graph.add_edges_from([
-            (
-                edge.src_node,
-                edge.dst_node,
-                {
-                    "kind": str(edge.kind),
-                    "title": edge.rel,
-                    "weight": float(edge.count),
-                    "prob": edge.prob,
-                    "count": edge.count,
-                },
-            )
-            for edge_key, edge in self.edges.items()
-        ])
-
-
-    def build_graph_embeddings (
+    def collect_graph_elements (
         self,
         pipe: Pipeline,
         *,
@@ -393,14 +310,11 @@ dependencies, lemmas, entities, and noun chunks.
         debug: bool = False,
         ) -> None:
         """
-Construct a _lemma graph_ from the results of running the `textgraph`
-algorithm, represented in `NetworkX` as a directed graph with parallel
-edges.
+Collect the elements of a _lemma graph_ from the results of running
+the `textgraph` algorithm. These elements include: parse dependencies,
+lemmas, entities, and noun chunks.
 
-In other words, this represents "reverse embeddings" from the parsed
-document.
-
-    ner_map_path: maps from OntoTypes4 to an IRI; defaults to local file `dat/ner_map.json`
+    ner_map_path: map OntoTypes4 to IRI; defaults to local file `dat/ner_map.json`
         """
         # load the NER map
         ner_map: typing.Dict[ str, dict ] = OrderedDict(
@@ -466,15 +380,104 @@ document.
             debug = debug,
         )
 
-        # run entity linking
-        self._link_entities(
-            pipe,
-            debug = debug,
-        )
 
-        # build the _lemma graph_ used for analysis
-        self._build_lemma_graph()
+    def construct_lemma_graph (
+        self,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Construct the base level of the _lemma graph_ from the collected
+elements. This gets represented in `NetworkX` as a directed graph
+with parallel edges.
+        """
+        # add the nodes
+        self.lemma_graph.add_nodes_from([
+            node.node_id
+            for node in self.nodes.values()
+        ])
 
+        # populate the minimum required node properties
+        for node_key, node in self.nodes.items():
+            nx_node = self.lemma_graph.nodes[node.node_id]
+            nx_node["title"] = node_key
+            nx_node["size"] = node.count
+            nx_node["value"] = node.weight
+
+            if debug:
+                ic(nx_node)
+
+        # add the edges and their properties
+        self.lemma_graph.add_edges_from([
+            (
+                edge.src_node,
+                edge.dst_node,
+                {
+                    "kind": str(edge.kind),
+                    "title": edge.rel,
+                    "weight": float(edge.count),
+                    "prob": edge.prob,
+                    "count": edge.count,
+                },
+            )
+            for edge_key, edge in self.edges.items()
+        ])
+
+
+    ######################################################################
+    ## entity linking
+
+    def perform_entity_linking (
+        self,
+        pipe: Pipeline,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Perform _entity linking_ based on `DBPedia Spotlight` and other services.
+        """
+        for link in pipe.link_dbpedia_entities(self.tokens, debug = debug):
+            if debug:
+                ic(link)
+
+            # link to previously constructed entity node,
+            # otherwise construct a new node for the linked entity
+            if link.iri in self.nodes:
+                self.nodes[link.iri].count += 1
+
+            else:
+                self.nodes[link.iri] = Node(
+                    len(self.nodes),
+                    link.iri,
+                    link.span,
+                    link.wiki_ent.descrip,
+                    "dbpedia",
+                    NodeEnum.IRI,
+                    label = link.iri,
+                    length = link.length,
+                    count = 1,
+                )
+
+            node: Node = self.nodes.get(link.iri)  # type: ignore
+
+            if debug:
+                ic(node)
+
+            # back-link to entity object
+            self.tokens[link.token_id].entity.append(link)
+
+            # construct an edge for this linked entity
+            self._make_edge(
+                self.tokens[link.token_id],
+                node,
+                RelEnum.IRI,
+                "dbpedia",
+                link.prob,
+            )
+
+
+    ######################################################################
+    ## relation extraction
 
     def _iter_entity_pairs (
         self,
@@ -653,6 +656,9 @@ Multiple approaches infer relations among co-occurring entities:
 
         return inferred_edges
 
+
+    ######################################################################
+    ## rank the extracted and linked phrases
 
     @classmethod
     def _solve_restack_coeffs (
@@ -855,6 +861,9 @@ Return the ranked extracted entities as a `pandas.DataFrame`
         """
         return pd.DataFrame.from_dict(self.get_phrases())
 
+
+    ######################################################################
+    ## handle data exports
 
     def dump_lemma_graph (
         self,

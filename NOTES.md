@@ -4,25 +4,22 @@ TODO:
   * add `fishing` ents
   * non-linked entities (lemma, ent, noun chunk?) use MediaWiki lookups?
 
-  * compare results: DBPedia Spotlight vs. Wikidata
-  https://lookup.dbpedia.org/api/search?query=Austin,+Texas
-
-  * download ZIP: KuzuDB node-link
-  https://neo4j.com/docs/getting-started/data-import/csv-import/
-
-  * use community detection to condense nodes
-  k-medoids? https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
+  * add to namespace normalization:
+  https://mappings.dbpedia.org/index.php/Agent_Relations
 
   * build a _graph of relations_ topology transform
     * transformed graph
     * calculate affinities
 
-  * why aren't there multiple relations in the lemma graph?
+  * use community detection to condense nodes
+  k-medoids? https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
 
-  * eval use of https://huggingface.co/SetFit
-  https://github.com/davidberenstein1957/spacy-setfit
+  * download ZIP: KuzuDB node-link
+  https://neo4j.com/docs/getting-started/data-import/csv-import/
 
-  * link `sense2vec` synonyms
+  * are multiple relations missing in the lemma graph?
+
+  * link `sense2vec` synonyms; make affordances for UI to annotate synonyms
 
   * add conda packaging
   * publish on PyPi and Conda

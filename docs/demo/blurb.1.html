@@ -4,7 +4,7 @@
     Construct a <em>lemma graph</em>, then perform <em>entity linking</em> based on:
     <code>spaCy</code>, <code>transformers</code>, <code>SpanMarkerNER</code>,
     <code>spaCy-DBpedia-Spotlight</code>, <code>REBEL</code>, <code>OpenNRE</code>,
-    <code>spaCy fishing</code>, <code>qwikidata</code>
+    <code>spaCy fishing</code>, <code>qwikidata</code>, <code>pulp</code>
   </p>
   <p>
     This is a prelude step before leveraging
@@ -27,7 +27,7 @@
     <li>infer relations, plus graph inference: <code>REBEL</code>, <code>OpenNRE</code>, <code>qwikidata</code></li>
     <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
-    <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities</li>
+    <li>approximate a <em>pareto archive</em> (hypervolume) to re-rank extracted entities with <code>pulp</code></li>
     <li>visualize the <em>lemma graph</em> interactively in <code>PyVis</code></li>
     <li>cluster communities within the <em>lemma graph</em>
     <li>apply topological transforms to enhance embeddings (in progress)</li>
@@ -73,6 +73,9 @@
     </li>
     <li>
       <a href="https://github.com/kensho-technologies/qwikidata" target="_blank"><code>qwikidata</code></a>
+    </li>
+    <li>
+      <a href="https://github.com/coin-or/pulp" target="_blank"><code>pulp</code></a>
     </li>
     <li>
       <a href="https://spacy.io/" target="_blank"><code>spaCy</code></a>
