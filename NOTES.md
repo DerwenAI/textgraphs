@@ -5,9 +5,6 @@ TODO:
   * add `fishing` ents
   * non-linked entities (lemma, ent, noun chunk?) use MediaWiki lookups?
 
-  * add to namespace normalization:
-  https://mappings.dbpedia.org/index.php/Agent_Relations
-
   * build a _graph of relations_ topology transform
     * transformed graph
     * calculate affinities
@@ -19,6 +16,8 @@ TODO:
   https://neo4j.com/docs/getting-started/data-import/csv-import/
 
   * are multiple relations missing in the lemma graph?
+
+  * check out https://github.com/wikipedia2vec/wikipedia2vec
 
   * link `sense2vec` synonyms; make affordances for UI to annotate synonyms
 

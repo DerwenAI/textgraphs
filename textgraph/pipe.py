@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-NLP pipeline factory builder pattern.
+Leveraging a factory pattern for NLP pipelines.
+
+This class handles processing for one "chunk" of raw text input to
+analyze, which is typically a paragraph. In other words, objects in
+this class are expected to get recycled when processing moves on to
+the next paragraph, to ease memory requirements overall.
 
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """

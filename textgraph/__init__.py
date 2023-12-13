@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Package definitions.
+Package definitions for the `TextGraph` library.
 
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
@@ -27,7 +27,7 @@ from .vis import RenderPyVis
 from .wiki import WikiDatum
 
 
-__title__ = "TextGraph: raw texts, KGs, and LLMs, oh my!"
+__title__ = "TextGraph: raw texts, LLMs, and KGs, oh my!"
 
 __description__ = "TextGraph + LLM + graph ML for entity extraction, linking, ranking, and constructing a lemma graph"  # pylint: disable=C0301
 
@@ -37,5 +37,5 @@ __author__ = """\n""".join([
     "derwen.ai <info@derwen.ai>"
 ])
 
-__version__ = "0.1.1"
-__release__ = "0.1.1"
+__version__ = "0.1.2"
+__release__ = "0.1.2"

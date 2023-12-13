@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-default settings
+Default settings for the `TextGraph` library.
 """
 
 import spacy_dbpedia_spotlight  # pylint: disable=E0401

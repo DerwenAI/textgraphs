@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Utility functions.
+Utility functions for the `TextGraph` library.
 
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """

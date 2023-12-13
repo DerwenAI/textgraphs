@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Visualization methods based on `PyVis`
+Visualization methods based on `PyVis`, `wordcloud`, and so on.
+
+This class handles visualizations of graphs and graph elements.
 
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """

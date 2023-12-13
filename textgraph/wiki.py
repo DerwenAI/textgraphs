@@ -2,7 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """
-MediaWiki API access.
+This class provides a wrapper for MediaWiki API access, supporting
+use of:
+
+  * DBpedia
+  * Wikidata
+  * KBPedia (in progress)
+
+Plus related machine learning models which derive from the exports of
+these projects.
 """
 
 from collections import OrderedDict

@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Babelscape `REBEL` relation extraction.
+This class provides a wrapper for integrating the Babelscape `REBEL`
+model used for _relation extraction_.
 """
 
 from icecream import ic  # pylint: disable=E0401

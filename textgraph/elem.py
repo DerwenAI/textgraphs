@@ -2,10 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
-Classes used for graph representation:
+These classes represent graph elements.
 
-  * superset of openCypher, adding support for a probabilitic graph
-  * IRI discipline also guarantees export to RDF, e.g., for transitive closure
+Consider this "flavor" of graph representation to be a superset of
+`openCypher` _labeled property graphs_ (LPG) with additional support
+for probabilistic graphs.
+
+Imposing a discipline of IRIs for node names and edge relations
+helps guarantee that a view of the graph can be exported to RDF
+for data quality checks, transitive closure, semantic inference,
+and so on.
 
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """

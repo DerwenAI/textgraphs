@@ -1,5 +1,5 @@
 ---
-title: TextGraph
+title: TextGraphs
 emoji: ✴
 colorFrom: green
 colorTo: gray
@@ -12,7 +12,7 @@ license: mit
 
 ## project info:
 
-see <https://huggingface.co/spaces/DerwenAI/textgraph>
+see <https://huggingface.co/spaces/DerwenAI/textgraphs>
 
 
 ## requirements:
@@ -65,9 +65,9 @@ streamlit run app.py
 <details>
   <summary>License and Copyright</summary>
 
-Source code for **textgraph** plus its logo, documentation, and examples
-have an [MIT license](https://spdx.org/licenses/MIT.html) which is
-succinct and simplifies use in commercial applications.
+Source code for **TextGraphs** plus its logo, documentation, and
+examples have an [MIT license](https://spdx.org/licenses/MIT.html)
+which is succinct and simplifies use in commercial applications.
 
 All materials herein are Copyright &copy; 2023 Derwen, Inc.
 </details>

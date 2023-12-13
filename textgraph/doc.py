@@ -4,6 +4,11 @@
 """
 Implementation of an LLM-augmented `TextGraph` algorithm for
 constructing a _lemma graph_ from raw, unstructured text source.
+The results provide elements for semi-automated construction or
+augmentation of a _knowledge graph_.
+
+This class maintains the state of a graph. Updates get applied by
+running methods on `Pipeline` objects, typically per paragraph.
 
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
 """
