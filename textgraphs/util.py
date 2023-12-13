@@ -14,6 +14,9 @@ import numpy as np  # type: ignore  # pylint: disable=E0401
 import pandas as pd  # type: ignore  # pylint: disable=E0401
 
 
+######################################################################
+## utility functions
+
 def calc_quantile_bins (
     num_rows: int
     ) -> np.ndarray:

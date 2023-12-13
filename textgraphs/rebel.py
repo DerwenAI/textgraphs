@@ -12,6 +12,9 @@ from icecream import ic  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
 
 
+######################################################################
+## class definitions
+
 class Rebel:
     """
 Perform relation extraction based on the `REBEL` library.

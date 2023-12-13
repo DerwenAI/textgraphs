@@ -103,7 +103,7 @@ After the war, Werner fled to America to become famous.
     )
 
     duration = round(time.time() - start_time, 3)
-    print(f"{duration:7.3f} sec: relation extraction, {len(inferred_edges)} edges")
+    print(f"{duration:7.3f} sec: relation extraction")
 
     n_list: list = list(tg.nodes.values())
 
@@ -134,7 +134,6 @@ After the war, Werner fled to America to become famous.
     ic(tg.get_phrases_as_df(pipe))
 
     ic(tg.nodes)
-    sys.exit(0)
     ic(tg.edges)  # pylint: disable=W0101
 
 

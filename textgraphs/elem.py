@@ -23,6 +23,9 @@ import typing
 import spacy  # pylint: disable=E0401
 
 
+######################################################################
+## class definitions
+
 @dataclass(order=False, frozen=False)
 class WikiEntity:  # pylint: disable=R0902
     """

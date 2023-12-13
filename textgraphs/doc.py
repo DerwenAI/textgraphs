@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# pylint: disable=C0302
 
 """
 Implementation of an LLM-augmented `textgraph` algorithm for
@@ -30,7 +31,6 @@ import pandas as pd  # pylint: disable=E0401
 import pulp  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
-
 
 from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, DBPEDIA_SEARCH_API, \
     MAX_SKIP, NER_MAP, OPENNRE_MIN_PROB, PAGERANK_ALPHA, WIKIDATA_API
@@ -77,7 +77,6 @@ Constructor.
         """
         self.nodes: typing.Dict[ str, Node ] = OrderedDict()
         self.edges: typing.Dict[ str, Edge ] = {}
-        self.tokens: typing.List[ Node ] = []  # one Node for each parsed token
         self.lemma_graph: nx.MultiDiGraph = nx.MultiDiGraph()
 
         # initialize the pipeline factory
@@ -105,6 +104,7 @@ for each text input, which are typically paragraph-length.
 
     def _make_node (  # pylint: disable=R0913
         self,
+        pipe: Pipeline,
         key: str,
         span: spacy.tokens.token.Token,
         kind: NodeEnum,
@@ -164,8 +164,8 @@ Lookup and return a `Node` object:
 
         node: Node = self.nodes.get(key)  # type: ignore
 
-        if kind not in [ NodeEnum.CHU ]:
-            self.tokens.append(node)
+        if kind not in [ NodeEnum.CHU, NodeEnum.IRI ]:
+            pipe.tokens.append(node)
 
         return node  # type: ignore
 
@@ -207,6 +207,7 @@ and increment the count if it does.
 
     def _extract_phrases (  # pylint: disable=R0913
         self,
+        pipe: Pipeline,
         sent_id: int,
         sent: spacy.tokens.span.Span,
         text_id: int,
@@ -246,6 +247,7 @@ _lemma graph_, while giving priority to:
                 lemma_key, span_len = next(lemma_iter)  # pylint: disable=R1708
 
                 yield self._make_node(
+                    pipe,
                     lemma_key,
                     token,
                     NodeEnum.ENT,
@@ -259,6 +261,7 @@ _lemma graph_, while giving priority to:
             elif token.pos_ in [ "NOUN", "PROPN", "VERB" ]:
                 # link a lemmatized entity
                 yield self._make_node(
+                    pipe,
                     Pipeline.get_lemma_key(token),
                     token,
                     NodeEnum.LEM,
@@ -270,6 +273,7 @@ _lemma graph_, while giving priority to:
             else:
                 # fall-through case: use token as a placeholder in the lemma graph
                 yield self._make_node(
+                    pipe,
                     Pipeline.get_lemma_key(token, placeholder = True),
                     token,
                     NodeEnum.DEP,
@@ -293,7 +297,7 @@ Identify the unique noun chunks, i.e., those which differ from the
 entities and lemmas that have already been linked in the lemma graph.
         """
         # scan the noun chunks for uniqueness
-        for chunk in pipe.link_noun_chunks(self.nodes, self.tokens):
+        for chunk in pipe.link_noun_chunks(self.nodes):
             if chunk.unseen:
                 location: typing.List[ int ] = [
                     text_id,
@@ -325,11 +329,11 @@ entities and lemmas that have already been linked in the lemma graph.
                 # correspond 1:1 with the existing nodes
                 for token_id in range(chunk.start, chunk.start + chunk.length):
                     if debug:
-                        ic(self.tokens[token_id])
+                        ic(pipe.tokens[token_id])
 
                     self._make_edge(
                         node,  # type: ignore
-                        self.tokens[token_id],
+                        pipe.tokens[token_id],
                         RelEnum.CHU,
                         "noun_chunk",
                         1.0,
@@ -365,6 +369,7 @@ lemmas, entities, and noun chunks.
                 ic(sent_id, sent, sent.start)
 
             sent_nodes: typing.List[ Node ] = list(self._extract_phrases(
+                pipe,
                 sent_id,
                 sent,
                 text_id,
@@ -465,6 +470,7 @@ with parallel edges.
 
     def _make_link (
         self,
+        pipe: Pipeline,
         link: LinkedEntity,
         rel: str,
         *,
@@ -477,6 +483,7 @@ otherwise construct a new node for this linked entity.
         if debug:
             ic(link)
 
+        # special case of `_make_node()`
         if link.iri in self.nodes:
             self.nodes[link.iri].count += 1
 
@@ -493,17 +500,18 @@ otherwise construct a new node for this linked entity.
                 count = 1,
             )
 
+        src_node: Node = pipe.tokens[link.token_id]
         dst_node: Node = self.nodes.get(link.iri)  # type: ignore
 
         if debug:
             ic(dst_node)
 
         # back-link to the parsed entity object
-        self.tokens[link.token_id].entity.append(link)
+        pipe.tokens[link.token_id].entity.append(link)
 
         # construct a directed edge between them
         self._make_edge(
-            self.tokens[link.token_id],
+            src_node,
             dst_node,
             RelEnum.IRI,
             rel,
@@ -525,7 +533,6 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
         """
         # first pass: use DBPedia Spotlight
         iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_dbpedia_spotlight_entities(
-            self.tokens,
             dbpedia_search_api,
             min_alias,
             min_similarity,
@@ -534,12 +541,13 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
 
         for link in iter_ents:
             self._make_link(
+                pipe,
                 link,
                 "dbpedia",
                 debug = debug,
             )
 
-            src_node: Node = self.tokens[link.token_id]
+            src_node: Node = pipe.tokens[link.token_id]
             src_node.annotated = True
 
         # second pass: use DBPedia search on unlinked entities
@@ -552,12 +560,13 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
 
         for link in iter_ents:
             self._make_link(
+                pipe,
                 link,
                 "dbpedia",
                 debug = debug,
             )
 
-            src_node = self.tokens[link.token_id]
+            src_node = pipe.tokens[link.token_id]
             src_node.annotated = True
 
 
@@ -672,7 +681,7 @@ Iterate on sentences to drive `REBEL`, yielding inferred relations.
             triples: typing.List[ dict ] = rebel.extract_triplets_typed(extract)
 
             tok_map: dict = {
-                token.text: self.tokens[token.i]
+                token.text: pipe.tokens[token.i]
                 for token in sent
             }
 

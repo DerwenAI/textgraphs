@@ -1,6 +1,5 @@
 TODO:
 
-  * refactor TextGraph.tokens to Pipeline.tokens and remove non-parsed nodes
   * are the label/title values correct in PyVis?
 
   * cross-link the DBPedia/Wikidata equivs

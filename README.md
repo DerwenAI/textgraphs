@@ -24,7 +24,6 @@ see <https://huggingface.co/spaces/DerwenAI/textgraphs>
 
 ```bash
 python3 -m pip install -u textgraphs
-python3 -m spacy download en_core_web_sm
 python3 -m pip install git+https://github.com/thunlp/OpenNRE
 ```
 

@@ -22,6 +22,9 @@ from .elem import Edge, Node, NodeEnum, RelEnum
 from .pipe import Pipeline
 
 
+######################################################################
+## class definitions
+
 @dataclass(order=False, frozen=True)
 class NodeStyle:  # pylint: disable=R0902
     """

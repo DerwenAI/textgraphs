@@ -21,9 +21,12 @@ import opennre  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
 from .defaults import DBPEDIA_SPOTLIGHT_API, NER_MODEL, NRE_MODEL, SPACY_MODEL
-from .elem import LinkedEntity, NodeEnum, NounChunk, WikiEntity
+from .elem import LinkedEntity, Node, NodeEnum, NounChunk, WikiEntity
 from .wiki import WikiDatum
 
+
+######################################################################
+## class definitions
 
 class Pipeline:  # pylint: disable=R0903
     """
@@ -45,6 +48,9 @@ Constructor.
         self.dbp_doc: spacy.tokens.Doc = dbp_pipe(self.text)
         self.ent_doc: spacy.tokens.Doc = ent_pipe(self.text)
         self.wiki: WikiDatum = WikiDatum()
+
+        # list of Node objects for each parsed token, in sequence
+        self.tokens: typing.List[ Node ] = []
 
 
     @classmethod
@@ -92,7 +98,6 @@ Iterate through the fully qualified lemma keys for an extracted entity.
     def link_noun_chunks (
         self,
         nodes: dict,
-        tokens: list,
         *,
         debug: bool = False,
         ) -> typing.List[ NounChunk ]:
@@ -119,7 +124,7 @@ Link any noun chunks which are not already subsumed by named entities.
 
         # second pass: remap span indices to the merged entities pipeline
         for i, span in enumerate(self.ent_doc.noun_chunks):
-            if span.text == tokens[span.start].text:
+            if span.text == self.tokens[span.start].text:
                 chunks[i].unseen = False
             elif chunks[i].unseen:
                 chunks[i].start = span.start
@@ -132,7 +137,6 @@ Link any noun chunks which are not already subsumed by named entities.
 
     def link_dbpedia_spotlight_entities (  # pylint: disable=R0914
         self,
-        tokens: list,
         dbpedia_search_api: str,
         min_alias: float,
         min_similarity: float,
@@ -150,7 +154,7 @@ Iterator for the results of using DBPedia Spotlight for entity linking.
         ent_idx: int = 0
         tok_idx: int = 0
 
-        for i, tok in enumerate(tokens):  # pylint: disable=R1702
+        for i, tok in enumerate(self.tokens):  # pylint: disable=R1702
             if debug:
                 print()
                 ic(tok_idx, tok.text, tok.pos)

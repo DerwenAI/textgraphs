@@ -34,6 +34,9 @@ from .defaults import DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, WIKIDATA_API
 from .elem import WikiEntity
 
 
+######################################################################
+## class definitions
+
 class WikiDatum:  # pylint: disable=R0903
     """
 Manage access to MediaWiki-related APIs.
