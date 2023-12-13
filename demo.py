@@ -12,6 +12,7 @@ import time
 
 from icecream import ic  # pylint: disable=E0401
 from pyinstrument import Profiler  # pylint: disable=E0401
+import pandas as pd  # pylint: disable=E0401
 
 import textgraph
 
@@ -104,6 +105,19 @@ After the war, Werner fled to America to become famous.
     duration = round(time.time() - start_time, 3)
     print(f"{duration:7.3f} sec: relation extraction, {len(inferred_edges)} edges")
 
+    n_list: list = list(tg.nodes.values())
+
+    df_rel: pd.DataFrame = pd.DataFrame.from_dict([
+        {
+            "src": n_list[edge.src_node].text,
+            "dst": n_list[edge.dst_node].text,
+            "rel": textgraph.WikiDatum.normalize_prefix(edge.rel),
+            "weight": edge.prob,
+        }
+        for edge in inferred_edges
+    ])
+
+    ic(df_rel)
 
     ## rank phrases
     start_time = time.time()
@@ -119,6 +133,7 @@ After the war, Werner fled to America to become famous.
     # show the results
     ic(tg.get_phrases_as_df(pipe))
 
+    sys.exit(0)
     ic(tg.edges)  # pylint: disable=W0101
     ic(tg.nodes)
 

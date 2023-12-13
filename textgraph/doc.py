@@ -913,7 +913,7 @@ Return the entities extracted from the document.
                 reverse = True,
             ):
 
-            label: str = pipe.wiki.dbpedia_normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
+            label: str = pipe.wiki.normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
 
             yield {
                 "node_id": node.node_id,

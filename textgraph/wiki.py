@@ -40,6 +40,8 @@ Manage access to MediaWiki-related APIs.
         "dbpedia-commons": "http://commons.dbpedia.org/resource/",
         "dbpedia-wikicompany": "http://dbpedia.openlinksw.com/wikicompany/",
         "dbpedia-wikidata": "http://wikidata.dbpedia.org/resource/",
+        "wd": "https://www.wikidata.org/wiki/",
+        "schema": "https://schema.org/",
     })
 
 
@@ -55,7 +57,7 @@ Constructor.
 
 
     @classmethod
-    def dbpedia_normalize_prefix (
+    def normalize_prefix (
         cls,
         iri: str,
         *,
@@ -460,7 +462,7 @@ if __name__ == "__main__":
         start_time = time.time()
 
         wikid_iri: str = wiki.dbpedia_wikidata_equiv(
-            wiki.dbpedia_normalize_prefix(dbp_iri, debug = False),  # type: ignore
+            wiki.normalize_prefix(dbp_iri, debug = False),  # type: ignore
             debug = False,
         )
 
