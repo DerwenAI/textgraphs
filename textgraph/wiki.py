@@ -194,15 +194,26 @@ Convert markdown to plain text.
         """
 Find the best-matching aliases for a search term.
         """
+        # best case scenario: the label is an exact match
+        if query == label.lower():
+            return ( 1.0, label, )
+
+        # ...therefore the label is not an exact match
         prob_list: typing.List[ typing.Tuple[ float, str ]] = [
-            ( SequenceMatcher(None, query, alias.lower()).ratio(), alias, )
-            for alias in aliases
+            ( SequenceMatcher(None, query, label.lower()).ratio(), label, )
         ]
 
-        prob_list.append(
-            ( SequenceMatcher(None, query, label.lower()).ratio(), label, )
-        )
+        # fallback: test the aliases
+        for alias in aliases:
+            prob: float = SequenceMatcher(None, query, alias.lower()).ratio()
 
+            if prob == 1.0:
+                # early termination for success
+                return ( prob, alias, )
+
+            prob_list.append(( prob, alias, ))
+
+        # find the closest match
         prob_list.sort(reverse = True)
 
         if debug:

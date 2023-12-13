@@ -500,11 +500,27 @@ otherwise construct a new node for this linked entity.
         """
 Perform _entity linking_ based on `DBPedia Spotlight` and other services.
         """
-        iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_dbpedia_entities(
+        # first pass: use DBPedia Spotlight
+        iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_dbpedia_spotlight_entities(
             self.tokens,
             dbpedia_search_api,
             min_alias,
             min_similarity,
+            debug = debug
+        )
+
+        for link in iter_ents:
+            self._make_link(
+                link,
+                "dbpedia",
+                debug = debug,
+            )
+
+        # second pass: use DBPedia search on unlinked entities
+        iter_ents = pipe.link_dbpedia_search_entities(
+            list(self.nodes.values()),
+            dbpedia_search_api,
+            min_alias,
             debug = debug
         )
 

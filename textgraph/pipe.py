@@ -16,7 +16,7 @@ import opennre  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
 from .defaults import DBPEDIA_SPOTLIGHT_API, NER_MODEL, NRE_MODEL, SPACY_MODEL
-from .elem import LinkedEntity, NounChunk, WikiEntity
+from .elem import LinkedEntity, NodeEnum, NounChunk, WikiEntity
 from .wiki import WikiDatum
 
 
@@ -125,7 +125,7 @@ Link any noun chunks which are not already subsumed by named entities.
         return chunks
 
 
-    def link_dbpedia_entities (  # pylint: disable=R0914
+    def link_dbpedia_spotlight_entities (  # pylint: disable=R0914
         self,
         tokens: list,
         dbpedia_search_api: str,
@@ -135,7 +135,7 @@ Link any noun chunks which are not already subsumed by named entities.
         debug: bool = False,
         ) -> typing.Iterator[ LinkedEntity ]:
         """
-Iterator for the results of DBPedia Spotlight entity linking.
+Iterator for the results of using DBPedia Spotlight for entity linking.
         """
         ents: typing.List[ spacy.tokens.span.Span ] = list(self.dbp_doc.ents)
 
@@ -179,7 +179,7 @@ Iterator for the results of DBPedia Spotlight entity linking.
                         if wiki_ent is not None and wiki_ent.prob > min_alias:  # type: ignore
                             iri: str = ent.kb_id_
 
-                            dbp_link = LinkedEntity(
+                            dbp_link: LinkedEntity = LinkedEntity(
                                 ent,
                                 iri,
                                 len(ent),
@@ -198,6 +198,42 @@ Iterator for the results of DBPedia Spotlight entity linking.
                     ent_idx += 1
 
             tok_idx += tok.length
+
+
+    def link_dbpedia_search_entities (
+        self,
+        nodes: list,
+        dbpedia_search_api: str,
+        min_alias: float,
+        *,
+        debug: bool = False,
+        ) -> typing.Iterator[ LinkedEntity ]:
+        """
+Iterator for the results of using DBPedia Search directly for entity linking.
+        """
+        for i, node in enumerate(nodes):
+            if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
+                wiki_ent: typing.Optional[ WikiEntity ] = self.wiki.dbpedia_search_entity(
+                    node.text,
+                    dbpedia_search_api,
+                    debug = debug,
+                )
+
+                if wiki_ent.prob > min_alias:  # type: ignore
+                    dbp_link: LinkedEntity = LinkedEntity(
+                        node.span,
+                        wiki_ent.iri,  # type: ignore
+                        node.length,
+                        "dbpedia",
+                        wiki_ent.prob,  # type: ignore
+                        i,
+                        wiki_ent,  # type: ignore
+                    )
+
+                    if debug:
+                        ic("found", dbp_link)
+
+                    yield dbp_link
 
 
 class PipelineFactory:  # pylint: disable=R0903
