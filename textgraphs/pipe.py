@@ -275,6 +275,12 @@ Constructor which instantiates the `spaCy` pipelines:
             exclude.append("ner")
 
         # build the pipelines
+        # NB: `spaCy` team doesn't quite get the PEP 621 restrictions:
+        # https://github.com/explosion/spaCy/issues/3536
+        # https://github.com/explosion/spaCy/issues/4592#issuecomment-704373657
+        if not spacy.util.is_package(spacy_model):
+            spacy.cli.download(spacy_model)
+
         self.tok_pipe = spacy.load(
             spacy_model,
             exclude = exclude,

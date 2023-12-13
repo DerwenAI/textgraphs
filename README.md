@@ -20,6 +20,19 @@ see <https://huggingface.co/spaces/DerwenAI/textgraphs>
   * Python 3.9+
 
 
+## deploy library from PyPi:
+
+```bash
+python3 -m pip install -u textgraphs
+python3 -m spacy download en_core_web_sm
+python3 -m pip install git+https://github.com/thunlp/OpenNRE
+```
+
+NB: both the spaCy and PyPi teams cause packagine errors
+because they have "opinionated" views against following
+the Python packaging standards.
+
+
 ## install locally:
 
 ```bash
@@ -57,6 +70,14 @@ python3 demo.py
 
 ```bash
 streamlit run app.py
+```
+
+## to publish:
+
+```bash
+python3 -m build
+twine check dist/*
+twine upload ./dist/* --verbose
 ```
 
 

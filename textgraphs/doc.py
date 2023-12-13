@@ -16,6 +16,8 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 from collections import OrderedDict
 import itertools
 import json
+import logging
+import os
 import pathlib
 import sys
 import traceback
@@ -27,6 +29,8 @@ import numpy as np  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 import pulp  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
+import transformers  # pylint: disable=E0401
+
 
 from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, DBPEDIA_SEARCH_API, \
     MAX_SKIP, NER_MAP, OPENNRE_MIN_PROB, PAGERANK_ALPHA, WIKIDATA_API
@@ -35,13 +39,27 @@ from .pipe import Pipeline, PipelineFactory
 from .rebel import Rebel
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
-# determine whether this is loading into a Jupyter notebook,
-# to allow for `tqdm` progress bars
+
+######################################################################
+## fix the borked libraries
+
+# workaround: determine whether this is loading into a Jupyter
+# notebook, to allow for `tqdm` progress bars
 if "ipykernel" in sys.modules:
     from tqdm.notebook import tqdm  # pylint: disable=E0401,W0611
 else:
     from tqdm import tqdm  # pylint: disable=E0401
 
+# override: HF `transformers` and `tokenizers` have noisy logging
+transformers.logging.set_verbosity_error()
+os.environ["TOKENIZERS_PARALLELISM"] = "0"
+
+# override: `OpenNRE` uses `word2vec` which has noisy logging
+logging.disable(logging.INFO)
+
+
+######################################################################
+## class definitions
 
 class TextGraphs:
     """
@@ -59,7 +77,7 @@ Constructor.
         """
         self.nodes: typing.Dict[ str, Node ] = OrderedDict()
         self.edges: typing.Dict[ str, Edge ] = {}
-        self.tokens: typing.List[ Node ] = []
+        self.tokens: typing.List[ Node ] = []  # one Node for each parsed token
         self.lemma_graph: nx.MultiDiGraph = nx.MultiDiGraph()
 
         # initialize the pipeline factory
@@ -521,6 +539,9 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
                 debug = debug,
             )
 
+            src_node: Node = self.tokens[link.token_id]
+            src_node.annotated = True
+
         # second pass: use DBPedia search on unlinked entities
         iter_ents = pipe.link_dbpedia_search_entities(
             list(self.nodes.values()),
@@ -535,6 +556,9 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
                 "dbpedia",
                 debug = debug,
             )
+
+            src_node = self.tokens[link.token_id]
+            src_node.annotated = True
 
 
     ######################################################################

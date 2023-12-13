@@ -56,11 +56,6 @@ classifiers = [
 ]
 
 dependencies = [
-    "spacy >= 3.7",
-    "en_core_web_sm @ https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-none-any.whl",
-
-    "open-nre @ git+https://github.com/thunlp/OpenNRE",
-
     "beautifulsoup4 >= 4.12",
     "icecream >= 2.1",
     "markdown2 >= 2.4",
@@ -69,6 +64,7 @@ dependencies = [
     "pulp >= 2.7",
     "pyvis >= 0.3",
     "qwikidata >= 0.4",
+    "spacy >= 3.7",
     "spacy-dbpedia-spotlight >= 0.2.6",
     "spacyfishing >= 0.1.8",
     "span_marker >= 1.5",
@@ -80,7 +76,9 @@ dependencies = [
 [project.optional-dependencies]
 
 dev = [
+    "build >= 1.0",
     "pre-commit >= 3.5",
+    "twine >= 4.0",
 ]
 
 test = [

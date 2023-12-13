@@ -133,9 +133,9 @@ After the war, Werner fled to America to become famous.
     # show the results
     ic(tg.get_phrases_as_df(pipe))
 
+    ic(tg.nodes)
     sys.exit(0)
     ic(tg.edges)  # pylint: disable=W0101
-    ic(tg.nodes)
 
 
     # EXPERIMENT

@@ -110,6 +110,7 @@ A data class representing one node, i.e., an extracted phrase.
     neighbors: int = 0
     weight: float = 0.0
     entity: typing.List[ LinkedEntity ] = field(default_factory = lambda: [])
+    annotated: bool = False
 
 
     def get_linked_label (

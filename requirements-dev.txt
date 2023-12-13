@@ -1,4 +1,4 @@
-streamlit < 1.29
+build >= 1.0
 ipywidgets >= 8.1
 jupyterlab >= 4.0
 jupyterlab_execute_time >= 3.1
@@ -6,3 +6,5 @@ pre-commit >= 3.5
 pytest >= 7.4
 sense2vec >= 2.0
 spacy-entity-linker >= 1.0
+streamlit < 1.29
+twine >= 4.0
