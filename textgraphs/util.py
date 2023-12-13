@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Utility functions for the `TextGraph` library.
+Utility functions for the `TextGraphs` library.
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 import math

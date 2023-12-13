@@ -3,9 +3,9 @@
 # pylint: disable=C0301
 
 """
-HuggingFace Spaces demo of `textgraph` using Streamlit
+HuggingFace Spaces demo of the `TextGraphs` library using Streamlit
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 import pathlib
@@ -17,7 +17,7 @@ import pyvis  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import streamlit as st  # pylint: disable=E0401
 
-import textgraph
+import textgraphs
 
 
 if __name__ == "__main__":
@@ -32,9 +32,9 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         st.session_state.disabled = False
 
     with st.container():
-        st.title("demo: TextGraph + LLMs to construct a 'lemma graph'")
+        st.title("demo: TextGraphs + LLMs to construct a 'lemma graph'")
         st.markdown(
-            "_TextGraph_ library is intended for iterating through a sequence of paragraphs.",
+            "_TextGraphs_ library is intended for iterating through a sequence of paragraphs.",
         )
 
         blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
@@ -66,16 +66,16 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             start_time: float = time.time()
 
             # fine to use factory defaults, although let's demonstrate the settings here
-            tg: textgraph.TextGraph = textgraph.TextGraph(
-                factory = textgraph.PipelineFactory(
-                    spacy_model = textgraph.SPACY_MODEL,
-                    ner_model = textgraph.NER_MODEL if llm_ner else None,
-                    nre_model = textgraph.NRE_MODEL if infer_rel else None,
-                    dbpedia_spotlight_api = textgraph.DBPEDIA_SPOTLIGHT_API,
+            tg: textgraphs.TextGraphs = textgraphs.TextGraphs(
+                factory = textgraphs.PipelineFactory(
+                    spacy_model = textgraphs.SPACY_MODEL,
+                    ner_model = textgraphs.NER_MODEL if llm_ner else None,
+                    nre_model = textgraphs.NRE_MODEL if infer_rel else None,
+                    dbpedia_spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
                 ),
             )
 
-            pipe: textgraph.Pipeline = tg.create_pipeline(
+            pipe: textgraphs.Pipeline = tg.create_pipeline(
                 text_input.strip(),
             )
 
@@ -126,9 +126,9 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             tg.perform_entity_linking(
                 pipe,
-                dbpedia_search_api = textgraph.DBPEDIA_SEARCH_API,
-                min_alias = textgraph.DBPEDIA_MIN_ALIAS,
-                min_similarity = textgraph.DBPEDIA_MIN_SIM,
+                dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
+                min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
+                min_similarity = textgraphs.DBPEDIA_MIN_SIM,
                 debug = False,
             )
 
@@ -154,9 +154,9 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
                 inferred_edges: list = tg.infer_relations(
                     pipe,
-                    wikidata_api = textgraph.WIKIDATA_API,
-                    max_skip = textgraph.MAX_SKIP,
-                    opennre_min_prob = textgraph.OPENNRE_MIN_PROB,
+                    wikidata_api = textgraphs.WIKIDATA_API,
+                    max_skip = textgraphs.MAX_SKIP,
+                    opennre_min_prob = textgraphs.OPENNRE_MIN_PROB,
                     debug = False,
                 )
 
@@ -183,7 +183,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             start_time = time.time()
 
             tg.calc_phrase_ranks(
-                pr_alpha = textgraph.PAGERANK_ALPHA,
+                pr_alpha = textgraphs.PAGERANK_ALPHA,
                 debug = False,
             )
 
@@ -198,7 +198,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             ## generate a word cloud
             st.subheader("generate a word cloud", divider = "rainbow")
 
-            render: textgraph.RenderPyVis = textgraph.RenderPyVis(
+            render: textgraphs.RenderPyVis = textgraphs.RenderPyVis(
                 tg.nodes,
                 tg.edges,
                 tg.lemma_graph,

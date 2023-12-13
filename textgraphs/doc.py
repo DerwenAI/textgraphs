@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Implementation of an LLM-augmented `TextGraph` algorithm for
+Implementation of an LLM-augmented `textgraph` algorithm for
 constructing a _lemma graph_ from raw, unstructured text source.
 The results provide elements for semi-automated construction or
 augmentation of a _knowledge graph_.
@@ -10,7 +10,7 @@ augmentation of a _knowledge graph_.
 This class maintains the state of a graph. Updates get applied by
 running methods on `Pipeline` objects, typically per paragraph.
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 from collections import OrderedDict
@@ -43,7 +43,7 @@ else:
     from tqdm import tqdm  # pylint: disable=E0401
 
 
-class TextGraph:
+class TextGraphs:
     """
 Construct a _lemma graph_ from the unstructured text source,
 then extract ranked phrases using a `textgraph` algorithm.

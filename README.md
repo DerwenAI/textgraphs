@@ -30,8 +30,8 @@ python3 -m pip install -U pip wheel setuptools
 python3 -m pip install -r requirements.txt
 ```
 
-if you want to run the Streamlit or JupyterLab demos,
-or work on development/testing of this repo:
+to run the Streamlit or JupyterLab demos, or prior to working
+locally on the development and testing of this repo:
 
 ```bash
 python3 -m pip install -r requirements-dev.txt

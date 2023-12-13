@@ -13,7 +13,7 @@ helps guarantee that a view of the graph can be exported to RDF
 for data quality checks, transitive closure, semantic inference,
 and so on.
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 from dataclasses import dataclass, field

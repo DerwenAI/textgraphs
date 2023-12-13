@@ -7,9 +7,9 @@ Leveraging a factory pattern for NLP pipelines.
 This class handles processing for one "chunk" of raw text input to
 analyze, which is typically a paragraph. In other words, objects in
 this class are expected to get recycled when processing moves on to
-the next paragraph, to ease memory requirements overall.
+the next paragraph, to ease memory requirements.
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 import functools
@@ -27,7 +27,7 @@ from .wiki import WikiDatum
 
 class Pipeline:  # pylint: disable=R0903
     """
- Manage parsing the two documents, which are assumed to be paragraph-sized.
+Manage parsing of a document, which is assumed to be paragraph-sized.
     """
 
     def __init__ (

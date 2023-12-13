@@ -6,7 +6,7 @@ Visualization methods based on `PyVis`, `wordcloud`, and so on.
 
 This class handles visualizations of graphs and graph elements.
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 from dataclasses import dataclass

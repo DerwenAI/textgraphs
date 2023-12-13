@@ -9,8 +9,10 @@ use of:
   * Wikidata
   * KBPedia (in progress)
 
-Plus related machine learning models which derive from the exports of
-these projects.
+... plus related machine learning models which derive from the exports
+of these projects.
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 from collections import OrderedDict

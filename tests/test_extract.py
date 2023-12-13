@@ -6,7 +6,7 @@ unit tests:
 
   * extract the top-k entities from a raw text
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 from os.path import abspath, dirname
@@ -14,7 +14,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(dirname(dirname(abspath(__file__))))))
-import textgraph  # pylint: disable=C0413
+import textgraphs  # pylint: disable=C0413
 
 
 def test_extract_herzog (
@@ -25,14 +25,14 @@ Run an extract with the Werner Herzog blurb.
     text: str = """
 Werner Herzog is a remarkable filmmaker and intellectual originally from Germany, the son of Dietrich Herzog.
     """
-    tg: textgraph.TextGraph = textgraph.TextGraph(  # pylint: disable=C0103
-        factory = textgraph.PipelineFactory(
+    tg: textgraphs.TextGraphs = textgraphs.TextGraphs(  # pylint: disable=C0103
+        factory = textgraphs.PipelineFactory(
             ner_model = None,
             nre_model = None,
         ),
     )
 
-    pipe: textgraph.Pipeline = tg.create_pipeline(
+    pipe: textgraphs.Pipeline = tg.create_pipeline(
         text.strip(),
     )
 

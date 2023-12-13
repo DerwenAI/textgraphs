@@ -11,24 +11,24 @@ requires = [
 
 [tool.setuptools]
 
-packages = [ "textgraph" ]
+packages = [ "textgraphs" ]
 
 
 [project.urls]
 
-home = "https://huggingface.co/spaces/DerwenAI/textgraph"
+home = "https://huggingface.co/spaces/DerwenAI/textgraphs"
 
 
 [project]
 
-name = "textgraph"
-version = "0.1.0"
+name = "textgraphs"
+version = "0.1.2"
 
 authors = [
     { name = "derwen.ai", email = "info@derwen.ai" },
 ]
 
-description = "Using textgraph + LLM + graph ML for entity extraction, linking, and ranking"
+description = "Using textgraphs + LLM + graph ML for entity extraction, linking, and ranking"
 readme = "README.md"
 license = { file = "LICENSE" }
 

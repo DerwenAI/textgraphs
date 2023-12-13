@@ -5,7 +5,7 @@ include pyproject.toml
 include requirements.txt
 include setup.py
 include tests/*.py
-include textgraph/*.py
+include textgraphs/*.py
 prune .ipynb_checkpoints
 prune .mypy_cache
 prune .pre-commit-config.yaml

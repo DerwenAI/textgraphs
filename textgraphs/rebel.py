@@ -4,6 +4,8 @@
 """
 This class provides a wrapper for integrating the Babelscape `REBEL`
 model used for _relation extraction_.
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 from icecream import ic  # pylint: disable=E0401

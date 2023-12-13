@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Sample application to demo the `textgraph` library.
+Sample application to demo the `TextGraphs` library.
 
-see copyright/license https://huggingface.co/spaces/DerwenAI/textgraph/blob/main/README.md
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 import sys  # pylint: disable=W0611
@@ -14,7 +14,7 @@ from icecream import ic  # pylint: disable=E0401
 from pyinstrument import Profiler  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 
-import textgraph
+import textgraphs
 
 
 if __name__ == "__main__":
@@ -29,12 +29,12 @@ After the war, Werner fled to America to become famous.
 
     start_time: float = time.time()
 
-    tg: textgraph.TextGraph = textgraph.TextGraph(
-        factory = textgraph.PipelineFactory(
-            spacy_model = textgraph.SPACY_MODEL,
+    tg: textgraphs.TextGraphs = textgraphs.TextGraphs(
+        factory = textgraphs.PipelineFactory(
+            spacy_model = textgraphs.SPACY_MODEL,
             ner_model = None,
-            nre_model = textgraph.NRE_MODEL,
-            dbpedia_spotlight_api = textgraph.DBPEDIA_SPOTLIGHT_API,
+            nre_model = textgraphs.NRE_MODEL,
+            dbpedia_spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
         ),
     )
 
@@ -45,7 +45,7 @@ After the war, Werner fled to America to become famous.
     ## NLP parse
     start_time = time.time()
 
-    pipe: textgraph.Pipeline = tg.create_pipeline(
+    pipe: textgraphs.Pipeline = tg.create_pipeline(
         SRC_TEXT.strip(),
     )
 
@@ -70,9 +70,9 @@ After the war, Werner fled to America to become famous.
 
     tg.perform_entity_linking(
         pipe,
-        dbpedia_search_api = textgraph.DBPEDIA_SEARCH_API,
-        min_alias = textgraph.DBPEDIA_MIN_ALIAS,
-        min_similarity = textgraph.DBPEDIA_MIN_SIM,
+        dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
+        min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
+        min_similarity = textgraphs.DBPEDIA_MIN_SIM,
         debug = False,
     )
 
@@ -96,9 +96,9 @@ After the war, Werner fled to America to become famous.
 
     inferred_edges: list = tg.infer_relations(
         pipe,
-        wikidata_api = textgraph.WIKIDATA_API,
-        max_skip = textgraph.MAX_SKIP,
-        opennre_min_prob = textgraph.OPENNRE_MIN_PROB,
+        wikidata_api = textgraphs.WIKIDATA_API,
+        max_skip = textgraphs.MAX_SKIP,
+        opennre_min_prob = textgraphs.OPENNRE_MIN_PROB,
         debug = False,
     )
 
@@ -111,7 +111,7 @@ After the war, Werner fled to America to become famous.
         {
             "src": n_list[edge.src_node].text,
             "dst": n_list[edge.dst_node].text,
-            "rel": textgraph.WikiDatum.normalize_prefix(edge.rel),
+            "rel": textgraphs.WikiDatum.normalize_prefix(edge.rel),
             "weight": edge.prob,
         }
         for edge in inferred_edges
@@ -123,7 +123,7 @@ After the war, Werner fled to America to become famous.
     start_time = time.time()
 
     tg.calc_phrase_ranks(
-        pr_alpha = textgraph.PAGERANK_ALPHA,
+        pr_alpha = textgraphs.PAGERANK_ALPHA,
         debug = False,
     )
 

@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-Default settings for the `TextGraph` library.
+Default settings for the `TextGraphs` library.
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 import spacy_dbpedia_spotlight  # pylint: disable=E0401
