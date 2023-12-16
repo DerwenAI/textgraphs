@@ -30,7 +30,8 @@ from qwikidata.linked_data_interface import get_entity_dict_from_api  # pylint: 
 import markdown2  # pylint: disable=E0401
 import requests  # type: ignore  # pylint: disable=E0401
 
-from .defaults import DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, WIKIDATA_API
+from .defaults import DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, DBPEDIA_SPOTLIGHT_API, \
+    WIKIDATA_API
 from .elem import WikiEntity
 
 
@@ -60,12 +61,19 @@ Manage access to MediaWiki-related APIs.
 
     def __init__ (
         self,
+        *,
+        spotlight_api: str = DBPEDIA_SPOTLIGHT_API,
+        wikidata_api: str = WIKIDATA_API,
         ) -> None:
         """
 Constructor.
         """
+        self.spotlight_api: str = spotlight_api
+        self.wikidata_api: str = wikidata_api
+
         self.ent_cache: dict = {}
         self.iri_cache: dict = {}
+
         self.markdowner = markdown2.Markdown()
 
 
@@ -103,7 +111,6 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
     def resolve_wikidata_rel_iri (
         self,
         rel: str,
-        wikidata_api: str,
         *,
         lang: str = "en",
         debug: bool = False,
@@ -127,7 +134,7 @@ which has been trained on `Wikidata`.
 
         try:
             response: requests.models.Response = requests.get(
-                wikidata_api,
+                self.wikidata_api,
                 params = params,
                 headers = {
                     "Accept": "application/json",
@@ -428,7 +435,6 @@ if __name__ == "__main__":
 
         result: typing.Optional[ str ] = wiki.resolve_wikidata_rel_iri(
             test_rel,
-            WIKIDATA_API,
             debug = True,
         )
 

@@ -32,9 +32,22 @@ After the war, Werner fled to America to become famous.
     tg: textgraphs.TextGraphs = textgraphs.TextGraphs(
         factory = textgraphs.PipelineFactory(
             spacy_model = textgraphs.SPACY_MODEL,
-            ner_model = None,
-            nre_model = textgraphs.NRE_MODEL,
-            dbpedia_spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
+            ner_model = None, # textgraphs.NER_MODEL,
+            wiki = textgraphs.WikiDatum(
+                spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
+                wikidata_api = textgraphs.WIKIDATA_API,
+            ),
+            infer_rels = [
+                textgraphs.InferRel_OpenNRE(
+                    model = textgraphs.OPENNRE_MODEL,
+                    max_skip = textgraphs.MAX_SKIP,
+                    min_prob = textgraphs.OPENNRE_MIN_PROB,
+                ),
+                textgraphs.InferRel_Rebel(
+                    lang = "en_XX",
+                    mrebel_model = textgraphs.MREBEL_MODEL,
+                ),
+            ],
         ),
     )
 
@@ -96,9 +109,6 @@ After the war, Werner fled to America to become famous.
 
     inferred_edges: list = tg.infer_relations(
         pipe,
-        wikidata_api = textgraphs.WIKIDATA_API,
-        max_skip = textgraphs.MAX_SKIP,
-        opennre_min_prob = textgraphs.OPENNRE_MIN_PROB,
         debug = False,
     )
 

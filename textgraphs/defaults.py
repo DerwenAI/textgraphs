@@ -17,14 +17,17 @@ DBPEDIA_SEARCH_API: str = "https://lookup.dbpedia.org/api/search"
 DBPEDIA_SPARQL_API: str = "https://dbpedia.org/sparql"
 DBPEDIA_SPOTLIGHT_API: str = f"{spacy_dbpedia_spotlight.EntityLinker.base_url}/en"
 
+FISHING_API: str = "https://cloud.science-miner.com/nerd/service"
+
 MAX_SKIP: int = 11
+
+MREBEL_MODEL: str = "Babelscape/mrebel-large"
 
 NER_MAP: str = "dat/ner_map.json"
 NER_MODEL: str = "tomaarsen/span-marker-roberta-large-ontonotes5"
 
-NRE_MODEL: str = "wiki80_cnn_softmax"
-
 OPENNRE_MIN_PROB: float = 0.9
+OPENNRE_MODEL: str = "wiki80_cnn_softmax"
 
 PAGERANK_ALPHA: float = 0.85
 

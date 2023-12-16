@@ -15,13 +15,12 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 """
 
 from collections import OrderedDict
-import itertools
+import asyncio
 import json
 import logging
 import os
 import pathlib
 import sys
-import traceback
 import typing
 
 from icecream import ic  # pylint: disable=E0401
@@ -33,10 +32,9 @@ import spacy  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
 
 from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, DBPEDIA_SEARCH_API, \
-    MAX_SKIP, NER_MAP, OPENNRE_MIN_PROB, PAGERANK_ALPHA, WIKIDATA_API
+    NER_MAP, PAGERANK_ALPHA
 from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum
 from .pipe import Pipeline, PipelineFactory
-from .rebel import Rebel
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 
@@ -96,6 +94,7 @@ for each text input, which are typically paragraph-length.
         """
         return self.factory.create_pipeline(
             text_input,
+            self.lemma_graph,
         )
 
 
@@ -501,6 +500,8 @@ otherwise construct a new node for this linked entity.
             )
 
         src_node: Node = pipe.tokens[link.token_id]
+        src_node.annotated = True
+
         dst_node: Node = self.nodes.get(link.iri)  # type: ignore
 
         if debug:
@@ -529,10 +530,10 @@ otherwise construct a new node for this linked entity.
         debug: bool = False,
         ) -> None:
         """
-Perform _entity linking_ based on `DBPedia Spotlight` and other services.
+Perform _entity linking_ based on "spotlight" and other services.
         """
-        # first pass: use DBPedia Spotlight
-        iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_dbpedia_spotlight_entities(
+        # first pass: use "spotlight" API to markup text
+        iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_spotlight_entities(
             dbpedia_search_api,
             min_alias,
             min_similarity,
@@ -546,9 +547,6 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
                 "dbpedia",
                 debug = debug,
             )
-
-            src_node: Node = pipe.tokens[link.token_id]
-            src_node.annotated = True
 
         # second pass: use DBPedia search on unlinked entities
         iter_ents = pipe.link_dbpedia_search_entities(
@@ -566,187 +564,96 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
                 debug = debug,
             )
 
-            src_node = pipe.tokens[link.token_id]
-            src_node.annotated = True
-
 
     ######################################################################
     ## relation extraction
 
-    def _iter_entity_pairs (
+    async def _consume_infer_rel (
         self,
-        max_skip: int,
+        queue: asyncio.Queue,
+        inferred_edges: typing.List[ Edge ],
         *,
-        debug: bool = True,
-        ) -> typing.Iterator[ typing.Tuple[ Node, Node ]]:
+        debug: bool = False,
+        ) -> None:
         """
-Iterator for entity pairs for which the algorithm infers relations.
+Consume from queue: inferred relations represented as triples.
         """
-        ent_list: typing.List[ Node ] = [
-            node
-            for node in self.nodes.values()
-            if node.kind in [ NodeEnum.ENT ]
-        ]
+        while True:
+            src, iri, dst = await queue.get()
 
-        for pair in itertools.product(ent_list, repeat = 2):
-            if pair[0] != pair[1]:
-                src: Node = pair[0]
-                dst: Node = pair[1]
-
-                try:
-                    path: typing.List[ int ] = nx.shortest_path(
-                        self.lemma_graph.to_undirected(as_view = True),
-                        source = src.node_id,
-                        target = dst.node_id,
-                        weight = "weight",
-                        method = "dijkstra",
-                    )
-
-                    if debug:
-                        ic(src.node_id, dst.node_id, path)
-
-                    if len(path) <= max_skip:
-                        yield ( src, dst, )
-                except nx.NetworkXNoPath:
-                    pass
-                except Exception as ex:  # pylint: disable=W0718
-                    ic(ex)
-                    ic("ERROR", src, dst)
-                    traceback.print_exc()
-
-
-    def _iter_rel_opennre (
-        self,
-        pipe: Pipeline,
-        wikidata_api: str,
-        max_skip: int,
-        opennre_min_prob: float,
-        *,
-        debug: bool = True,
-        ) -> typing.Iterator[ Edge ]:
-        """
-Iterate on entity pairs to drive `OpenNRE`, to infer relations
-        """
-        # error-check the model config
-        if self.factory.nre is None:
-            return
-
-        for src, dst in self._iter_entity_pairs(max_skip, debug = debug):
-            rel, prob = self.factory.nre.infer({  # type: ignore
-                "text": pipe.text,
-                "h": { "pos": src.get_pos() },
-                "t": { "pos": dst.get_pos() },
-            })
-
-            if prob >= opennre_min_prob:
-                if debug:
-                    ic(src.text, dst.text)
-                    ic(rel, prob)
-
-                # Wikidata lookup
-                iri: typing.Optional[ str ] = pipe.wiki.resolve_wikidata_rel_iri(
-                    rel,
-                    wikidata_api,
-                )
-
-                if iri is None:
-                    iri = "opennre:" + rel.replace(" ", "_")
-
-                # construct an Edge
-                edge: Edge = self._make_edge(  # type: ignore
-                    src,
-                    dst,
-                    RelEnum.INF,
-                    iri,
-                    prob,
-                )
-
-                yield edge  # type: ignore
-
-
-    def _iter_rel_rebel (
-        self,
-        pipe: Pipeline,
-        wikidata_api: str,
-        *,
-        debug: bool = True,
-        ) -> typing.Iterator[ Edge ]:
-        """
-Iterate on sentences to drive `REBEL`, yielding inferred relations.
-        """
-        rebel: Rebel = Rebel()
-
-        for sent in pipe.ent_doc.sents:
-            extract: str = rebel.tokenize_sent(str(sent).strip())
-            triples: typing.List[ dict ] = rebel.extract_triplets_typed(extract)
-
-            tok_map: dict = {
-                token.text: pipe.tokens[token.i]
-                for token in sent
-            }
+            # construct an Edge
+            edge = self._make_edge(  # type: ignore
+                src,
+                dst,
+                RelEnum.INF,
+                iri,
+                1.0,
+            )
 
             if debug:
-                ic(extract, triples)
+                ic(edge)
 
-            for triple in triples:
-                src: typing.Optional[ Node ] = tok_map.get(triple["head"])
-                dst: typing.Optional[ Node ] = tok_map.get(triple["tail"])
-                rel: str = triple["rel"]
+            inferred_edges.append(edge)  # type: ignore
+            queue.task_done()
 
-                if src is not None and dst is not None:
-                    if debug:
-                        ic(src, dst, rel)
 
-                    # Wikidata lookup
-                    iri: typing.Optional[ str ] = pipe.wiki.resolve_wikidata_rel_iri(
-                        rel,
-                        wikidata_api,
-                    )
+    async def _gather_triples (
+        self,
+        pipe: Pipeline,
+        *,
+        debug: bool = False,
+        ) -> list:
+        """
+Run the async queue to gather triples representing inferred relations.
+        """
+        inferred_edges: typing.List[ Edge ] = []
+        queue: asyncio.Queue = asyncio.Queue()
 
-                    if iri is None:
-                        iri = "mrebel:" + rel.replace(" ", "_")
+        producer_tasks: typing.List[ asyncio.Task ] = [
+            asyncio.create_task(
+                producer.gen_triples(  # type: ignore
+                    pipe,
+                    queue,
+                    debug = debug,
+                )
+            )
+            for producer in pipe.infer_rels
+        ]
 
-                    # construct an Edge
-                    edge = self._make_edge(  # type: ignore
-                        src,
-                        dst,
-                        RelEnum.INF,
-                        iri,
-                        1.0,
-                    )
+        consumer_task: asyncio.Task = asyncio.create_task(
+            self._consume_infer_rel(
+                queue,
+                inferred_edges,
+                debug = debug,
+            )
+        )
 
-                    yield edge  # type: ignore
+        # wait for producers to finish
+        await asyncio.gather(*producer_tasks)
+
+        if debug:
+            ic("Queue: done producing")
+
+        # wait for remaining tasks, then cancel the now-idle consumer
+        await queue.join()
+        consumer_task.cancel()
+
+        return inferred_edges
 
 
     def infer_relations (
         self,
         pipe: Pipeline,
         *,
-        wikidata_api: str = WIKIDATA_API,
-        max_skip: int = MAX_SKIP,
-        opennre_min_prob: float = OPENNRE_MIN_PROB,
         debug: bool = True,
         ) -> typing.List[ Edge ]:
         """
-Multiple approaches infer relations among co-occurring entities:
-
-  * `OpenNRE`
-  * `REBEL`
+Use multiple models to infer relations among co-occurring entities.
         """
-        inferred_edges: typing.List[ Edge ] = list(
-            itertools.chain(
-                self._iter_rel_opennre(
-                    pipe,
-                    wikidata_api,
-                    max_skip,
-                    opennre_min_prob,
-                    debug = debug,
-                ),
-                self._iter_rel_rebel(
-                    pipe,
-                    wikidata_api,
-                    debug = debug,
-                ),
+        inferred_edges: typing.List[ Edge ] = asyncio.run(
+            self._gather_triples(
+                pipe,
+                debug = debug,
             )
         )
 

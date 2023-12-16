@@ -9,16 +9,17 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 
 from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
     DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, DBPEDIA_SPOTLIGHT_API, \
-    MAX_SKIP, NER_MAP, NER_MODEL, NRE_MODEL, OPENNRE_MIN_PROB, \
+    FISHING_API, MAX_SKIP, MREBEL_MODEL, \
+    NER_MAP, NER_MODEL, OPENNRE_MIN_PROB, OPENNRE_MODEL, \
     PAGERANK_ALPHA, SPACY_MODEL, WIKIDATA_API
 
 from .doc import TextGraphs
 
 from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum, WikiEntity
 
-from .pipe import Pipeline, PipelineFactory
+from .pipe import InferRel, Pipeline, PipelineFactory
 
-from .rebel import Rebel
+from .rel import InferRel_OpenNRE, InferRel_Rebel
 
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
