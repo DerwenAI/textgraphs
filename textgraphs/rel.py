@@ -10,7 +10,6 @@ These classes provide wrappers for _relation extraction_ models:
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
-import asyncio
 import typing
 
 from icecream import ic  # pylint: disable=E0401
@@ -46,16 +45,15 @@ Constructor.
         self.nre_pipeline: opennre.model.softmax_nn.SoftmaxNN = opennre.get_model(model)
 
 
-    async def gen_triples (
+    def gen_triples (
         self,
         pipe: Pipeline,
-        queue: asyncio.Queue,
         *,
         debug: bool = False,
-        ) -> None:
+        ) -> typing.Iterator[typing.Tuple[ Node, str, Node ]]:
         """
 Iterate on entity pairs to drive `OpenNRE`, inferring relations
-represented in triples which get produced to a queue.
+represented as triples which get produced by a generator.
         """
         for src, dst in pipe.iter_entity_pairs(self.max_skip, debug = debug):
             rel, prob = self.nre_pipeline.infer({  # type: ignore
@@ -77,7 +75,7 @@ represented in triples which get produced to a queue.
                 if iri is None:
                     iri = "opennre:" + rel.replace(" ", "_")
 
-                await queue.put(( src, iri, dst, ))
+                yield src, iri, dst
 
 
 class InferRel_Rebel (InferRel):  # pylint: disable=C0103,R0903
@@ -207,16 +205,15 @@ Parse the generated text and extract its triplets.
         return triplets
 
 
-    async def gen_triples (
+    def gen_triples (
         self,
         pipe: Pipeline,
-        queue: asyncio.Queue,
         *,
         debug: bool = False,
-        ) -> None:
+        ) -> typing.Iterator[typing.Tuple[ Node, str, Node ]]:
         """
-Iterate on sentences to drive `REBEL`, inferring relations
-represented in triples which get produced to a queue.
+Drive `REBEL` to infer relations for each sentence, represented as
+triples which get produced by a generator.
         """
         for sent in pipe.ner_doc.sents:
             extract: str = self.tokenize_sent(str(sent).strip())
@@ -247,7 +244,7 @@ represented in triples which get produced to a queue.
                     if iri is None:
                         iri = "mrebel:" + rel.replace(" ", "_")
 
-                    await queue.put(( src, iri, dst, ))
+                    yield src, iri, dst
 
 
 if __name__ == "__main__":

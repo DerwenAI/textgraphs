@@ -38,7 +38,19 @@ Abstract base class for a _relation extraction_ model wrapper.
     """
 
     @abc.abstractmethod
-    async def gen_triples (
+    def gen_triples (
+        self,
+        pipe: "Pipeline",
+        *,
+        debug: bool = False,
+        ) -> typing.Iterator[typing.Tuple[ Node, str, Node ]]:
+        """
+Infer relations as triples through a generator _iteratively_.
+        """
+        raise NotImplementedError
+
+
+    async def gen_triples_async (
         self,
         pipe: "Pipeline",
         queue: asyncio.Queue,
@@ -46,9 +58,10 @@ Abstract base class for a _relation extraction_ model wrapper.
         debug: bool = False,
         ) -> None:
         """
-Infer relations as triples produced to a query.
+Infer relations as triples produced to a queue _concurrently_.
         """
-        raise NotImplementedError
+        for src, iri, dst in self.gen_triples(pipe, debug = debug):
+            await queue.put(( src, iri, dst, ))
 
 
 class Pipeline:  # pylint: disable=R0902,R0903

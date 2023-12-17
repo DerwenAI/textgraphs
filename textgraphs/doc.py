@@ -565,6 +565,51 @@ Perform _entity linking_ based on "spotlight" and other services.
     ######################################################################
     ## relation extraction
 
+    def _infer_rel_update_graph (
+        self,
+        inferred_edges: typing.List[ Edge ],
+        ) -> None:
+        """
+Add edges to the _lemma graph_ from the inferred relations.
+        """
+        self.lemma_graph.add_edges_from([
+            (
+                edge.src_node,
+                edge.dst_node,
+                {
+                    "weight": edge.prob,
+                    "title": edge.rel,
+                },
+            )
+            for edge in inferred_edges
+        ])
+
+
+    def _infer_rel_construct_edge (
+        self,
+        src: Node,
+        iri: str,
+        dst: Node,
+        *,
+        debug: bool = False,
+        ) -> Edge:
+        """
+Create an edge for the linked IRI, based on the input triple.
+        """
+        edge = self._make_edge(  # type: ignore
+            src,
+            dst,
+            RelEnum.INF,
+            iri,
+            1.0,
+        )
+
+        if debug:
+            ic(edge)
+
+        return edge  # type: ignore
+
+
     async def _consume_infer_rel (
         self,
         queue: asyncio.Queue,
@@ -578,38 +623,35 @@ Consume from queue: inferred relations represented as triples.
         while True:
             src, iri, dst = await queue.get()
 
-            # construct an Edge
-            edge = self._make_edge(  # type: ignore
-                src,
-                dst,
-                RelEnum.INF,
-                iri,
-                1.0,
+            inferred_edges.append(
+                self._infer_rel_construct_edge(
+                    src,
+                    iri,
+                    dst,
+                    debug = debug,
+                )
             )
 
-            if debug:
-                ic(edge)
-
-            inferred_edges.append(edge)  # type: ignore
             queue.task_done()
 
 
-    async def infer_relations (
+    async def infer_relations_async (
         self,
         pipe: Pipeline,
         *,
         debug: bool = False,
         ) -> typing.List[ Edge ]:
         """
-Run the async queue to gather triples representing inferred relations.
-https://stackoverflow.com/questions/52582685/using-asyncio-queue-for-producer-consumer-flow
+Gather triples representing inferred relations and build edges,
+concurrently by running an async queue.
+<https://stackoverflow.com/questions/52582685/using-asyncio-queue-for-producer-consumer-flow>
         """
         inferred_edges: typing.List[ Edge ] = []
         queue: asyncio.Queue = asyncio.Queue()
 
         producer_tasks: typing.List[ asyncio.Task ] = [
             asyncio.create_task(
-                producer.gen_triples(  # type: ignore
+                producer.gen_triples_async(  # type: ignore
                     pipe,
                     queue,
                     debug = debug,
@@ -640,18 +682,29 @@ https://stackoverflow.com/questions/52582685/using-asyncio-queue-for-producer-co
         if debug:
             ic("Queue: done consuming")
 
-        # add edges from inferred relations
-        self.lemma_graph.add_edges_from([
-            (
-                edge.src_node,
-                edge.dst_node,
-                {
-                    "weight": edge.prob,
-                    "title": edge.rel,
-                },
-            )
-            for edge in inferred_edges
-        ])
+        # update the graph
+        self._infer_rel_update_graph(inferred_edges)
+
+        return inferred_edges
+
+
+    def infer_relations (
+        self,
+        pipe: Pipeline,
+        *,
+        debug: bool = False,
+        ) -> typing.List[ Edge ]:
+        """
+Gather triples representing inferred relations and build edges.
+        """
+        inferred_edges: typing.List[ Edge ] = [
+            self._infer_rel_construct_edge(src, iri, dst, debug = debug)
+            for infer_rel in pipe.infer_rels
+            for src, iri, dst in infer_rel.gen_triples(pipe, debug = debug)
+        ]
+
+        # update the graph
+        self._infer_rel_update_graph(inferred_edges)
 
         return inferred_edges
 

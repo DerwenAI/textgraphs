@@ -8,7 +8,6 @@ HuggingFace Spaces demo of the `TextGraphs` library using Streamlit
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
-import asyncio
 import pathlib
 import time
 
@@ -184,14 +183,10 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 with st.spinner(text = "relation extraction..."):
                     start_time = time.time()
 
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
-                    inferred_edges: list = loop.run_until_complete(
-                        tg.infer_relations(
-                            pipe,
-                            debug = False,
-                        )
+                    # NB: run this iteratively since Streamlit on HF Spaces is *sloooooooooow*
+                    inferred_edges: list = tg.infer_relations(
+                        pipe,
+                        debug = False,
                     )
 
                 duration = round(time.time() - start_time, 3)

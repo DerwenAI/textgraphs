@@ -8,3 +8,4 @@ sense2vec >= 2.0
 spacy-entity-linker >= 1.0
 streamlit < 1.29
 twine >= 4.0
+watermark >= 2.4

@@ -32,7 +32,7 @@ description = "Using textgraphs + LLM + graph ML for entity extraction, linking,
 readme = "README.md"
 license = { file = "LICENSE" }
 
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -66,7 +66,6 @@ dependencies = [
     "qwikidata >= 0.4",
     "spacy >= 3.7",
     "spacy-dbpedia-spotlight >= 0.2.6",
-    "spacyfishing >= 0.1.8",
     "span_marker >= 1.5",
     "transformers >= 4.35",
     "wordcloud >= 1.9",
@@ -93,4 +92,5 @@ demo = [
     "sense2vec >= 2.0",
     "spacy-entity-linker >= 1.0",
     "streamlit < 1.29",
+    "watermark >= 2.4",
 ]

@@ -17,7 +17,7 @@ see <https://huggingface.co/spaces/DerwenAI/textgraphs>
 
 ## requirements:
 
-  * Python 3.9+
+  * Python 3.10+
 
 
 ## deploy library from PyPi:
