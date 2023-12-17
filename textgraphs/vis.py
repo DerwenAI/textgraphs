@@ -104,7 +104,7 @@ and returning a `PyVis` network to render.
                 nx_node["label"] = ""
             elif node.kind in [ NodeEnum.IRI ]:
                 nx_node["title"] = node.text
-                nx_node["label"] = pipe.wiki.normalize_prefix(node.label)  # type: ignore
+                nx_node["label"] = pipe.kg.normalize_prefix(node.label)  # type: ignore
             else:
                 nx_node["label"] = node.text
 

@@ -26,7 +26,7 @@ import spacy  # pylint: disable=E0401
 
 from .defaults import NER_MODEL, SPACY_MODEL
 from .elem import LinkedEntity, Node, NodeEnum, NounChunk, WikiEntity
-from .wiki import WikiDatum
+from .kg import WikiDatum
 
 
 ######################################################################
@@ -63,7 +63,7 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
         tok_pipe: spacy.Language,
         dbp_pipe: spacy.Language,
         ent_pipe: spacy.Language,
-        wiki: WikiDatum,
+        kg: WikiDatum,  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ],
         ) -> None:
         """
@@ -76,7 +76,7 @@ Constructor.
         self.dbp_doc: spacy.tokens.Doc = dbp_pipe(self.text)
         self.ent_doc: spacy.tokens.Doc = ent_pipe(self.text)
 
-        self.wiki: WikiDatum = wiki
+        self.kg: WikiDatum = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
 
         # list of Node objects for each parsed token, in sequence
@@ -170,7 +170,6 @@ Link any noun chunks which are not already subsumed by named entities.
 
     def link_spotlight_entities (  # pylint: disable=R0914
         self,
-        dbpedia_search_api: str,
         min_alias: float,
         min_similarity: float,
         *,
@@ -210,16 +209,15 @@ entity linking results, which defaults to the `DBPedia Spotlight` service.
                     count: int = int(ent._.dbpedia_raw_result["@support"])
 
                     if tok.pos == "PROPN" and prob >= min_similarity:
-                        wiki_ent: typing.Optional[ WikiEntity ] = self.wiki.dbpedia_search_entity(
+                        kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(
                             ent.text,
-                            dbpedia_search_api,
                             debug = debug,
                         )
 
                         if debug:
-                            ic(wiki_ent)
+                            ic(kg_ent)
 
-                        if wiki_ent is not None and wiki_ent.prob > min_alias:  # type: ignore
+                        if kg_ent is not None and kg_ent.prob > min_alias:  # type: ignore
                             iri: str = ent.kb_id_
 
                             dbp_link: LinkedEntity = LinkedEntity(
@@ -229,7 +227,7 @@ entity linking results, which defaults to the `DBPedia Spotlight` service.
                                 "dbpedia",
                                 prob,
                                 i,
-                                wiki_ent,  # type: ignore
+                                kg_ent,  # type: ignore
                                 count = count,
                             )
 
@@ -246,7 +244,6 @@ entity linking results, which defaults to the `DBPedia Spotlight` service.
     def link_dbpedia_search_entities (
         self,
         nodes: list,
-        dbpedia_search_api: str,
         min_alias: float,
         *,
         debug: bool = False,
@@ -256,21 +253,20 @@ Iterator for the results of using DBPedia Search directly for entity linking.
         """
         for i, node in enumerate(nodes):
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
-                wiki_ent: typing.Optional[ WikiEntity ] = self.wiki.dbpedia_search_entity(
+                kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(
                     node.text,
-                    dbpedia_search_api,
                     debug = debug,
                 )
 
-                if wiki_ent.prob > min_alias:  # type: ignore
+                if kg_ent.prob > min_alias:  # type: ignore
                     dbp_link: LinkedEntity = LinkedEntity(
                         node.span,
-                        wiki_ent.iri,  # type: ignore
+                        kg_ent.iri,  # type: ignore
                         node.length,
                         "dbpedia",
-                        wiki_ent.prob,  # type: ignore
+                        kg_ent.prob,  # type: ignore
                         i,
-                        wiki_ent,  # type: ignore
+                        kg_ent,  # type: ignore
                     )
 
                     if debug:
@@ -339,7 +335,7 @@ expensive operations with `spaCy`
         *,
         spacy_model: str = SPACY_MODEL,
         ner_model: typing.Optional[ str ] = NER_MODEL,
-        wiki: WikiDatum = WikiDatum(),
+        kg: WikiDatum = WikiDatum(),  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ] = []
         ) -> None:
         """
@@ -349,7 +345,7 @@ Constructor which instantiates the `spaCy` pipelines:
   * `dbp_pipe` -- DBPedia entity linking
   * `ent_pipe` -- with entities merged
         """
-        self.wiki: WikiDatum = wiki
+        self.kg: WikiDatum = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
 
         # determine the NER model to be used
@@ -407,7 +403,7 @@ Constructor which instantiates the `spaCy` pipelines:
         self.dbp_pipe.add_pipe(
             "dbpedia_spotlight",
             config = {
-                "dbpedia_rest_endpoint": wiki.spotlight_api,
+                "dbpedia_rest_endpoint": kg.spotlight_api,
             },
         )
 
@@ -431,7 +427,7 @@ Return document pipelines to parse the input text.
             self.tok_pipe,
             self.dbp_pipe,
             self.ent_pipe,
-            self.wiki,
+            self.kg,
             self.infer_rels,
         )
 

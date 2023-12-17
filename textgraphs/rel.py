@@ -69,8 +69,8 @@ represented in triples which get produced to a queue.
                     ic(src.text, dst.text)
                     ic(rel, prob)
 
-                # Wikidata lookup
-                iri: typing.Optional[ str ] = pipe.wiki.resolve_wikidata_rel_iri(
+                # use the knowledge graph to resolve the IRI
+                iri: typing.Optional[ str ] = pipe.kg.resolve_rel_iri(
                     rel,
                 )
 
@@ -239,8 +239,8 @@ represented in triples which get produced to a queue.
                     if debug:
                         ic(src, dst, rel)
 
-                    # Wikidata lookup
-                    iri: typing.Optional[ str ] = pipe.wiki.resolve_wikidata_rel_iri(
+                    # use the knowledge graph to resolve the IRI
+                    iri: typing.Optional[ str ] = pipe.kg.resolve_rel_iri(
                         rel,
                     )
 

@@ -49,7 +49,7 @@ A data class representing one noun chunk, i.e., a candidate as an extracted phra
     rel: str
     prob: float
     token_id: int
-    wiki_ent: WikiEntity
+    kg_ent: WikiEntity
     count: int = 1
 
 

@@ -17,6 +17,8 @@ from .doc import TextGraphs
 
 from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum, WikiEntity
 
+from .kg import WikiDatum
+
 from .pipe import InferRel, Pipeline, PipelineFactory
 
 from .rel import InferRel_OpenNRE, InferRel_Rebel
@@ -24,8 +26,6 @@ from .rel import InferRel_OpenNRE, InferRel_Rebel
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
 from .vis import RenderPyVis
-
-from .wiki import WikiDatum
 
 
 __title__ = "TextGraphs: raw texts, LLMs, and KGs, oh my!"

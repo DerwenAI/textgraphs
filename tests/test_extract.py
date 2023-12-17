@@ -26,10 +26,7 @@ Run an extract with the Werner Herzog blurb.
 Werner Herzog is a remarkable filmmaker and intellectual originally from Germany, the son of Dietrich Herzog.
     """
     tg: textgraphs.TextGraphs = textgraphs.TextGraphs(  # pylint: disable=C0103
-        factory = textgraphs.PipelineFactory(
-            ner_model = None,
-            nre_model = None,
-        ),
+        factory = textgraphs.PipelineFactory(),
     )
 
     pipe: textgraphs.Pipeline = tg.create_pipeline(

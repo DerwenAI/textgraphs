@@ -5,9 +5,8 @@
 This class provides a wrapper for MediaWiki API access, supporting
 use of:
 
-  * DBpedia
+  * DBPedia
   * Wikidata
-  * KBPedia (in progress)
 
 ... plus related machine learning models which derive from the exports
 of these projects.
@@ -42,7 +41,7 @@ class WikiDatum:  # pylint: disable=R0903
     """
 Manage access to MediaWiki-related APIs.
     """
-    DBPEDIA_NS_PREFIX: typing.Dict[ str, str ] = OrderedDict({
+    NS_PREFIX: typing.Dict[ str, str ] = OrderedDict({
         "dbc": "http://dbpedia.org/resource/Category:",
         "dbt": "http://dbpedia.org/resource/Template:",
         "dbr": "http://dbpedia.org/resource/",
@@ -59,17 +58,21 @@ Manage access to MediaWiki-related APIs.
     })
 
 
-    def __init__ (
+    def __init__ (  # pylint: disable=W0102
         self,
         *,
         spotlight_api: str = DBPEDIA_SPOTLIGHT_API,
+        dbpedia_search_api: str = DBPEDIA_SEARCH_API,
         wikidata_api: str = WIKIDATA_API,
+        ns_prefix: dict = NS_PREFIX,
         ) -> None:
         """
 Constructor.
         """
         self.spotlight_api: str = spotlight_api
+        self.dbpedia_search_api: str = dbpedia_search_api
         self.wikidata_api: str = wikidata_api
+        self.ns_prefix: dict = ns_prefix
 
         self.ent_cache: dict = {}
         self.iri_cache: dict = {}
@@ -77,9 +80,8 @@ Constructor.
         self.markdowner = markdown2.Markdown()
 
 
-    @classmethod
     def normalize_prefix (
-        cls,
+        self,
         iri: str,
         *,
         debug: bool = False,
@@ -92,7 +94,7 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
         if debug:
             ic(iri_parse)
 
-        for prefix, ns_fqdn in cls.DBPEDIA_NS_PREFIX.items():
+        for prefix, ns_fqdn in self.ns_prefix.items():
             ns_parse: urllib.parse.ParseResult = urllib.parse.urlparse(ns_fqdn)
 
             if debug:
@@ -108,7 +110,7 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
         return iri
 
 
-    def resolve_wikidata_rel_iri (
+    def resolve_rel_iri (
         self,
         rel: str,
         *,
@@ -116,8 +118,10 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
         debug: bool = False,
         ) -> typing.Optional[ str ]:
         """
-Resolve a `rel` string from one of the _relation extraction_ models
-which has been trained on `Wikidata`.
+Resolve a `rel` string from a _relation extraction_ model which has
+been trained on the knowledge graph.
+
+Defaults to the `MediaWiki` graphs.
         """
         # first, check the cache
         if rel in self.iri_cache:
@@ -247,7 +251,6 @@ Find the best-matching aliases for a search term.
     def dbpedia_search_entity (  # pylint: disable=R0914
         self,
         query: str,
-        dbpedia_search_api: str,
         *,
         lang: str = "en",
         debug: bool = False,
@@ -269,7 +272,7 @@ Perform a DBPedia API search.
 
         try:
             response: requests.models.Response = requests.get(
-                dbpedia_search_api,
+                self.dbpedia_search_api,
                 params = params,
                 headers = {
                     "Accept": "application/json",
@@ -418,7 +421,7 @@ LIMIT 1000
 
 
 if __name__ == "__main__":
-    wiki: WikiDatum = WikiDatum()
+    kg: WikiDatum = WikiDatum()
 
     ## resolve rel => iri
     rel_list: typing.List[ str ] = [
@@ -433,7 +436,7 @@ if __name__ == "__main__":
     for test_rel in rel_list:
         start_time: float = time.time()
 
-        result: typing.Optional[ str ] = wiki.resolve_wikidata_rel_iri(
+        result: typing.Optional[ str ] = kg.resolve_rel_iri(
             test_rel,
             debug = True,
         )
@@ -458,15 +461,14 @@ if __name__ == "__main__":
     for test_query in query_list:
         start_time = time.time()
 
-        wiki_ent: WikiEntity = wiki.dbpedia_search_entity(  # type: ignore
+        kg_ent: WikiEntity = kg.dbpedia_search_entity(  # type: ignore
             test_query,
-            DBPEDIA_SEARCH_API,
             debug = True,
         )
 
         duration = round(time.time() - start_time, 3)
 
-        ic(test_query, wiki_ent)
+        ic(test_query, kg_ent)
         print(f"lookup: {round(duration, 3)} sec")
 
 
@@ -480,12 +482,12 @@ if __name__ == "__main__":
     for dbp_iri in dbp_iri_list:
         start_time = time.time()
 
-        wikid_iri: str = wiki.dbpedia_wikidata_equiv(
-            wiki.normalize_prefix(dbp_iri, debug = False),  # type: ignore
+        wd_iri: str = kg.dbpedia_wikidata_equiv(
+            kg.normalize_prefix(dbp_iri, debug = False),  # type: ignore
             debug = False,
         )
 
         duration = round(time.time() - start_time, 3)
 
-        ic(dbp_iri, wikid_iri)
+        ic(dbp_iri, wd_iri)
         print(f"query: {round(duration, 3)} sec")

@@ -8,6 +8,7 @@ HuggingFace Spaces demo of the `TextGraphs` library using Streamlit
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
+import asyncio
 import pathlib
 import time
 
@@ -65,21 +66,48 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.subheader("parse the raw text", divider = "rainbow")
             start_time: float = time.time()
 
-            # fine to use factory defaults, although let's demonstrate the settings here
+            # generally it is fine to use factory defaults,
+            # although let's illustrate these settings here
+            infer_rels: list = []
+
+            if infer_rel:
+                with st.spinner(text = "load rel models..."):
+                    infer_rels = [
+                        textgraphs.InferRel_OpenNRE(
+                            model = textgraphs.OPENNRE_MODEL,
+                            max_skip = textgraphs.MAX_SKIP,
+                            min_prob = textgraphs.OPENNRE_MIN_PROB,
+                        ),
+                        textgraphs.InferRel_Rebel(
+                            lang = "en_XX",
+                            mrebel_model = textgraphs.MREBEL_MODEL,
+                        ),
+                    ]
+
             tg: textgraphs.TextGraphs = textgraphs.TextGraphs(
                 factory = textgraphs.PipelineFactory(
                     spacy_model = textgraphs.SPACY_MODEL,
                     ner_model = textgraphs.NER_MODEL if llm_ner else None,
-                    nre_model = textgraphs.NRE_MODEL if infer_rel else None,
-                    dbpedia_spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
+                    kg = textgraphs.WikiDatum(
+                        spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
+                        dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
+                        wikidata_api = textgraphs.WIKIDATA_API,
+                    ),
+                    infer_rels = infer_rels,
                 ),
             )
 
-            pipe: textgraphs.Pipeline = tg.create_pipeline(
-                text_input.strip(),
-            )
-
             duration: float = round(time.time() - start_time, 3)
+            st.write(f"set up: {round(duration, 3)} sec")
+
+            with st.spinner(text = "parse text..."):
+                start_time = time.time()
+
+                pipe: textgraphs.Pipeline = tg.create_pipeline(
+                    text_input.strip(),
+                )
+
+            duration = round(time.time() - start_time, 3)
             st.write(f"parse text: {round(duration, 3)} sec, {len(text_input)} characters")
 
             # render the entity html
@@ -122,15 +150,16 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             ## perform entity linking
             st.subheader("extract entities and perform entity linking", divider = "rainbow")
-            start_time = time.time()
 
-            tg.perform_entity_linking(
-                pipe,
-                dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
-                min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
-                min_similarity = textgraphs.DBPEDIA_MIN_SIM,
-                debug = False,
-            )
+            with st.spinner(text = "entity linking..."):
+                start_time = time.time()
+
+                tg.perform_entity_linking(
+                    pipe,
+                    min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
+                    min_similarity = textgraphs.DBPEDIA_MIN_SIM,
+                    debug = False,
+                )
 
             duration = round(time.time() - start_time, 3)
             st.write(f"entity linking: {round(duration, 3)} sec")
@@ -150,15 +179,19 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             ## perform relation extraction
             if infer_rel:
                 st.subheader("infer relations", divider = "rainbow")
-                start_time = time.time()
 
-                inferred_edges: list = tg.infer_relations(
-                    pipe,
-                    wikidata_api = textgraphs.WIKIDATA_API,
-                    max_skip = textgraphs.MAX_SKIP,
-                    opennre_min_prob = textgraphs.OPENNRE_MIN_PROB,
-                    debug = False,
-                )
+                with st.spinner(text = "relation extraction..."):
+                    start_time = time.time()
+
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+
+                    inferred_edges: list = loop.run_until_complete(
+                        tg.infer_relations(
+                            pipe,
+                            debug = False,
+                        )
+                    )
 
                 duration = round(time.time() - start_time, 3)
 

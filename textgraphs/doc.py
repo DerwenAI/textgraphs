@@ -31,7 +31,7 @@ import pulp  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
 
-from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, DBPEDIA_SEARCH_API, \
+from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
     NER_MAP, PAGERANK_ALPHA
 from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum
 from .pipe import Pipeline, PipelineFactory
@@ -491,7 +491,7 @@ otherwise construct a new node for this linked entity.
                 len(self.nodes),
                 link.iri,
                 link.span,
-                link.wiki_ent.descrip,
+                link.kg_ent.descrip,
                 rel,
                 NodeEnum.IRI,
                 label = link.iri,
@@ -524,7 +524,6 @@ otherwise construct a new node for this linked entity.
         self,
         pipe: Pipeline,
         *,
-        dbpedia_search_api: str = DBPEDIA_SEARCH_API,
         min_alias: float = DBPEDIA_MIN_ALIAS,
         min_similarity: float = DBPEDIA_MIN_SIM,
         debug: bool = False,
@@ -534,7 +533,6 @@ Perform _entity linking_ based on "spotlight" and other services.
         """
         # first pass: use "spotlight" API to markup text
         iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_spotlight_entities(
-            dbpedia_search_api,
             min_alias,
             min_similarity,
             debug = debug
@@ -551,7 +549,6 @@ Perform _entity linking_ based on "spotlight" and other services.
         # second pass: use DBPedia search on unlinked entities
         iter_ents = pipe.link_dbpedia_search_entities(
             list(self.nodes.values()),
-            dbpedia_search_api,
             min_alias,
             debug = debug
         )
@@ -597,12 +594,12 @@ Consume from queue: inferred relations represented as triples.
             queue.task_done()
 
 
-    async def _gather_triples (
+    async def infer_relations (
         self,
         pipe: Pipeline,
         *,
         debug: bool = False,
-        ) -> list:
+        ) -> typing.List[ Edge ]:
         """
 Run the async queue to gather triples representing inferred relations.
         """
@@ -637,25 +634,6 @@ Run the async queue to gather triples representing inferred relations.
         # wait for remaining tasks, then cancel the now-idle consumer
         await queue.join()
         consumer_task.cancel()
-
-        return inferred_edges
-
-
-    def infer_relations (
-        self,
-        pipe: Pipeline,
-        *,
-        debug: bool = True,
-        ) -> typing.List[ Edge ]:
-        """
-Use multiple models to infer relations among co-occurring entities.
-        """
-        inferred_edges: typing.List[ Edge ] = asyncio.run(
-            self._gather_triples(
-                pipe,
-                debug = debug,
-            )
-        )
 
         # add edges from inferred relations
         self.lemma_graph.add_edges_from([
@@ -858,7 +836,7 @@ Return the entities extracted from the document.
                 reverse = True,
             ):
 
-            label: str = pipe.wiki.normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
+            label: str = pipe.kg.normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
 
             yield {
                 "node_id": node.node_id,

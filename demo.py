@@ -7,6 +7,7 @@ Sample application to demo the `TextGraphs` library.
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
+import asyncio
 import sys  # pylint: disable=W0611
 import time
 
@@ -33,8 +34,9 @@ After the war, Werner fled to America to become famous.
         factory = textgraphs.PipelineFactory(
             spacy_model = textgraphs.SPACY_MODEL,
             ner_model = None, # textgraphs.NER_MODEL,
-            wiki = textgraphs.WikiDatum(
+            kg = textgraphs.WikiDatum(
                 spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
+                dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
                 wikidata_api = textgraphs.WIKIDATA_API,
             ),
             infer_rels = [
@@ -83,7 +85,6 @@ After the war, Werner fled to America to become famous.
 
     tg.perform_entity_linking(
         pipe,
-        dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
         min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
         min_similarity = textgraphs.DBPEDIA_MIN_SIM,
         debug = False,
@@ -107,9 +108,13 @@ After the war, Werner fled to America to become famous.
     ## perform relation extraction
     start_time = time.time()
 
-    inferred_edges: list = tg.infer_relations(
-        pipe,
-        debug = False,
+    loop = asyncio.get_event_loop()
+
+    inferred_edges: list = loop.run_until_complete(
+        tg.infer_relations(
+            pipe,
+            debug = False,
+        )
     )
 
     duration = round(time.time() - start_time, 3)
@@ -121,13 +126,14 @@ After the war, Werner fled to America to become famous.
         {
             "src": n_list[edge.src_node].text,
             "dst": n_list[edge.dst_node].text,
-            "rel": textgraphs.WikiDatum.normalize_prefix(edge.rel),
+            "rel": pipe.kg.normalize_prefix(edge.rel),
             "weight": edge.prob,
         }
         for edge in inferred_edges
     ])
 
     ic(df_rel)
+
 
     ## rank phrases
     start_time = time.time()
