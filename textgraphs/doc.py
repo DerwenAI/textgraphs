@@ -363,7 +363,7 @@ lemmas, entities, and noun chunks.
         # parse each sentence
         lemma_iter: typing.Iterator[ typing.Tuple[ str, int ]] = pipe.get_ent_lemma_keys()
 
-        for sent_id, sent in enumerate(pipe.ent_doc.sents):
+        for sent_id, sent in enumerate(pipe.ner_doc.sents):
             if debug:
                 ic(sent_id, sent, sent.start)
 
@@ -546,8 +546,8 @@ Perform _entity linking_ based on "spotlight" and other services.
                 debug = debug,
             )
 
-        # second pass: use DBPedia search on unlinked entities
-        iter_ents = pipe.link_dbpedia_search_entities(
+        # second pass: use KG search on entities which weren't linked by Spotlight
+        iter_ents = pipe.link_kg_search_entities(
             list(self.nodes.values()),
             min_alias,
             debug = debug
@@ -602,6 +602,7 @@ Consume from queue: inferred relations represented as triples.
         ) -> typing.List[ Edge ]:
         """
 Run the async queue to gather triples representing inferred relations.
+https://stackoverflow.com/questions/52582685/using-asyncio-queue-for-producer-consumer-flow
         """
         inferred_edges: typing.List[ Edge ] = []
         queue: asyncio.Queue = asyncio.Queue()
@@ -625,15 +626,19 @@ Run the async queue to gather triples representing inferred relations.
             )
         )
 
-        # wait for producers to finish
+        # wait for producers to finish,
+        # await the remaining tasks,
+        # then cancel the now-idle consumer
         await asyncio.gather(*producer_tasks)
 
         if debug:
             ic("Queue: done producing")
 
-        # wait for remaining tasks, then cancel the now-idle consumer
         await queue.join()
         consumer_task.cancel()
+
+        if debug:
+            ic("Queue: done consuming")
 
         # add edges from inferred relations
         self.lemma_graph.add_edges_from([

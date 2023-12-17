@@ -37,7 +37,7 @@ from .elem import WikiEntity
 ######################################################################
 ## class definitions
 
-class WikiDatum:  # pylint: disable=R0903
+class WikiDatum:  # pylint: disable=R0902,R0903
     """
 Manage access to MediaWiki-related APIs.
     """
@@ -63,6 +63,7 @@ Manage access to MediaWiki-related APIs.
         *,
         spotlight_api: str = DBPEDIA_SPOTLIGHT_API,
         dbpedia_search_api: str = DBPEDIA_SEARCH_API,
+        dbpedia_sparql_api: str = DBPEDIA_SPARQL_API,
         wikidata_api: str = WIKIDATA_API,
         ns_prefix: dict = NS_PREFIX,
         ) -> None:
@@ -71,6 +72,7 @@ Constructor.
         """
         self.spotlight_api: str = spotlight_api
         self.dbpedia_search_api: str = dbpedia_search_api
+        self.dbpedia_sparql_api: str = dbpedia_sparql_api
         self.wikidata_api: str = wikidata_api
         self.ns_prefix: dict = ns_prefix
 
@@ -119,7 +121,7 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
         ) -> typing.Optional[ str ]:
         """
 Resolve a `rel` string from a _relation extraction_ model which has
-been trained on the knowledge graph.
+been trained on this knowledge graph.
 
 Defaults to the `MediaWiki` graphs.
         """
@@ -333,7 +335,6 @@ Perform a DBPedia API search.
         self,
         sparql: str,
         *,
-        dbpedia_sparql_api: str = DBPEDIA_SPARQL_API,
         debug: bool = False,
         ) -> dict:
         """
@@ -350,7 +351,7 @@ Perform a SPARQL query on DBPedia.
 
         try:
             response: requests.models.Response = requests.get(
-                dbpedia_sparql_api,
+                self.dbpedia_sparql_api,
                 params = params,
                 headers = {
                     "Accept": "application/json",
@@ -374,7 +375,6 @@ Perform a SPARQL query on DBPedia.
         self,
         dbpedia_iri: str,
         *,
-        dbpedia_sparql_api: str = DBPEDIA_SPARQL_API,
         debug: bool = False,
         ) -> typing.Optional[ str ]:
         """
@@ -395,7 +395,6 @@ LIMIT 1000
 
         dat: dict = self.dbpedia_sparql_query(
             sparql,
-            dbpedia_sparql_api = dbpedia_sparql_api,
             debug = debug,
         )
 

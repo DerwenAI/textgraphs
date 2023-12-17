@@ -218,7 +218,7 @@ Parse the generated text and extract its triplets.
 Iterate on sentences to drive `REBEL`, inferring relations
 represented in triples which get produced to a queue.
         """
-        for sent in pipe.ent_doc.sents:
+        for sent in pipe.ner_doc.sents:
             extract: str = self.tokenize_sent(str(sent).strip())
             triples: typing.List[ dict ] = self.extract_triplets_typed(extract)
 

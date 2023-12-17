@@ -91,6 +91,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                     kg = textgraphs.WikiDatum(
                         spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
                         dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
+                        dbpedia_sparql_api = textgraphs.DBPEDIA_SPARQL_API,
                         wikidata_api = textgraphs.WIKIDATA_API,
                     ),
                     infer_rels = infer_rels,
@@ -112,7 +113,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             # render the entity html
             ent_html: str = spacy.displacy.render(
-                pipe.ent_doc,
+                pipe.ner_doc,
                 style = "ent",
                 jupyter = False,
             )
@@ -124,7 +125,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
             # generate dependencies as an SVG
             dep_svg = spacy.displacy.render(
-                pipe.ent_doc,
+                pipe.ner_doc,
                 style = "dep",
                 jupyter = False,
             )

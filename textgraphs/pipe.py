@@ -61,8 +61,8 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
         text_input: str,
         lemma_graph: nx.MultiDiGraph,
         tok_pipe: spacy.Language,
-        dbp_pipe: spacy.Language,
-        ent_pipe: spacy.Language,
+        spl_pipe: spacy.Language,
+        ner_pipe: spacy.Language,
         kg: WikiDatum,  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ],
         ) -> None:
@@ -72,9 +72,14 @@ Constructor.
         self.text: str = text_input
         self.lemma_graph: nx.MultiDiGraph = lemma_graph
 
+        # `tok_doc` provides a stream of individual tokens
         self.tok_doc: spacy.tokens.Doc = tok_pipe(self.text)
-        self.dbp_doc: spacy.tokens.Doc = dbp_pipe(self.text)
-        self.ent_doc: spacy.tokens.Doc = ent_pipe(self.text)
+
+        # `spl_doc` provides span indexing for Spotlight entity linking
+        self.spl_doc: spacy.tokens.Doc = spl_pipe(self.text)
+
+        # `ner_doc` provides the merged-entity spans from NER
+        self.ner_doc: spacy.tokens.Doc = ner_pipe(self.text)
 
         self.kg: WikiDatum = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
@@ -153,7 +158,7 @@ Link any noun chunks which are not already subsumed by named entities.
                 )
 
         # second pass: remap span indices to the merged entities pipeline
-        for i, span in enumerate(self.ent_doc.noun_chunks):
+        for i, span in enumerate(self.ner_doc.noun_chunks):
             if span.text == self.tokens[span.start].text:
                 chunks[i].unseen = False
             elif chunks[i].unseen:
@@ -179,7 +184,7 @@ Link any noun chunks which are not already subsumed by named entities.
 Iterator for the results of using a "spotlight" to markup text with
 entity linking results, which defaults to the `DBPedia Spotlight` service.
         """
-        ents: typing.List[ spacy.tokens.span.Span ] = list(self.dbp_doc.ents)
+        ents: typing.List[ spacy.tokens.span.Span ] = list(self.spl_doc.ents)
 
         if debug:
             ic(ents)
@@ -241,7 +246,7 @@ entity linking results, which defaults to the `DBPedia Spotlight` service.
             tok_idx += tok.length
 
 
-    def link_dbpedia_search_entities (
+    def link_kg_search_entities (
         self,
         nodes: list,
         min_alias: float,
@@ -342,8 +347,8 @@ expensive operations with `spaCy`
 Constructor which instantiates the `spaCy` pipelines:
 
   * `tok_pipe` -- regular generator for parsed tokens
-  * `dbp_pipe` -- DBPedia entity linking
-  * `ent_pipe` -- with entities merged
+  * `spl_pipe` -- DBPedia entity linking
+  * `ner_pipe` -- with entities merged
         """
         self.kg: WikiDatum = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
@@ -366,12 +371,12 @@ Constructor which instantiates the `spaCy` pipelines:
             exclude = exclude,
         )
 
-        self.dbp_pipe = spacy.load(
+        self.spl_pipe = spacy.load(
             spacy_model,
             exclude = exclude,
         )
 
-        self.ent_pipe = spacy.load(
+        self.ner_pipe = spacy.load(
             spacy_model,
             exclude = exclude,
         )
@@ -385,30 +390,30 @@ Constructor which instantiates the `spaCy` pipelines:
                 },
             )
 
-            self.dbp_pipe.add_pipe(
+            self.spl_pipe.add_pipe(
                 "span_marker",
                 config = {
                     "model": ner_model,
                 },
             )
 
-            self.ent_pipe.add_pipe(
+            self.ner_pipe.add_pipe(
                 "span_marker",
                 config = {
                     "model": ner_model,
                 },
             )
 
-        # `dbp_pipe` only: DBPedia entity linking
-        self.dbp_pipe.add_pipe(
+        # `spl_pipe` only: KG entity linking
+        self.spl_pipe.add_pipe(
             "dbpedia_spotlight",
             config = {
                 "dbpedia_rest_endpoint": kg.spotlight_api,
             },
         )
 
-        # `ent_pipe` only: merge entities
-        self.ent_pipe.add_pipe(
+        # `ner_pipe` only: merge entities
+        self.ner_pipe.add_pipe(
             "merge_entities",
         )
 
@@ -419,14 +424,14 @@ Constructor which instantiates the `spaCy` pipelines:
         lemma_graph: nx.MultiDiGraph,
         ) -> Pipeline:
         """
-Return document pipelines to parse the input text.
+Instantiate the document pipelines needed to parse the input text.
         """
         pipe: Pipeline = Pipeline(
             text_input,
             lemma_graph,
             self.tok_pipe,
-            self.dbp_pipe,
-            self.ent_pipe,
+            self.spl_pipe,
+            self.ner_pipe,
             self.kg,
             self.infer_rels,
         )
