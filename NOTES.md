@@ -2,10 +2,11 @@ TODO:
 
   * are the label/title values correct in PyVis?
 
-  * cross-link the DBPedia/Wikidata equivs
+  * SPARQL the DBPedia/Wikidata equivs
 
-  * add `fishing` ents
-  * non-linked entities (lemma, ent, noun chunk?) use MediaWiki lookups?
+  * link entities for noun chunks using MediaWiki lookups?
+
+
 
   * build a _graph of relations_ topology transform
     * transformed graph

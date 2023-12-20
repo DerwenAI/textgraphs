@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This class provides a wrapper for MediaWiki API access, supporting
+This class provides a wrapper for WikiMedia API access, supporting
 use of:
 
   * DBPedia
@@ -39,7 +39,7 @@ from .elem import WikiEntity
 
 class WikiDatum:  # pylint: disable=R0902,R0903
     """
-Manage access to MediaWiki-related APIs.
+Manage access to WikiMedia-related APIs.
     """
     NS_PREFIX: typing.Dict[ str, str ] = OrderedDict({
         "dbc": "http://dbpedia.org/resource/Category:",
@@ -53,7 +53,7 @@ Manage access to MediaWiki-related APIs.
         "dbpedia-commons": "http://commons.dbpedia.org/resource/",
         "dbpedia-wikicompany": "http://dbpedia.openlinksw.com/wikicompany/",
         "dbpedia-wikidata": "http://wikidata.dbpedia.org/resource/",
-        "wd": "https://www.wikidata.org/wiki/",
+        "wd": "https://www.wikidata.org/",
         "schema": "https://schema.org/",
     })
 
@@ -112,6 +112,102 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
         return iri
 
 
+    def _wikidata_endpoint (
+        self,
+        query: str,
+        *,
+        search_type: str = "item",
+        lang: str = "en",
+        debug: bool = False,
+        ) -> dict:
+        """
+Call a generic endpoint for Wikidata API.
+Raises various untrapped exceptions, to be handled by caller.
+        """
+        hit: dict = {}
+
+        params: dict = {
+            "action": "wbsearchentities",
+            "type": search_type,
+            "language": lang,
+            "format": "json",
+            "continue": "0",
+            "search": query,
+        }
+
+        response: requests.models.Response = requests.get(
+            self.wikidata_api,
+            params = params,
+            headers = {
+                "Accept": "application/json",
+            },
+        )
+
+        if debug:
+            ic(response.status_code)
+
+        # check for API success
+        if http.HTTPStatus.OK == response.status_code:
+            dat: dict = response.json()
+            hit = dat["search"][0]
+
+            #print(json.dumps(hit, indent = 2, sort_keys = True))
+
+        return hit
+
+
+    def wikidata_search (
+        self,
+        query: str,
+        *,
+        lang: str = "en",
+        debug: bool = False,
+        ) -> typing.Optional[ WikiEntity ]:
+        """
+Query the Wikidata search API.
+        """
+        try:
+            hit: dict = self._wikidata_endpoint(
+                query,
+                search_type = "item",
+                lang = lang,
+                debug = debug,
+            )
+
+            # extract the needed properties
+            url: str = hit["concepturi"]
+            label: str = hit["label"]
+            descrip: str = hit["description"]
+
+            # determine match likelihood
+            prob, _ = self._match_aliases(
+                query.lower(),
+                label,
+                [],
+                debug = debug,
+            )
+
+            if debug:
+                ic(query, url, label, descrip, prob)
+
+            # return a linked entity
+            wiki_ent: WikiEntity = WikiEntity(
+                url,
+                label,
+                descrip,
+                [],
+                prob,
+            )
+
+            return wiki_ent
+
+        except Exception as ex:  # pylint: disable=W0718
+            ic(ex)
+            traceback.print_exc()
+
+        return None
+
+
     def resolve_rel_iri (
         self,
         rel: str,
@@ -123,46 +219,20 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
 Resolve a `rel` string from a _relation extraction_ model which has
 been trained on this knowledge graph.
 
-Defaults to the `MediaWiki` graphs.
+Defaults to the `WikiMedia` graphs.
         """
         # first, check the cache
         if rel in self.iri_cache:
             return self.iri_cache.get(rel)
 
         # otherwise construct a Wikidata API search
-        params: dict = {
-            "language": lang,
-            "format": "json",
-            "type": "property",
-            "action": "wbsearchentities",
-            "search": rel,
-        }
-
         try:
-            response: requests.models.Response = requests.get(
-                self.wikidata_api,
-                params = params,
-                headers = {
-                    "Accept": "application/json",
-                },
+            hit: dict = self._wikidata_endpoint(
+                rel,
+                search_type = "property",
+                lang = lang,
+                debug = debug,
             )
-
-            if debug:
-                ic(response.status_code)
-
-            # check for failed API calls
-            if http.HTTPStatus.OK != response.status_code:
-                return None
-
-            dat: dict = response.json()
-
-            if debug:
-                ic(len(dat["search"]))
-                #ic(dat)
-                #ic(dat["search"])
-
-            # take the first hit -- generally the most relevant
-            hit: dict = dat["search"][0]
 
             if debug:
                 ic(hit["label"], hit["id"])

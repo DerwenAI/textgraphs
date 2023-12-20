@@ -4,7 +4,7 @@
     Construct a <em>lemma graph</em>, then perform <em>entity linking</em> based on:
     <code>spaCy</code>, <code>transformers</code>, <code>SpanMarkerNER</code>,
     <code>spaCy-DBpedia-Spotlight</code>, <code>REBEL</code>, <code>OpenNRE</code>,
-    <code>spaCy fishing</code>, <code>qwikidata</code>, <code>pulp</code>
+    <code>qwikidata</code>, <code>pulp</code>
   </p>
   <p>
     In other words, this hybrid approach integrates
@@ -29,7 +29,7 @@
   <ol>
     <li>use <code>spaCy</code> to parse a document, with <code>SpanMarkerNER</code> LLM assist</li>
     <li>add noun chunks in parallel to entities, as "candidate" phrases for subsequent HITL</li>
-    <li>perform <em>entity linking</em>: <code>spaCy-DBpedia-Spotlight</code>, <code>spaCy fishing</code></li>
+    <li>perform <em>entity linking</em>: <code>spaCy-DBpedia-Spotlight</code>, <code>WikiMedia API</code></li>
     <li>infer relations, plus graph inference: <code>REBEL</code>, <code>OpenNRE</code>, <code>qwikidata</code></li>
     <li>build a <em>lemma graph</em> in <code>NetworkX</code> from the parse results</li>
     <li>run a modified <code>textrank</code> algorithm plus graph analytics</li>
@@ -73,9 +73,6 @@
     </li>
     <li>
       <a href="https://github.com/thunlp/OpenNRE/" target="_blank"><code>OpenNRE</code></a>
-    </li>
-    <li>
-      <a href="https://github.com/Lucaterre/spacyfishing" target="_blank"><code>spaCy fishing</code></a>
     </li>
     <li>
       <a href="https://github.com/kensho-technologies/qwikidata" target="_blank"><code>qwikidata</code></a>

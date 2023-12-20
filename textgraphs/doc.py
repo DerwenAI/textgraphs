@@ -33,7 +33,7 @@ import transformers  # pylint: disable=E0401
 
 from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
     NER_MAP, PAGERANK_ALPHA
-from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum
+from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum, WikiEntity
 from .pipe import Pipeline, PipelineFactory
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
@@ -520,6 +520,56 @@ otherwise construct a new node for this linked entity.
         )
 
 
+    def _secondary_entity_linking (
+        self,
+        pipe: Pipeline,
+        link: LinkedEntity,
+        *,
+        min_similarity: float = DBPEDIA_MIN_SIM,
+        debug: bool = False,
+        ) -> None:
+        """
+Perform secondary _entity linking_, e.g., based on Wikidata API.
+        """
+        wd_ent: typing.Optional[ WikiEntity ] = pipe.kg.wikidata_search(
+            link.kg_ent.label,
+            debug = debug,
+        )
+
+        if wd_ent is not None and wd_ent.prob > min_similarity:
+            wd_link: LinkedEntity = LinkedEntity(
+                link.span,
+                wd_ent.iri,
+                len(link.span),
+                "wikidata",
+                wd_ent.prob,
+                link.token_id,
+                wd_ent,
+            )
+
+            if debug:
+                ic(wd_link)
+
+            self._make_link(
+                pipe,
+                wd_link,
+                "wikidata",
+                debug = debug,
+            )
+
+            # add an equivalency edge between the two linked entities
+            src_node: Node = pipe.tokens[wd_link.token_id]
+            dst_node: Node = pipe.tokens[link.token_id]
+
+            self._make_edge(
+                src_node,
+                dst_node,
+                RelEnum.IRI,
+                "owl:sameAs",
+                1.0,
+            )
+
+
     def perform_entity_linking (
         self,
         pipe: Pipeline,
@@ -546,6 +596,13 @@ Perform _entity linking_ based on "spotlight" and other services.
                 debug = debug,
             )
 
+            self._secondary_entity_linking(
+                pipe,
+                link,
+                min_similarity = min_similarity,
+                debug = debug,
+            )
+
         # second pass: use KG search on entities which weren't linked by Spotlight
         iter_ents = pipe.link_kg_search_entities(
             list(self.nodes.values()),
@@ -558,6 +615,13 @@ Perform _entity linking_ based on "spotlight" and other services.
                 pipe,
                 link,
                 "dbpedia",
+                debug = debug,
+            )
+
+            self._secondary_entity_linking(
+                pipe,
+                link,
+                min_similarity = min_similarity,
                 debug = debug,
             )
 

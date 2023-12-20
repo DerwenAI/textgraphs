@@ -51,16 +51,21 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         )
 
         llm_ner = st.checkbox(
-            "enhance spaCy NER, using SpanMarker",
+            "enhance spaCy NER using: SpanMarker",
+            value = False,
+        )
+
+        link_ents = st.checkbox(
+            "link entities using: Spotlight, WikiMedia API",
             value = False,
         )
 
         infer_rel = st.checkbox(
-            "infer relations, using REBEL, OpenNRE, qwikidata",
+            "infer relations using: REBEL, OpenNRE, qwikidata",
             value = False,
         )
 
-        if text_input or llm_ner or infer_rel:
+        if text_input or llm_ner or link_ents or infer_rel:
             ## parse the document
             st.subheader("parse the raw text", divider = "rainbow")
             start_time: float = time.time()
@@ -149,20 +154,21 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.write(f"collect elements: {round(duration, 3)} sec, {len(tg.nodes)} nodes, {len(tg.edges)} edges")
 
             ## perform entity linking
-            st.subheader("extract entities and perform entity linking", divider = "rainbow")
+            if link_ents:
+                st.subheader("extract entities and perform entity linking", divider = "rainbow")
 
-            with st.spinner(text = "entity linking..."):
-                start_time = time.time()
+                with st.spinner(text = "entity linking..."):
+                    start_time = time.time()
 
-                tg.perform_entity_linking(
-                    pipe,
-                    min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
-                    min_similarity = textgraphs.DBPEDIA_MIN_SIM,
-                    debug = False,
-                )
+                    tg.perform_entity_linking(
+                        pipe,
+                        min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
+                        min_similarity = textgraphs.DBPEDIA_MIN_SIM,
+                        debug = False,
+                    )
 
-            duration = round(time.time() - start_time, 3)
-            st.write(f"entity linking: {round(duration, 3)} sec")
+                duration = round(time.time() - start_time, 3)
+                st.write(f"entity linking: {round(duration, 3)} sec")
 
 
             ## construct the _lemma graph_
@@ -179,6 +185,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             ## perform relation extraction
             if infer_rel:
                 st.subheader("infer relations", divider = "rainbow")
+                st.write("NB: this part runs an order of magnitude more *slooooooowly* on HF Spaces")
 
                 with st.spinner(text = "relation extraction..."):
                     start_time = time.time()
