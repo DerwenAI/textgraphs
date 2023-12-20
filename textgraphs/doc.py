@@ -176,6 +176,8 @@ Lookup and return a `Node` object:
         kind: RelEnum,
         rel: str,
         prob: float,
+        *,
+        debug: bool = False,
         ) -> typing.Optional[ Edge ]:
         """
 Lookup an edge, creating a new one if it does not exist already,
@@ -187,6 +189,9 @@ and increment the count if it does.
             rel.replace(" ", "_"),
             str(kind.value),
         ])
+
+        if debug:
+            ic(key)
 
         if key in self.edges:
             self.edges[key].count += 1
@@ -200,6 +205,9 @@ and increment the count if it does.
                 rel,
                 prob,
             )
+
+        if debug:
+            ic(self.edges.get(key))
 
         return self.edges.get(key)
 
@@ -336,6 +344,7 @@ entities and lemmas that have already been linked in the lemma graph.
                         RelEnum.CHU,
                         "noun_chunk",
                         1.0,
+                        debug = debug,
                     )
 
 
@@ -406,6 +415,7 @@ lemmas, entities, and noun chunks.
                     RelEnum.DEP,
                     node.span.dep_,
                     1.0,
+                    debug = debug,
                 )
 
                 # annotate src nodes which are subjects or direct objects
@@ -474,7 +484,7 @@ with parallel edges.
         rel: str,
         *,
         debug: bool = False,
-        ) -> None:
+        ) -> Node:
         """
 Link to previously constructed entity node;
 otherwise construct a new node for this linked entity.
@@ -505,19 +515,26 @@ otherwise construct a new node for this linked entity.
         dst_node: Node = self.nodes.get(link.iri)  # type: ignore
 
         if debug:
-            ic(dst_node)
+            ic(src_node, dst_node)
 
         # back-link to the parsed entity object
         pipe.tokens[link.token_id].entity.append(link)
 
         # construct a directed edge between them
-        self._make_edge(
+        edge: Edge = self._make_edge(  # type: ignore
             src_node,
             dst_node,
             RelEnum.IRI,
             rel,
             link.prob,
+            debug = debug,
         )
+
+        if debug:
+            ic(edge)
+
+        # return the linked node
+        return dst_node
 
 
     def _secondary_entity_linking (
@@ -527,7 +544,7 @@ otherwise construct a new node for this linked entity.
         *,
         min_similarity: float = DBPEDIA_MIN_SIM,
         debug: bool = False,
-        ) -> None:
+        ) -> typing.Optional[ Edge ]:
         """
 Perform secondary _entity linking_, e.g., based on Wikidata API.
         """
@@ -535,6 +552,9 @@ Perform secondary _entity linking_, e.g., based on Wikidata API.
             link.kg_ent.label,
             debug = debug,
         )
+
+        if debug:
+            ic(link.span, wd_ent)
 
         if wd_ent is not None and wd_ent.prob > min_similarity:
             wd_link: LinkedEntity = LinkedEntity(
@@ -550,7 +570,9 @@ Perform secondary _entity linking_, e.g., based on Wikidata API.
             if debug:
                 ic(wd_link)
 
-            self._make_link(
+            src_node: Node = self.nodes.get(link.iri)  # type: ignore
+
+            dst_node: Node = self._make_link(
                 pipe,
                 wd_link,
                 "wikidata",
@@ -558,16 +580,21 @@ Perform secondary _entity linking_, e.g., based on Wikidata API.
             )
 
             # add an equivalency edge between the two linked entities
-            src_node: Node = pipe.tokens[wd_link.token_id]
-            dst_node: Node = pipe.tokens[link.token_id]
+            rel: str = "http://www.w3.org/2002/07/owl#sameAs"
 
-            self._make_edge(
+            edge: Edge = self._make_edge(  # type: ignore
                 src_node,
                 dst_node,
                 RelEnum.IRI,
-                "owl:sameAs",
-                1.0,
+                rel,
+                wd_link.prob,
+                debug = debug,
             )
+
+            # return the constructed edge
+            return edge
+
+        return None
 
 
     def perform_entity_linking (
@@ -589,14 +616,14 @@ Perform _entity linking_ based on "spotlight" and other services.
         )
 
         for link in iter_ents:
-            self._make_link(
+            _ = self._make_link(
                 pipe,
                 link,
                 "dbpedia",
                 debug = debug,
             )
 
-            self._secondary_entity_linking(
+            _ = self._secondary_entity_linking(
                 pipe,
                 link,
                 min_similarity = min_similarity,
@@ -611,14 +638,14 @@ Perform _entity linking_ based on "spotlight" and other services.
         )
 
         for link in iter_ents:
-            self._make_link(
+            _ = self._make_link(
                 pipe,
                 link,
                 "dbpedia",
                 debug = debug,
             )
 
-            self._secondary_entity_linking(
+            _ = self._secondary_entity_linking(
                 pipe,
                 link,
                 min_similarity = min_similarity,
@@ -666,6 +693,7 @@ Create an edge for the linked IRI, based on the input triple.
             RelEnum.INF,
             iri,
             1.0,
+            debug = debug,
         )
 
         if debug:

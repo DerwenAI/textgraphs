@@ -55,6 +55,7 @@ Manage access to WikiMedia-related APIs.
         "dbpedia-wikidata": "http://wikidata.dbpedia.org/resource/",
         "wd": "https://www.wikidata.org/",
         "schema": "https://schema.org/",
+        "owl": "http://www.w3.org/2002/07/owl#",
     })
 
 
