@@ -34,6 +34,7 @@ import transformers  # pylint: disable=E0401
 from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
     NER_MAP, PAGERANK_ALPHA
 from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum, WikiEntity
+from .graph import SimpleGraph
 from .pipe import Pipeline, PipelineFactory
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
@@ -59,7 +60,7 @@ logging.disable(logging.INFO)
 ######################################################################
 ## class definitions
 
-class TextGraphs:
+class TextGraphs (SimpleGraph):
     """
 Construct a _lemma graph_ from the unstructured text source,
 then extract ranked phrases using a `textgraph` algorithm.
@@ -73,9 +74,7 @@ then extract ranked phrases using a `textgraph` algorithm.
         """
 Constructor.
         """
-        self.nodes: typing.Dict[ str, Node ] = OrderedDict()
-        self.edges: typing.Dict[ str, Edge ] = {}
-        self.lemma_graph: nx.MultiDiGraph = nx.MultiDiGraph()
+        super().__init__()
 
         # initialize the pipeline factory
         if factory is not None:
@@ -96,120 +95,6 @@ for each text input, which are typically paragraph-length.
             text_input,
             self.lemma_graph,
         )
-
-
-    ######################################################################
-    ## graph construction
-
-    def _make_node (  # pylint: disable=R0913
-        self,
-        pipe: Pipeline,
-        key: str,
-        span: spacy.tokens.token.Token,
-        kind: NodeEnum,
-        text_id: int,
-        para_id: int,
-        sent_id: int,
-        *,
-        label: typing.Optional[ str ] = None,
-        length: int = 1,
-        linked: bool = True,
-        ) -> Node:
-        """
-Lookup and return a `Node` object:
-
-    * default: link matching keys into the same node
-    * instantiate a new node if it does not exist already
-        """
-        location: typing.List[ int ] = [  # type: ignore
-            text_id,
-            para_id,
-            sent_id,
-            span.i,
-        ]
-
-        if not linked:
-            # construct a placeholder node (stopwords)
-            self.nodes[key] = Node(
-                len(self.nodes),
-                key,
-                span,
-                span.text,
-                span.pos_,
-                kind,
-                loc = [ location ],
-                length = length,
-            )
-
-        elif key in self.nodes:
-            # link to previously constructed entity node
-            self.nodes[key].loc.append(location)
-            self.nodes[key].count += 1
-
-        # construct a new node for entity or lemma
-        else:
-            self.nodes[key] = Node(
-                len(self.nodes),
-                key,
-                span,
-                span.text,
-                span.pos_,
-                kind,
-                loc = [ location ],
-                label = label,
-                length = length,
-                count = 1,
-            )
-
-        node: Node = self.nodes.get(key)  # type: ignore
-
-        if kind not in [ NodeEnum.CHU, NodeEnum.IRI ]:
-            pipe.tokens.append(node)
-
-        return node  # type: ignore
-
-
-    def _make_edge (  # pylint: disable=R0913
-        self,
-        src_node: Node,
-        dst_node: Node,
-        kind: RelEnum,
-        rel: str,
-        prob: float,
-        *,
-        debug: bool = False,
-        ) -> typing.Optional[ Edge ]:
-        """
-Lookup an edge, creating a new one if it does not exist already,
-and increment the count if it does.
-        """
-        key: str = ".".join([
-            str(src_node.node_id),
-            str(dst_node.node_id),
-            rel.replace(" ", "_"),
-            str(kind.value),
-        ])
-
-        if debug:
-            ic(key)
-
-        if key in self.edges:
-            self.edges[key].count += 1
-
-        elif src_node.node_id != dst_node.node_id:
-            # preclude cycles in the graph
-            self.edges[key] = Edge(
-                src_node.node_id,
-                dst_node.node_id,
-                kind,
-                rel,
-                prob,
-            )
-
-        if debug:
-            ic(self.edges.get(key))
-
-        return self.edges.get(key)
 
 
     def _extract_phrases (  # pylint: disable=R0913
@@ -253,7 +138,7 @@ _lemma graph_, while giving priority to:
                 ent = ent_seq.pop(0)
                 lemma_key, span_len = next(lemma_iter)  # pylint: disable=R1708
 
-                yield self._make_node(
+                yield self.make_node(
                     pipe,
                     lemma_key,
                     token,
@@ -267,7 +152,7 @@ _lemma graph_, while giving priority to:
 
             elif token.pos_ in [ "NOUN", "PROPN", "VERB" ]:
                 # link a lemmatized entity
-                yield self._make_node(
+                yield self.make_node(
                     pipe,
                     Pipeline.get_lemma_key(token),
                     token,
@@ -279,7 +164,7 @@ _lemma graph_, while giving priority to:
 
             else:
                 # fall-through case: use token as a placeholder in the lemma graph
-                yield self._make_node(
+                yield self.make_node(
                     pipe,
                     Pipeline.get_lemma_key(token, placeholder = True),
                     token,
@@ -338,7 +223,7 @@ entities and lemmas that have already been linked in the lemma graph.
                     if debug:
                         ic(pipe.tokens[token_id])
 
-                    self._make_edge(
+                    self.make_edge(
                         node,  # type: ignore
                         pipe.tokens[token_id],
                         RelEnum.CHU,
@@ -409,7 +294,7 @@ lemmas, entities, and noun chunks.
                 if debug:
                     ic(node, len(sent_nodes), node.span.head.i, node.span.head.text, head_idx)
 
-                self._make_edge(
+                self.make_edge(
                     node,
                     sent_nodes[head_idx],
                     RelEnum.DEP,
@@ -431,49 +316,6 @@ lemmas, entities, and noun chunks.
         )
 
 
-    def construct_lemma_graph (
-        self,
-        *,
-        debug: bool = False,
-        ) -> None:
-        """
-Construct the base level of the _lemma graph_ from the collected
-elements. This gets represented in `NetworkX` as a directed graph
-with parallel edges.
-        """
-        # add the nodes
-        self.lemma_graph.add_nodes_from([
-            node.node_id
-            for node in self.nodes.values()
-        ])
-
-        # populate the minimum required node properties
-        for node_key, node in self.nodes.items():
-            nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["title"] = node_key
-            nx_node["size"] = node.count
-            nx_node["value"] = node.weight
-
-            if debug:
-                ic(nx_node)
-
-        # add the edges and their properties
-        self.lemma_graph.add_edges_from([
-            (
-                edge.src_node,
-                edge.dst_node,
-                {
-                    "kind": str(edge.kind),
-                    "title": edge.rel,
-                    "weight": float(edge.count),
-                    "prob": edge.prob,
-                    "count": edge.count,
-                },
-            )
-            for edge_key, edge in self.edges.items()
-        ])
-
-
     ######################################################################
     ## entity linking
 
@@ -492,7 +334,7 @@ otherwise construct a new node for this linked entity.
         if debug:
             ic(link)
 
-        # special case of `_make_node()`
+        # special case of `make_node()`
         if link.iri in self.nodes:
             self.nodes[link.iri].count += 1
 
@@ -521,7 +363,7 @@ otherwise construct a new node for this linked entity.
         pipe.tokens[link.token_id].entity.append(link)
 
         # construct a directed edge between them
-        edge: Edge = self._make_edge(  # type: ignore
+        edge: Edge = self.make_edge(  # type: ignore
             src_node,
             dst_node,
             RelEnum.IRI,
@@ -582,7 +424,7 @@ Perform secondary _entity linking_, e.g., based on Wikidata API.
             # add an equivalency edge between the two linked entities
             rel: str = "http://www.w3.org/2002/07/owl#sameAs"
 
-            edge: Edge = self._make_edge(  # type: ignore
+            edge: Edge = self.make_edge(  # type: ignore
                 src_node,
                 dst_node,
                 RelEnum.IRI,
@@ -687,7 +529,7 @@ Add edges to the _lemma graph_ from the inferred relations.
         """
 Create an edge for the linked IRI, based on the input triple.
         """
-        edge = self._make_edge(  # type: ignore
+        edge = self.make_edge(  # type: ignore
             src,
             dst,
             RelEnum.INF,
@@ -1006,32 +848,3 @@ Return the entities extracted from the document.
 Return the ranked extracted entities as a `pandas.DataFrame`
         """
         return pd.DataFrame.from_dict(self.get_phrases(pipe))
-
-
-    ######################################################################
-    ## handle data exports
-
-    def dump_lemma_graph (
-        self,
-        ) -> str:
-        """
-Dump the _lemma graph_ as a JSON string in _node-link_ format,
-suitable for serialization and subsequent use in JavaScript,
-Neo4j, Graphistry, etc.
-        """
-        # populate the optional node properties
-        for node in self.nodes.values():
-            nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["name"] = node.text
-            nx_node["kind"] = str(node.kind)
-            nx_node["iri"] = node.label
-            nx_node["subobj"] = node.sub_obj
-            nx_node["pos"] = node.pos
-            nx_node["loc"] = str(node.loc)
-
-        return json.dumps(
-            nx.node_link_data(self.lemma_graph),
-            sort_keys = True,
-            indent =  2,
-            separators = ( ",", ":" ),
-        )
