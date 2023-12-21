@@ -17,7 +17,6 @@ import networkx as nx  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
-from .pipe import Pipeline
 
 
 ######################################################################
@@ -41,7 +40,7 @@ Constructor.
 
     def make_node (  # pylint: disable=R0913
         self,
-        pipe: Pipeline,
+        tokens: typing.List[ Node ],
         key: str,
         span: spacy.tokens.token.Token,
         kind: NodeEnum,
@@ -102,7 +101,7 @@ Lookup and return a `Node` object:
         node: Node = self.nodes.get(key)  # type: ignore
 
         if kind not in [ NodeEnum.CHU, NodeEnum.IRI ]:
-            pipe.tokens.append(node)
+            tokens.append(node)
 
         return node  # type: ignore
 

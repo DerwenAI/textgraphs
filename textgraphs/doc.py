@@ -135,7 +135,7 @@ _lemma graph_, while giving priority to:
                 lemma_key, span_len = next(lemma_iter)  # pylint: disable=R1708
 
                 yield self.make_node(
-                    pipe,
+                    pipe.tokens,
                     lemma_key,
                     token,
                     NodeEnum.ENT,
@@ -149,7 +149,7 @@ _lemma graph_, while giving priority to:
             elif token.pos_ in [ "NOUN", "PROPN", "VERB" ]:
                 # link a lemmatized entity
                 yield self.make_node(
-                    pipe,
+                    pipe.tokens,
                     Pipeline.get_lemma_key(token),
                     token,
                     NodeEnum.LEM,
@@ -161,7 +161,7 @@ _lemma graph_, while giving priority to:
             else:
                 # fall-through case: use token as a placeholder in the lemma graph
                 yield self.make_node(
-                    pipe,
+                    pipe.tokens,
                     Pipeline.get_lemma_key(token, placeholder = True),
                     token,
                     NodeEnum.DEP,
