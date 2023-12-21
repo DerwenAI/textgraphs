@@ -14,12 +14,9 @@ running methods on `Pipeline` objects, typically per paragraph.
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
-from collections import OrderedDict
 import asyncio
-import json
 import logging
 import os
-import pathlib
 import sys
 import typing
 
@@ -31,8 +28,7 @@ import pulp  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
 
-from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
-    NER_MAP, PAGERANK_ALPHA
+from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, PAGERANK_ALPHA
 from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum, WikiEntity
 from .graph import SimpleGraph
 from .pipe import Pipeline, PipelineFactory
@@ -239,21 +235,13 @@ entities and lemmas that have already been linked in the lemma graph.
         *,
         text_id: int = 0,
         para_id: int = 0,
-        ner_map_path: pathlib.Path = pathlib.Path(NER_MAP),
         debug: bool = False,
         ) -> None:
         """
 Collect the elements of a _lemma graph_ from the results of running
 the `textgraph` algorithm. These elements include: parse dependencies,
 lemmas, entities, and noun chunks.
-
-    ner_map_path: map OntoTypes4 to IRI; defaults to local file `dat/ner_map.json`
         """
-        # load the NER map
-        ner_map: typing.Dict[ str, dict ] = OrderedDict(
-            json.loads(ner_map_path.read_text(encoding = "utf-8"))
-        )
-
         # parse each sentence
         lemma_iter: typing.Iterator[ typing.Tuple[ str, int ]] = pipe.get_ent_lemma_keys()
 
@@ -274,16 +262,7 @@ lemmas, entities, and noun chunks.
                 ic(sent_nodes)
 
             for node in sent_nodes:
-                # remap OntoTypes4 values to more general-purpose IRIs
-                if node.label is not None:
-                    iri: typing.Optional[ dict ] = ner_map.get(node.label)
-
-                    try:
-                        if iri is not None:
-                            node.label = iri["iri"]
-                    except TypeError as ex:
-                        ic(ex)
-                        print(f"unknown label: {node.label}")
+                node.label = pipe.kg.remap_ner(node.label)
 
                 # link parse elements, based on the token's head
                 head_idx: int = node.span.head.i

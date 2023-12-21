@@ -92,7 +92,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 factory = textgraphs.PipelineFactory(
                     spacy_model = textgraphs.SPACY_MODEL,
                     ner_model = textgraphs.NER_MODEL if llm_ner else None,
-                    kg = textgraphs.WikiDatum(
+                    kg = textgraphs.KGWikiMedia(
                         spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
                         dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
                         dbpedia_sparql_api = textgraphs.DBPEDIA_SPARQL_API,

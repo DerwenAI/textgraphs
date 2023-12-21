@@ -26,7 +26,7 @@ import spacy  # pylint: disable=E0401
 
 from .defaults import NER_MODEL, SPACY_MODEL
 from .elem import LinkedEntity, Node, NodeEnum, NounChunk, WikiEntity
-from .kg import WikiDatum
+from .kg import KGWikiMedia
 
 
 ######################################################################
@@ -76,7 +76,7 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
         tok_pipe: spacy.Language,
         spl_pipe: spacy.Language,
         ner_pipe: spacy.Language,
-        kg: WikiDatum,  # pylint: disable=C0103
+        kg: KGWikiMedia,  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ],
         ) -> None:
         """
@@ -94,7 +94,7 @@ Constructor.
         # `ner_doc` provides the merged-entity spans from NER
         self.ner_doc: spacy.tokens.Doc = ner_pipe(self.text)
 
-        self.kg: WikiDatum = kg  # pylint: disable=C0103
+        self.kg: KGWikiMedia = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
 
         # list of Node objects for each parsed token, in sequence
@@ -353,7 +353,7 @@ expensive operations with `spaCy`
         *,
         spacy_model: str = SPACY_MODEL,
         ner_model: typing.Optional[ str ] = NER_MODEL,
-        kg: WikiDatum = WikiDatum(),  # pylint: disable=C0103
+        kg: KGWikiMedia = KGWikiMedia(),  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ] = []
         ) -> None:
         """
@@ -363,7 +363,7 @@ Constructor which instantiates the `spaCy` pipelines:
   * `spl_pipe` -- DBPedia entity linking
   * `ner_pipe` -- with entities merged
         """
-        self.kg: WikiDatum = kg  # pylint: disable=C0103
+        self.kg: KGWikiMedia = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
 
         # determine the NER model to be used

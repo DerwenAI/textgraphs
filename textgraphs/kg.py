@@ -37,10 +37,85 @@ from .elem import WikiEntity
 ######################################################################
 ## class definitions
 
-class WikiDatum:  # pylint: disable=R0902,R0903
+class KGWikiMedia:  # pylint: disable=R0902,R0903
     """
 Manage access to WikiMedia-related APIs.
     """
+    NER_MAP: typing.Dict[ str, dict ] = OrderedDict({
+        "CARDINAL": {
+            "iri": "http://dbpedia.org/resource/Cardinal_number",
+            "definition": "Numerals that do not fall under another type"
+        },
+        "DATE": {
+            "iri": "http://dbpedia.org/ontology/date",
+            "definition": "Absolute or relative dates or periods"
+        },
+        "EVENT": {
+            "iri": "http://dbpedia.org/ontology/Event",
+            "definition": "Named hurricanes, battles, wars, sports events, etc."
+        },
+        "FAC": {
+            "iri": "http://dbpedia.org/ontology/Infrastructure",
+            "definition": "Buildings, airports, highways, bridges, etc."
+        },
+        "GPE": {
+            "iri": "http://dbpedia.org/ontology/Country",
+            "definition": "Countries, cities, states"
+        },
+        "LANGUAGE": {
+            "iri": "http://dbpedia.org/ontology/Language",
+            "definition": "Any named language"
+        },
+        "LAW": {
+            "iri": "http://dbpedia.org/ontology/Law",
+            "definition": "Named documents made into laws "
+        },
+        "LOC": {
+            "iri": "http://dbpedia.org/ontology/Place",
+            "definition": "Non-GPE locations, mountain ranges, bodies of water"
+        },
+        "MONEY": {
+            "iri": "http://dbpedia.org/resource/Money",
+            "definition": "Monetary values, including unit"
+        },
+        "NORP": {
+            "iri": "http://dbpedia.org/ontology/nationality",
+            "definition": "Nationalities or religious or political groups"
+        },
+        "ORDINAL": {
+            "iri": "http://dbpedia.org/resource/Ordinal_number",
+            "definition": "Ordinal number, i.e., first, second, etc."
+        },
+        "ORG": {
+            "iri": "http://dbpedia.org/ontology/Organisation",
+            "definition": "Companies, agencies, institutions, etc."
+        },
+        "PERCENT": {
+            "iri": "http://dbpedia.org/resource/Percentage",
+            "definition": "Percentage"
+        },
+        "PERSON": {
+            "iri": "http://dbpedia.org/ontology/Person",
+            "definition": "People, including fictional"
+        },
+        "PRODUCT": {
+            "iri": "http://dbpedia.org/ontology/product",
+            "definition": "Vehicles, weapons, foods, etc. (Not services)"
+        },
+        "QUANTITY": {
+            "iri": "http://dbpedia.org/resource/Quantity",
+            "definition": "Measurements, as of weight or distance"
+        },
+        "TIME": {
+            "iri": "http://dbpedia.org/ontology/time",
+            "definition": "Times smaller than a day"
+        },
+        "WORK OF ART": {
+            "iri": "http://dbpedia.org/resource/Work_of_art",
+            "definition": "Titles of books, songs, etc."
+        },
+    })
+
     NS_PREFIX: typing.Dict[ str, str ] = OrderedDict({
         "dbc": "http://dbpedia.org/resource/Category:",
         "dbt": "http://dbpedia.org/resource/Template:",
@@ -66,6 +141,7 @@ Manage access to WikiMedia-related APIs.
         dbpedia_search_api: str = DBPEDIA_SEARCH_API,
         dbpedia_sparql_api: str = DBPEDIA_SPARQL_API,
         wikidata_api: str = WIKIDATA_API,
+        ner_map: dict = NER_MAP,
         ns_prefix: dict = NS_PREFIX,
         ) -> None:
         """
@@ -75,12 +151,35 @@ Constructor.
         self.dbpedia_search_api: str = dbpedia_search_api
         self.dbpedia_sparql_api: str = dbpedia_sparql_api
         self.wikidata_api: str = wikidata_api
+        self.ner_map: dict = ner_map
         self.ns_prefix: dict = ns_prefix
 
         self.ent_cache: dict = {}
         self.iri_cache: dict = {}
 
         self.markdowner = markdown2.Markdown()
+
+
+    def remap_ner (
+        self,
+        label: typing.Optional[ str ],
+        ) -> typing.Optional[ str ]:
+        """
+Remap the OntoTypes4 values fromNER to more general-purpose IRIs.
+        """
+        if label is None:
+            return None
+
+        try:
+            iri: typing.Optional[ dict ] = self.ner_map.get(label)
+
+            if iri is not None:
+                return iri["iri"]
+        except TypeError as ex:
+            ic(ex)
+            print(f"unknown label: {label}")
+
+        return None
 
 
     def normalize_prefix (
@@ -491,7 +590,7 @@ LIMIT 1000
 
 
 if __name__ == "__main__":
-    kg: WikiDatum = WikiDatum()
+    kg: KGWikiMedia = KGWikiMedia()
 
     ## resolve rel => iri
     rel_list: typing.List[ str ] = [

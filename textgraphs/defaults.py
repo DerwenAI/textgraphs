@@ -23,7 +23,6 @@ MAX_SKIP: int = 11
 
 MREBEL_MODEL: str = "Babelscape/mrebel-large"
 
-NER_MAP: str = "dat/ner_map.json"
 NER_MODEL: str = "tomaarsen/span-marker-roberta-large-ontonotes5"
 
 OPENNRE_MIN_PROB: float = 0.9

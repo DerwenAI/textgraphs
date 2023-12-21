@@ -160,7 +160,7 @@ Enumeration for the kinds of edge relations
     CHU = 1  # `spaCy` noun chunk
     INF = 2  # `REBEL` or `OpenNRE` inferred relation
     SYN = 3  # `sense2vec` inferred synonym
-    IRI = 4  # `DBPedia` or `Wikipdata` linked entity
+    IRI = 4  # `DBPedia` or `Wikidata` linked entity
 
     def __str__ (
         self
