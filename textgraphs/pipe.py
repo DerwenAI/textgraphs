@@ -26,11 +26,51 @@ import spacy  # pylint: disable=E0401
 
 from .defaults import NER_MODEL, SPACY_MODEL
 from .elem import LinkedEntity, Node, NodeEnum, NounChunk, WikiEntity
-from .kg import KGWikiMedia
 
 
 ######################################################################
 ## class definitions
+
+class KnowledgeGraph:
+    """
+Abstract base class for a _knowledge graph_ interface.
+    """
+
+    def remap_ner (
+        self,
+        label: typing.Optional[ str ],
+        ) -> typing.Optional[ str ]:
+        """
+Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
+        """
+        return label
+
+
+    def normalize_prefix (
+        self,
+        iri: str,
+        *,
+        debug: bool = False,  # pylint: disable=W0613
+        ) -> str:
+        """
+Normalize the given IRI to use the standard DBPedia namespace prefixes.
+        """
+        return iri
+
+
+    def resolve_rel_iri (
+        self,
+        rel: str,
+        *,
+        lang: str = "en",  # pylint: disable=W0613
+        debug: bool = False,  # pylint: disable=W0613
+        ) -> typing.Optional[ str ]:
+        """
+Resolve a `rel` string from a _relation extraction_ model which has
+been trained on this knowledge graph.
+        """
+        return rel
+
 
 class InferRel (abc.ABC):  # pylint: disable=R0903
     """
@@ -76,7 +116,7 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
         tok_pipe: spacy.Language,
         spl_pipe: spacy.Language,
         ner_pipe: spacy.Language,
-        kg: KGWikiMedia,  # pylint: disable=C0103
+        kg: KnowledgeGraph,  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ],
         ) -> None:
         """
@@ -94,7 +134,7 @@ Constructor.
         # `ner_doc` provides the merged-entity spans from NER
         self.ner_doc: spacy.tokens.Doc = ner_pipe(self.text)
 
-        self.kg: KGWikiMedia = kg  # pylint: disable=C0103
+        self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
 
         # list of Node objects for each parsed token, in sequence
@@ -227,7 +267,7 @@ entity linking results, which defaults to the `DBPedia Spotlight` service.
                     count: int = int(ent._.dbpedia_raw_result["@support"])
 
                     if tok.pos == "PROPN" and prob >= min_similarity:
-                        kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(
+                        kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                             ent.text,
                             debug = debug,
                         )
@@ -271,7 +311,7 @@ Iterator for the results of using DBPedia Search directly for entity linking.
         """
         for i, node in enumerate(nodes):
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
-                kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(
+                kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                     node.text,
                     debug = debug,
                 )
@@ -353,7 +393,7 @@ expensive operations with `spaCy`
         *,
         spacy_model: str = SPACY_MODEL,
         ner_model: typing.Optional[ str ] = NER_MODEL,
-        kg: KGWikiMedia = KGWikiMedia(),  # pylint: disable=C0103
+        kg: KnowledgeGraph = KnowledgeGraph(),  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ] = []
         ) -> None:
         """
@@ -363,7 +403,7 @@ Constructor which instantiates the `spaCy` pipelines:
   * `spl_pipe` -- DBPedia entity linking
   * `ner_pipe` -- with entities merged
         """
-        self.kg: KGWikiMedia = kg  # pylint: disable=C0103
+        self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
 
         # determine the NER model to be used
@@ -421,7 +461,7 @@ Constructor which instantiates the `spaCy` pipelines:
         self.spl_pipe.add_pipe(
             "dbpedia_spotlight",
             config = {
-                "dbpedia_rest_endpoint": kg.spotlight_api,
+                "dbpedia_rest_endpoint": kg.spotlight_api,  # type: ignore
             },
         )
 

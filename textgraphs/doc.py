@@ -369,7 +369,7 @@ otherwise construct a new node for this linked entity.
         """
 Perform secondary _entity linking_, e.g., based on Wikidata API.
         """
-        wd_ent: typing.Optional[ WikiEntity ] = pipe.kg.wikidata_search(
+        wd_ent: typing.Optional[ WikiEntity ] = pipe.kg.wikidata_search(  # type: ignore
             link.kg_ent.label,
             debug = debug,
         )

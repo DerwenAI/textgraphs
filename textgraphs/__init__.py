@@ -17,9 +17,11 @@ from .doc import TextGraphs
 
 from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum, WikiEntity
 
+from .graph import SimpleGraph
+
 from .kg import KGWikiMedia
 
-from .pipe import InferRel, Pipeline, PipelineFactory
+from .pipe import InferRel, KnowledgeGraph, Pipeline, PipelineFactory
 
 from .rel import InferRel_OpenNRE, InferRel_Rebel
 

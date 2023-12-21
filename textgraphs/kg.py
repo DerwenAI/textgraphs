@@ -32,12 +32,13 @@ import requests  # type: ignore  # pylint: disable=E0401
 from .defaults import DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, DBPEDIA_SPOTLIGHT_API, \
     WIKIDATA_API
 from .elem import WikiEntity
+from .pipe import KnowledgeGraph
 
 
 ######################################################################
 ## class definitions
 
-class KGWikiMedia:  # pylint: disable=R0902,R0903
+class KGWikiMedia (KnowledgeGraph):  # pylint: disable=R0902,R0903
     """
 Manage access to WikiMedia-related APIs.
     """
@@ -165,7 +166,7 @@ Constructor.
         label: typing.Optional[ str ],
         ) -> typing.Optional[ str ]:
         """
-Remap the OntoTypes4 values fromNER to more general-purpose IRIs.
+Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
         """
         if label is None:
             return None
@@ -211,6 +212,9 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
         # normalization failed
         return iri
 
+
+    ######################################################################
+    ## customized per KG instance
 
     def _wikidata_endpoint (
         self,
