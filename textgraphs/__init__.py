@@ -21,6 +21,8 @@ from .graph import SimpleGraph
 
 from .kg import KGWikiMedia
 
+from .ner import NERSpanMarker
+
 from .pipe import Component, InferRel, KnowledgeGraph, Pipeline, PipelineFactory
 
 from .rel import InferRel_OpenNRE, InferRel_Rebel

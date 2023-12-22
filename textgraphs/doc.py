@@ -89,7 +89,6 @@ for each text input, which are typically paragraph-length.
         """
         return self.factory.create_pipeline(
             text_input,
-            self.lemma_graph,
         )
 
 
@@ -405,6 +404,7 @@ concurrently by running an async queue.
         producer_tasks: typing.List[ asyncio.Task ] = [
             asyncio.create_task(
                 producer.gen_triples_async(  # type: ignore
+                    self,
                     pipe,
                     queue,
                     debug = debug,
@@ -453,7 +453,7 @@ Gather triples representing inferred relations and build edges.
         inferred_edges: typing.List[ Edge ] = [
             self._infer_rel_construct_edge(src, iri, dst, debug = debug)
             for infer_rel in pipe.infer_rels
-            for src, iri, dst in infer_rel.gen_triples(pipe, debug = debug)
+            for src, iri, dst in infer_rel.gen_triples(self, pipe, debug = debug)
         ]
 
         # update the graph

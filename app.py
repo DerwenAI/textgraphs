@@ -10,6 +10,7 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 
 import pathlib
 import time
+import typing
 
 import matplotlib.pyplot as plt  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
@@ -56,7 +57,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
         )
 
         link_ents = st.checkbox(
-            "link entities using: Spotlight, WikiMedia API",
+            "link entities using: DBPedia Spotlight, WikiMedia API",
             value = False,
         )
 
@@ -88,15 +89,24 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                         ),
                     ]
 
+            ner: typing.Optional[ textgraphs.Component ] = None
+
+            if llm_ner:
+                ner = textgraphs.NERSpanMarker(
+                    ner_model = textgraphs.NER_MODEL,
+                )
+
             tg: textgraphs.TextGraphs = textgraphs.TextGraphs(
                 factory = textgraphs.PipelineFactory(
                     spacy_model = textgraphs.SPACY_MODEL,
-                    ner_model = textgraphs.NER_MODEL if llm_ner else None,
+                    ner = ner,
                     kg = textgraphs.KGWikiMedia(
                         spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
                         dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,
                         dbpedia_sparql_api = textgraphs.DBPEDIA_SPARQL_API,
                         wikidata_api = textgraphs.WIKIDATA_API,
+                        min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
+                        min_similarity = textgraphs.DBPEDIA_MIN_SIM,
                     ),
                     infer_rels = infer_rels,
                 ),
@@ -162,8 +172,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
                     tg.perform_entity_linking(
                         pipe,
-                        min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
-                        min_similarity = textgraphs.DBPEDIA_MIN_SIM,
                         debug = False,
                     )
 

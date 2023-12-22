@@ -41,7 +41,7 @@ After the war, Werner fled to America to become famous.
         tg: textgraphs.TextGraphs = textgraphs.TextGraphs(
             factory = textgraphs.PipelineFactory(
                 spacy_model = textgraphs.SPACY_MODEL,
-                ner_model = None, #textgraphs.NER_MODEL,
+                ner = None, #textgraphs.NERSpanMarker(),
                 kg = textgraphs.KGWikiMedia(
                     spotlight_api = textgraphs.DBPEDIA_SPOTLIGHT_API,
                     dbpedia_search_api = textgraphs.DBPEDIA_SEARCH_API,

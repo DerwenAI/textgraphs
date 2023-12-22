@@ -24,7 +24,7 @@ from icecream import ic  # pylint: disable=E0401,W0611
 import networkx as nx  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
-from .defaults import NER_MODEL, SPACY_MODEL
+from .defaults import SPACY_MODEL
 from .elem import Node, NodeEnum, NounChunk
 from .graph import SimpleGraph
 
@@ -120,6 +120,7 @@ Abstract base class for a _relation extraction_ model wrapper.
     @abc.abstractmethod
     def gen_triples (
         self,
+        graph: SimpleGraph,
         pipe: "Pipeline",
         *,
         debug: bool = False,
@@ -132,6 +133,7 @@ Infer relations as triples through a generator _iteratively_.
 
     async def gen_triples_async (
         self,
+        graph: SimpleGraph,
         pipe: "Pipeline",
         queue: asyncio.Queue,
         *,
@@ -140,7 +142,7 @@ Infer relations as triples through a generator _iteratively_.
         """
 Infer relations as triples produced to a queue _concurrently_.
         """
-        for src, iri, dst in self.gen_triples(pipe, debug = debug):
+        for src, iri, dst in self.gen_triples(graph, pipe, debug = debug):
             await queue.put(( src, iri, dst, ))
 
 
@@ -152,10 +154,9 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
     def __init__ (  # pylint: disable=R0913
         self,
         text_input: str,
-        lemma_graph: nx.MultiDiGraph,
         tok_pipe: spacy.Language,
-        spl_pipe: spacy.Language,
         ner_pipe: spacy.Language,
+        aux_pipe: spacy.Language,
         kg: KnowledgeGraph,  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ],
         ) -> None:
@@ -163,16 +164,15 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
 Constructor.
         """
         self.text: str = text_input
-        self.lemma_graph: nx.MultiDiGraph = lemma_graph
 
         # `tok_doc` provides a stream of individual tokens
         self.tok_doc: spacy.tokens.Doc = tok_pipe(self.text)
 
-        # `spl_doc` provides span re-indexing for Spotlight-style entity linking
-        self.spl_doc: spacy.tokens.Doc = spl_pipe(self.text)
-
         # `ner_doc` provides the merged-entity spans from NER
         self.ner_doc: spacy.tokens.Doc = ner_pipe(self.text)
+
+        # `aux_doc` e.g.,  span re-indexing for Spotlight entity linking
+        self.aux_doc: spacy.tokens.Doc = aux_pipe(self.text)
 
         self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
@@ -268,6 +268,7 @@ Link any noun chunks which are not already subsumed by named entities.
 
     def iter_entity_pairs (
         self,
+        graph: SimpleGraph,
         max_skip: int,
         *,
         debug: bool = True,
@@ -281,7 +282,7 @@ Iterator for entity pairs for which the algorithm infers relations.
             if node.kind in [ NodeEnum.ENT ]
         ]
 
-        lemma_graph_view: nx.MultiGraph = self.lemma_graph.to_undirected(
+        lemma_graph_view: nx.MultiGraph = graph.lemma_graph.to_undirected(
             as_view = True,
         )
 
@@ -322,7 +323,7 @@ expensive operations with `spaCy`
         self,
         *,
         spacy_model: str = SPACY_MODEL,
-        ner_model: typing.Optional[ str ] = NER_MODEL,
+        ner: typing.Optional[ Component ] = None,
         kg: KnowledgeGraph = KnowledgeGraph(),  # pylint: disable=C0103
         infer_rels: typing.List[ InferRel ] = []
         ) -> None:
@@ -330,16 +331,17 @@ expensive operations with `spaCy`
 Constructor which instantiates the `spaCy` pipelines:
 
   * `tok_pipe` -- regular generator for parsed tokens
-  * `spl_pipe` -- spotlight entity linking
   * `ner_pipe` -- with entities merged
+  * `aux_pipe` -- spotlight entity linking
         """
+        self.ner: typing.Optional[ Component ] = ner
         self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels
 
         # determine the NER model to be used
         exclude: typing.List[ str ] = []
 
-        if ner_model is not None:
+        if self.ner is not None:
             exclude.append("ner")
 
         # build the pipelines
@@ -354,44 +356,22 @@ Constructor which instantiates the `spaCy` pipelines:
             exclude = exclude,
         )
 
-        self.spl_pipe = spacy.load(
-            spacy_model,
-            exclude = exclude,
-        )
-
         self.ner_pipe = spacy.load(
             spacy_model,
             exclude = exclude,
         )
 
+        self.aux_pipe = spacy.load(
+            spacy_model,
+            exclude = exclude,
+        )
+
         # add NER
-        if ner_model is not None:
-            # REFACTOR
-            self.tok_pipe.add_pipe(
-                "span_marker",
-                config = {
-                    "model": ner_model,
-                },
-            )
+        if self.ner is not None:
+            self.ner.augment_pipe(self)
 
-            # REFACTOR
-            self.spl_pipe.add_pipe(
-                "span_marker",
-                config = {
-                    "model": ner_model,
-                },
-            )
-
-            # REFACTOR
-            self.ner_pipe.add_pipe(
-                "span_marker",
-                config = {
-                    "model": ner_model,
-                },
-            )
-
-        # `spl_pipe` only: KG entity linking
-        kg.augment_pipe(self)
+        # `aux_pipe` only: entity linking
+        self.kg.augment_pipe(self)
 
         # `ner_pipe` only: merge entities
         self.ner_pipe.add_pipe(
@@ -402,17 +382,15 @@ Constructor which instantiates the `spaCy` pipelines:
     def create_pipeline (
         self,
         text_input: str,
-        lemma_graph: nx.MultiDiGraph,
         ) -> Pipeline:
         """
 Instantiate the document pipelines needed to parse the input text.
         """
         pipe: Pipeline = Pipeline(
             text_input,
-            lemma_graph,
             self.tok_pipe,
-            self.spl_pipe,
             self.ner_pipe,
+            self.aux_pipe,
             self.kg,
             self.infer_rels,
         )

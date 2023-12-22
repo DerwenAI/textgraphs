@@ -18,6 +18,7 @@ import transformers  # pylint: disable=E0401
 
 from .defaults import MAX_SKIP, MREBEL_MODEL, OPENNRE_MIN_PROB, OPENNRE_MODEL
 from .elem import Node
+from .graph import SimpleGraph
 from .pipe import InferRel, Pipeline
 
 
@@ -47,6 +48,7 @@ Constructor.
 
     def gen_triples (
         self,
+        graph: SimpleGraph,
         pipe: Pipeline,
         *,
         debug: bool = False,
@@ -55,7 +57,7 @@ Constructor.
 Iterate on entity pairs to drive `OpenNRE`, inferring relations
 represented as triples which get produced by a generator.
         """
-        for src, dst in pipe.iter_entity_pairs(self.max_skip, debug = debug):
+        for src, dst in pipe.iter_entity_pairs(graph, self.max_skip, debug = debug):
             rel, prob = self.nre_pipeline.infer({  # type: ignore
                 "text": pipe.text,
                 "h": { "pos": src.get_pos() },
@@ -207,6 +209,7 @@ Parse the generated text and extract its triplets.
 
     def gen_triples (
         self,
+        graph: SimpleGraph,
         pipe: Pipeline,
         *,
         debug: bool = False,

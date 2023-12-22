@@ -47,6 +47,9 @@ class KGWikiMedia (KnowledgeGraph):  # pylint: disable=R0902,R0903
     """
 Manage access to WikiMedia-related APIs.
     """
+    REL_ISA: str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    REL_SAME: str = "http://www.w3.org/2002/07/owl#sameAs"
+
     NER_MAP: typing.Dict[ str, dict ] = OrderedDict({
         "CARDINAL": {
             "iri": "http://dbpedia.org/resource/Cardinal_number",
@@ -134,7 +137,8 @@ Manage access to WikiMedia-related APIs.
         "dbpedia-commons": "http://commons.dbpedia.org/resource/",
         "dbpedia-wikicompany": "http://dbpedia.openlinksw.com/wikicompany/",
         "dbpedia-wikidata": "http://wikidata.dbpedia.org/resource/",
-        "wd": "https://www.wikidata.org/",
+        "wd": "http://www.wikidata.org/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         "schema": "https://schema.org/",
         "owl": "http://www.w3.org/2002/07/owl#",
     })
@@ -177,7 +181,7 @@ Constructor.
         """
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
         """
-        factory.spl_pipe.add_pipe(
+        factory.aux_pipe.add_pipe(
             "dbpedia_spotlight",
             config = {
                 "dbpedia_rest_endpoint": self.spotlight_api,  # type: ignore
@@ -258,7 +262,7 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
                 graph,
                 pipe,
                 link,
-                "dbpedia",
+                self.REL_ISA,
                 debug = debug,
             )
 
@@ -280,7 +284,7 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
                 graph,
                 pipe,
                 link,
-                "dbpedia",
+                self.REL_ISA,
                 debug = debug,
             )
 
@@ -584,7 +588,7 @@ Perform a DBPedia API search.
             return None
 
 
-    def dbpedia_sparql_query (
+    def _dbpedia_sparql_query (
         self,
         sparql: str,
         *,
@@ -624,7 +628,7 @@ Perform a SPARQL query on DBPedia.
         return dat
 
 
-    def dbpedia_wikidata_equiv (
+    def _dbpedia_wikidata_equiv (
         self,
         dbpedia_iri: str,
         *,
@@ -646,7 +650,7 @@ WHERE {{
 LIMIT 1000
         """.strip().replace("\n", " ").format(dbpedia_iri)
 
-        dat: dict = self.dbpedia_sparql_query(
+        dat: dict = self._dbpedia_sparql_query(
             sparql,
             debug = debug,
         )
@@ -685,7 +689,7 @@ LIMIT 1000
 Iterator for the results of using `DBPedia Spotlight` to markup
 text with _entity linking_
         """
-        ents: typing.List[ spacy.tokens.span.Span ] = list(pipe.spl_doc.ents)
+        ents: typing.List[ spacy.tokens.span.Span ] = list(pipe.aux_doc.ents)
 
         if debug:
             ic(ents)
@@ -705,7 +709,6 @@ text with _entity linking_
                 if debug:
                     ic(ent.start, tok_idx)
 
-                # REFACTOR
                 if ent.start == tok_idx:
                     if debug:
                         ic(ent.text, ent.start, len(ent))
@@ -884,18 +887,16 @@ Perform secondary _entity linking_, e.g., based on Wikidata API.
                 graph,
                 pipe,
                 wd_link,
-                "wikidata",
+                self.REL_ISA,
                 debug = debug,
             )
 
             # add an equivalency edge between the two linked entities
-            rel: str = "http://www.w3.org/2002/07/owl#sameAs"
-
             edge: Edge = graph.make_edge(  # type: ignore
                 src_node,
                 dst_node,
                 RelEnum.IRI,
-                rel,
+                self.REL_SAME,
                 wd_link.prob,
                 debug = debug,
             )
@@ -968,7 +969,7 @@ if __name__ == "__main__":
     for dbp_iri in dbp_iri_list:
         start_time = time.time()
 
-        wd_iri: str = kg.dbpedia_wikidata_equiv(
+        wd_iri: str = kg._dbpedia_wikidata_equiv(  # pylint: disable=W0212
             kg.normalize_prefix(dbp_iri, debug = False),  # type: ignore
             debug = False,
         )
