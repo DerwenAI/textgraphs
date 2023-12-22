@@ -29,7 +29,7 @@ import spacy  # pylint: disable=E0401
 @dataclass(order=False, frozen=False)
 class WikiEntity:  # pylint: disable=R0902
     """
-A data class representing a hit from a WikiMedia search.
+A data class representing a hit from a _knowledge graph_ search.
     """
     iri: str
     label: str

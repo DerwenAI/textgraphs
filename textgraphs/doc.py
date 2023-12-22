@@ -28,8 +28,8 @@ import pulp  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
 
-from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, PAGERANK_ALPHA
-from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum, WikiEntity
+from .defaults import PAGERANK_ALPHA
+from .elem import Edge, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
 from .pipe import Pipeline, PipelineFactory
 from .util import calc_quantile_bins, root_mean_square, stripe_column
@@ -298,180 +298,20 @@ lemmas, entities, and noun chunks.
     ######################################################################
     ## entity linking
 
-    def _make_link (
-        self,
-        pipe: Pipeline,
-        link: LinkedEntity,
-        rel: str,
-        *,
-        debug: bool = False,
-        ) -> Node:
-        """
-Link to previously constructed entity node;
-otherwise construct a new node for this linked entity.
-        """
-        if debug:
-            ic(link)
-
-        # special case of `make_node()`
-        if link.iri in self.nodes:
-            self.nodes[link.iri].count += 1
-
-        else:
-            self.nodes[link.iri] = Node(
-                len(self.nodes),
-                link.iri,
-                link.span,
-                link.kg_ent.descrip,
-                rel,
-                NodeEnum.IRI,
-                label = link.iri,
-                length = link.length,
-                count = 1,
-            )
-
-        src_node: Node = pipe.tokens[link.token_id]
-        src_node.annotated = True
-
-        dst_node: Node = self.nodes.get(link.iri)  # type: ignore
-
-        if debug:
-            ic(src_node, dst_node)
-
-        # back-link to the parsed entity object
-        pipe.tokens[link.token_id].entity.append(link)
-
-        # construct a directed edge between them
-        edge: Edge = self.make_edge(  # type: ignore
-            src_node,
-            dst_node,
-            RelEnum.IRI,
-            rel,
-            link.prob,
-            debug = debug,
-        )
-
-        if debug:
-            ic(edge)
-
-        # return the linked node
-        return dst_node
-
-
-    def _secondary_entity_linking (
-        self,
-        pipe: Pipeline,
-        link: LinkedEntity,
-        *,
-        min_similarity: float = DBPEDIA_MIN_SIM,
-        debug: bool = False,
-        ) -> typing.Optional[ Edge ]:
-        """
-Perform secondary _entity linking_, e.g., based on Wikidata API.
-        """
-        wd_ent: typing.Optional[ WikiEntity ] = pipe.kg.wikidata_search(  # type: ignore
-            link.kg_ent.label,
-            debug = debug,
-        )
-
-        if debug:
-            ic(link.span, wd_ent)
-
-        if wd_ent is not None and wd_ent.prob > min_similarity:
-            wd_link: LinkedEntity = LinkedEntity(
-                link.span,
-                wd_ent.iri,
-                len(link.span),
-                "wikidata",
-                wd_ent.prob,
-                link.token_id,
-                wd_ent,
-            )
-
-            if debug:
-                ic(wd_link)
-
-            src_node: Node = self.nodes.get(link.iri)  # type: ignore
-
-            dst_node: Node = self._make_link(
-                pipe,
-                wd_link,
-                "wikidata",
-                debug = debug,
-            )
-
-            # add an equivalency edge between the two linked entities
-            rel: str = "http://www.w3.org/2002/07/owl#sameAs"
-
-            edge: Edge = self.make_edge(  # type: ignore
-                src_node,
-                dst_node,
-                RelEnum.IRI,
-                rel,
-                wd_link.prob,
-                debug = debug,
-            )
-
-            # return the constructed edge
-            return edge
-
-        return None
-
-
     def perform_entity_linking (
         self,
         pipe: Pipeline,
         *,
-        min_alias: float = DBPEDIA_MIN_ALIAS,
-        min_similarity: float = DBPEDIA_MIN_SIM,
         debug: bool = False,
         ) -> None:
         """
-Perform _entity linking_ based on "spotlight" and other services.
+Perform _entity linking_ based on the `KnowledgeGraph` object.
         """
-        # first pass: use "spotlight" API to markup text
-        iter_ents: typing.Iterator[ LinkedEntity ] = pipe.link_spotlight_entities(
-            min_alias,
-            min_similarity,
-            debug = debug
+        pipe.kg.perform_entity_linking(
+            self,
+            pipe,
+            debug = debug,
         )
-
-        for link in iter_ents:
-            _ = self._make_link(
-                pipe,
-                link,
-                "dbpedia",
-                debug = debug,
-            )
-
-            _ = self._secondary_entity_linking(
-                pipe,
-                link,
-                min_similarity = min_similarity,
-                debug = debug,
-            )
-
-        # second pass: use KG search on entities which weren't linked by Spotlight
-        iter_ents = pipe.link_kg_search_entities(
-            list(self.nodes.values()),
-            min_alias,
-            debug = debug
-        )
-
-        for link in iter_ents:
-            _ = self._make_link(
-                pipe,
-                link,
-                "dbpedia",
-                debug = debug,
-            )
-
-            _ = self._secondary_entity_linking(
-                pipe,
-                link,
-                min_similarity = min_similarity,
-                debug = debug,
-            )
 
 
     ######################################################################

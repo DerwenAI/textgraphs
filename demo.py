@@ -94,8 +94,6 @@ After the war, Werner fled to America to become famous.
 
         tg.perform_entity_linking(
             pipe,
-            min_alias = textgraphs.DBPEDIA_MIN_ALIAS,
-            min_similarity = textgraphs.DBPEDIA_MIN_SIM,
             debug = debug,
         )
 

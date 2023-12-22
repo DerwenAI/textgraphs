@@ -25,7 +25,8 @@ import networkx as nx  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
 from .defaults import NER_MODEL, SPACY_MODEL
-from .elem import LinkedEntity, Node, NodeEnum, NounChunk, WikiEntity
+from .elem import Node, NodeEnum, NounChunk
+from .graph import SimpleGraph
 
 
 ######################################################################
@@ -53,9 +54,22 @@ Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
         debug: bool = False,  # pylint: disable=W0613
         ) -> str:
         """
-Normalize the given IRI to use the standard DBPedia namespace prefixes.
+Normalize the given IRI to use standard namespace prefixes.
         """
         return iri
+
+
+    def perform_entity_linking (
+        self,
+        graph: SimpleGraph,
+        pipe: "Pipeline",
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Perform _entity linking_ based on "spotlight" and other services.
+        """
+        pass  # pylint: disable=W0107
 
 
     def resolve_rel_iri (
@@ -224,116 +238,6 @@ Link any noun chunks which are not already subsumed by named entities.
 
 
     ######################################################################
-    ## entity linking
-
-    def link_spotlight_entities (  # pylint: disable=R0914
-        self,
-        min_alias: float,
-        min_similarity: float,
-        *,
-        debug: bool = False,
-        ) -> typing.Iterator[ LinkedEntity ]:
-        """
-Iterator for the results of using a "spotlight" to markup text with
-entity linking results, which defaults to the `DBPedia Spotlight` service.
-        """
-        ents: typing.List[ spacy.tokens.span.Span ] = list(self.spl_doc.ents)
-
-        if debug:
-            ic(ents)
-
-        ent_idx: int = 0
-        tok_idx: int = 0
-
-        for i, tok in enumerate(self.tokens):  # pylint: disable=R1702
-            if debug:
-                print()
-                ic(tok_idx, tok.text, tok.pos)
-                ic(ent_idx, len(ents))
-
-            if ent_idx < len(ents):
-                ent = ents[ent_idx]
-
-                if debug:
-                    ic(ent.start, tok_idx)
-
-                if ent.start == tok_idx:
-                    if debug:
-                        ic(ent.text, ent.start, len(ent))
-                        ic(ent.kb_id_, ent._.dbpedia_raw_result["@similarityScore"])
-                        ic(ent._.dbpedia_raw_result)
-
-                    prob: float = float(ent._.dbpedia_raw_result["@similarityScore"])
-                    count: int = int(ent._.dbpedia_raw_result["@support"])
-
-                    if tok.pos == "PROPN" and prob >= min_similarity:
-                        kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
-                            ent.text,
-                            debug = debug,
-                        )
-
-                        if debug:
-                            ic(kg_ent)
-
-                        if kg_ent is not None and kg_ent.prob > min_alias:  # type: ignore
-                            iri: str = ent.kb_id_
-
-                            dbp_link: LinkedEntity = LinkedEntity(
-                                ent,
-                                iri,
-                                len(ent),
-                                "dbpedia",
-                                prob,
-                                i,
-                                kg_ent,  # type: ignore
-                                count = count,
-                            )
-
-                            if debug:
-                                ic("found", dbp_link)
-
-                            yield dbp_link
-
-                    ent_idx += 1
-
-            tok_idx += tok.length
-
-
-    def link_kg_search_entities (
-        self,
-        nodes: list,
-        min_alias: float,
-        *,
-        debug: bool = False,
-        ) -> typing.Iterator[ LinkedEntity ]:
-        """
-Iterator for the results of using DBPedia Search directly for entity linking.
-        """
-        for i, node in enumerate(nodes):
-            if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
-                kg_ent: typing.Optional[ WikiEntity ] = self.kg.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
-                    node.text,
-                    debug = debug,
-                )
-
-                if kg_ent.prob > min_alias:  # type: ignore
-                    dbp_link: LinkedEntity = LinkedEntity(
-                        node.span,
-                        kg_ent.iri,  # type: ignore
-                        node.length,
-                        "dbpedia",
-                        kg_ent.prob,  # type: ignore
-                        i,
-                        kg_ent,  # type: ignore
-                    )
-
-                    if debug:
-                        ic("found", dbp_link)
-
-                    yield dbp_link
-
-
-    ######################################################################
     ## relation extraction
 
     def iter_entity_pairs (
@@ -400,7 +304,7 @@ expensive operations with `spaCy`
 Constructor which instantiates the `spaCy` pipelines:
 
   * `tok_pipe` -- regular generator for parsed tokens
-  * `spl_pipe` -- DBPedia entity linking
+  * `spl_pipe` -- spotlight entity linking
   * `ner_pipe` -- with entities merged
         """
         self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
@@ -413,7 +317,7 @@ Constructor which instantiates the `spaCy` pipelines:
             exclude.append("ner")
 
         # build the pipelines
-        # NB: `spaCy` team doesn't quite get the PEP 621 restrictions:
+        # NB: `spaCy` team doesn't quite get the PEP 621 restrictions which PyPa mangled:
         # https://github.com/explosion/spaCy/issues/3536
         # https://github.com/explosion/spaCy/issues/4592#issuecomment-704373657
         if not spacy.util.is_package(spacy_model):
@@ -436,6 +340,7 @@ Constructor which instantiates the `spaCy` pipelines:
 
         # add NER
         if ner_model is not None:
+            # REFACTOR
             self.tok_pipe.add_pipe(
                 "span_marker",
                 config = {
@@ -443,6 +348,7 @@ Constructor which instantiates the `spaCy` pipelines:
                 },
             )
 
+            # REFACTOR
             self.spl_pipe.add_pipe(
                 "span_marker",
                 config = {
@@ -450,6 +356,7 @@ Constructor which instantiates the `spaCy` pipelines:
                 },
             )
 
+            # REFACTOR
             self.ner_pipe.add_pipe(
                 "span_marker",
                 config = {
@@ -457,6 +364,7 @@ Constructor which instantiates the `spaCy` pipelines:
                 },
             )
 
+        # REFACTOR
         # `spl_pipe` only: KG entity linking
         self.spl_pipe.add_pipe(
             "dbpedia_spotlight",
