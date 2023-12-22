@@ -27,7 +27,7 @@ import spacy  # pylint: disable=E0401
 ## class definitions
 
 @dataclass(order=False, frozen=False)
-class WikiEntity:  # pylint: disable=R0902
+class KGSearchHit:  # pylint: disable=R0902
     """
 A data class representing a hit from a _knowledge graph_ search.
     """
@@ -49,7 +49,7 @@ A data class representing one linked entity.
     rel: str
     prob: float
     token_id: int
-    kg_ent: WikiEntity
+    kg_ent: KGSearchHit
     count: int = 1
 
 

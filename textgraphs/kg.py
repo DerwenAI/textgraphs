@@ -35,9 +35,9 @@ import spacy  # pylint: disable=E0401
 from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
     DBPEDIA_SEARCH_API, DBPEDIA_SPARQL_API, DBPEDIA_SPOTLIGHT_API, \
     WIKIDATA_API
-from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum, WikiEntity
+from .elem import Edge, KGSearchHit, LinkedEntity, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
-from .pipe import KnowledgeGraph, Pipeline
+from .pipe import KnowledgeGraph, Pipeline, PipelineFactory
 
 
 ######################################################################
@@ -168,6 +168,21 @@ Constructor.
         self.iri_cache: dict = {}
 
         self.markdowner = markdown2.Markdown()
+
+
+    def augment_pipe (
+        self,
+        factory: PipelineFactory,
+        ) -> None:
+        """
+Encapsulate a `spaCy` call to `add_pipe()` configuration.
+        """
+        factory.spl_pipe.add_pipe(
+            "dbpedia_spotlight",
+            config = {
+                "dbpedia_rest_endpoint": self.spotlight_api,  # type: ignore
+            },
+        )
 
 
     def remap_ner (
@@ -442,7 +457,7 @@ Convert markdown to plain text.
         *,
         lang: str = "en",
         debug: bool = False,
-        ) -> typing.Optional[ WikiEntity ]:
+        ) -> typing.Optional[ KGSearchHit ]:
         """
 Query the Wikidata search API.
         """
@@ -471,7 +486,7 @@ Query the Wikidata search API.
                 ic(query, url, label, descrip, prob)
 
             # return a linked entity
-            wiki_ent: WikiEntity = WikiEntity(
+            wiki_ent: KGSearchHit = KGSearchHit(
                 url,
                 label,
                 descrip,
@@ -494,7 +509,7 @@ Query the Wikidata search API.
         *,
         lang: str = "en",
         debug: bool = False,
-        ) -> typing.Optional[ WikiEntity ]:
+        ) -> typing.Optional[ KGSearchHit ]:
         """
 Perform a DBPedia API search.
         """
@@ -551,7 +566,7 @@ Perform a DBPedia API search.
             if debug:
                 ic(iri, label, descrip, aliases, prob, best_match)
 
-            ent: WikiEntity = WikiEntity(
+            ent: KGSearchHit = KGSearchHit(
                 iri,
                 label,
                 descrip,
@@ -701,7 +716,7 @@ text with _entity linking_
                     count: int = int(ent._.dbpedia_raw_result["@support"])
 
                     if tok.pos == "PROPN" and prob >= self.min_similarity:
-                        kg_ent: typing.Optional[ WikiEntity ] = self._dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
+                        kg_ent: typing.Optional[ KGSearchHit ] = self._dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                             ent.text,
                             debug = debug,
                         )
@@ -747,7 +762,7 @@ _entity linking_.
 
         for i, node in enumerate(node_list):
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
-                kg_ent: typing.Optional[ WikiEntity ] = self._dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
+                kg_ent: typing.Optional[ KGSearchHit ] = self._dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                     node.text,
                     debug = debug,
                 )
@@ -841,7 +856,7 @@ otherwise construct a new node for this linked entity.
         """
 Perform secondary _entity linking_, e.g., based on Wikidata API.
         """
-        wd_ent: typing.Optional[ WikiEntity ] = self._wikidata_search(  # type: ignore
+        wd_ent: typing.Optional[ KGSearchHit ] = self._wikidata_search(  # type: ignore
             link.kg_ent.label,
             debug = debug,
         )
@@ -932,7 +947,7 @@ if __name__ == "__main__":
     for test_query in query_list:
         start_time = time.time()
 
-        _kg_ent: WikiEntity = kg._dbpedia_search_entity(  # type: ignore  # pylint: disable=W0212
+        _kg_ent: KGSearchHit = kg._dbpedia_search_entity(  # type: ignore  # pylint: disable=W0212
             test_query,
             debug = True,
         )

@@ -32,10 +32,36 @@ from .graph import SimpleGraph
 ######################################################################
 ## class definitions
 
-class KnowledgeGraph:
+class Component (abc.ABC):  # pylint: disable=R0903
     """
-Abstract base class for a _knowledge graph_ interface.
+Abstract base class for a `spaCy` pipeline component.
     """
+
+    @abc.abstractmethod
+    def augment_pipe (
+        self,
+        factory: "PipelineFactory",
+        ) -> None:
+        """
+Encapsulate a `spaCy` call to `add_pipe()` configuration.
+        """
+        raise NotImplementedError
+
+
+class KnowledgeGraph (Component):
+    """
+Base class for a _knowledge graph_ interface.
+    """
+
+    def augment_pipe (
+        self,
+        factory: "PipelineFactory",
+        ) -> None:
+        """
+Encapsulate a `spaCy` call to `add_pipe()` configuration.
+        """
+        pass  # pylint: disable=W0107
+
 
     def remap_ner (
         self,
@@ -142,7 +168,7 @@ Constructor.
         # `tok_doc` provides a stream of individual tokens
         self.tok_doc: spacy.tokens.Doc = tok_pipe(self.text)
 
-        # `spl_doc` provides span indexing for Spotlight entity linking
+        # `spl_doc` provides span re-indexing for Spotlight-style entity linking
         self.spl_doc: spacy.tokens.Doc = spl_pipe(self.text)
 
         # `ner_doc` provides the merged-entity spans from NER
@@ -364,14 +390,8 @@ Constructor which instantiates the `spaCy` pipelines:
                 },
             )
 
-        # REFACTOR
         # `spl_pipe` only: KG entity linking
-        self.spl_pipe.add_pipe(
-            "dbpedia_spotlight",
-            config = {
-                "dbpedia_rest_endpoint": kg.spotlight_api,  # type: ignore
-            },
-        )
+        kg.augment_pipe(self)
 
         # `ner_pipe` only: merge entities
         self.ner_pipe.add_pipe(

@@ -15,13 +15,13 @@ from .defaults import DBPEDIA_MIN_ALIAS, DBPEDIA_MIN_SIM, \
 
 from .doc import TextGraphs
 
-from .elem import Edge, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum, WikiEntity
+from .elem import Edge, KGSearchHit, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum
 
 from .graph import SimpleGraph
 
 from .kg import KGWikiMedia
 
-from .pipe import InferRel, KnowledgeGraph, Pipeline, PipelineFactory
+from .pipe import Component, InferRel, KnowledgeGraph, Pipeline, PipelineFactory
 
 from .rel import InferRel_OpenNRE, InferRel_Rebel
 
