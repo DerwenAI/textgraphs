@@ -13,12 +13,12 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 import typing
 
 from icecream import ic  # pylint: disable=E0401
+import networkx as nx  # pylint: disable=E0401
 import opennre  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
 
 from .defaults import MAX_SKIP, MREBEL_MODEL, OPENNRE_MIN_PROB, OPENNRE_MODEL
 from .elem import Node
-from .graph import SimpleGraph
 from .pipe import InferRel, Pipeline
 
 
@@ -48,7 +48,6 @@ Constructor.
 
     def gen_triples (
         self,
-        graph: SimpleGraph,
         pipe: Pipeline,
         *,
         debug: bool = False,
@@ -57,7 +56,21 @@ Constructor.
 Iterate on entity pairs to drive `OpenNRE`, inferring relations
 represented as triples which get produced by a generator.
         """
-        for src, dst in pipe.iter_entity_pairs(graph, self.max_skip, debug = debug):
+        node_list: list = [
+            node.node_id
+            for node in pipe.tokens
+        ]
+
+        pipe_graph: nx.MultiGraph = nx.MultiGraph()
+        pipe_graph.add_nodes_from(node_list)
+
+        pipe_graph.add_edges_from([
+            ( edge.src_node, edge.dst_node, )
+            for edge in pipe.edges
+            if edge is not None and edge.src_node in node_list and edge.dst_node in node_list
+        ])
+
+        for src, dst in pipe.iter_entity_pairs(pipe_graph, self.max_skip, debug = debug):
             rel, prob = self.nre_pipeline.infer({  # type: ignore
                 "text": pipe.text,
                 "h": { "pos": src.get_pos() },
@@ -209,7 +222,6 @@ Parse the generated text and extract its triplets.
 
     def gen_triples (
         self,
-        graph: SimpleGraph,
         pipe: Pipeline,
         *,
         debug: bool = False,

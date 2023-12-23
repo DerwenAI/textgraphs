@@ -844,6 +844,9 @@ otherwise construct a new node for this linked entity.
         if debug:
             ic(edge)
 
+        if edge is not None:
+            pipe.edges.append(edge)
+
         # return the linked node
         return dst_node
 
@@ -900,6 +903,9 @@ Perform secondary _entity linking_, e.g., based on Wikidata API.
                 wd_link.prob,
                 debug = debug,
             )
+
+            if edge is not None:
+                pipe.edges.append(edge)
 
             # return the constructed edge
             return edge

@@ -218,7 +218,7 @@ entities and lemmas that have already been linked in the lemma graph.
                     if debug:
                         ic(pipe.tokens[token_id])
 
-                    self.make_edge(
+                    edge: Edge = self.make_edge(
                         node,  # type: ignore
                         pipe.tokens[token_id],
                         RelEnum.CHU,
@@ -226,6 +226,9 @@ entities and lemmas that have already been linked in the lemma graph.
                         1.0,
                         debug = debug,
                     )
+
+                    if edge is not None:
+                        pipe.edges.append(edge)
 
 
     def collect_graph_elements (
@@ -240,6 +243,10 @@ entities and lemmas that have already been linked in the lemma graph.
 Collect the elements of a _lemma graph_ from the results of running
 the `textgraph` algorithm. These elements include: parse dependencies,
 lemmas, entities, and noun chunks.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.create_pipeline()`
         """
         # parse each sentence
         lemma_iter: typing.Iterator[ typing.Tuple[ str, int ]] = pipe.get_ent_lemma_keys()
@@ -272,7 +279,7 @@ lemmas, entities, and noun chunks.
                 if debug:
                     ic(node, len(sent_nodes), node.span.head.i, node.span.head.text, head_idx)
 
-                self.make_edge(
+                edge: Edge = self.make_edge(  # type: ignore
                     node,
                     sent_nodes[head_idx],
                     RelEnum.DEP,
@@ -280,6 +287,9 @@ lemmas, entities, and noun chunks.
                     1.0,
                     debug = debug,
                 )
+
+                if edge is not None:
+                    pipe.edges.append(edge)
 
                 # annotate src nodes which are subjects or direct objects
                 if node.span.dep_ in [ "nsubj", "pobj" ]:
@@ -305,6 +315,10 @@ lemmas, entities, and noun chunks.
         ) -> None:
         """
 Perform _entity linking_ based on the `KnowledgeGraph` object.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.collect_graph_elements()`
         """
         pipe.kg.perform_entity_linking(
             self,
@@ -315,26 +329,6 @@ Perform _entity linking_ based on the `KnowledgeGraph` object.
 
     ######################################################################
     ## relation extraction
-
-    def _infer_rel_update_graph (
-        self,
-        inferred_edges: typing.List[ Edge ],
-        ) -> None:
-        """
-Add edges to the _lemma graph_ from the inferred relations.
-        """
-        self.lemma_graph.add_edges_from([
-            (
-                edge.src_node,
-                edge.dst_node,
-                {
-                    "weight": edge.prob,
-                    "title": edge.rel,
-                },
-            )
-            for edge in inferred_edges
-        ])
-
 
     def _infer_rel_construct_edge (
         self,
@@ -397,6 +391,10 @@ Consume from queue: inferred relations represented as triples.
 Gather triples representing inferred relations and build edges,
 concurrently by running an async queue.
 <https://stackoverflow.com/questions/52582685/using-asyncio-queue-for-producer-consumer-flow>
+
+Make sure to call beforehand:
+
+  * `TextGraphs.collect_graph_elements()`
         """
         inferred_edges: typing.List[ Edge ] = []
         queue: asyncio.Queue = asyncio.Queue()
@@ -404,7 +402,6 @@ concurrently by running an async queue.
         producer_tasks: typing.List[ asyncio.Task ] = [
             asyncio.create_task(
                 producer.gen_triples_async(  # type: ignore
-                    self,
                     pipe,
                     queue,
                     debug = debug,
@@ -436,7 +433,7 @@ concurrently by running an async queue.
             ic("Queue: done consuming")
 
         # update the graph
-        self._infer_rel_update_graph(inferred_edges)
+        pipe.edges.extend(inferred_edges)
 
         return inferred_edges
 
@@ -449,15 +446,19 @@ concurrently by running an async queue.
         ) -> typing.List[ Edge ]:
         """
 Gather triples representing inferred relations and build edges.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.collect_graph_elements()`
         """
         inferred_edges: typing.List[ Edge ] = [
             self._infer_rel_construct_edge(src, iri, dst, debug = debug)
             for infer_rel in pipe.infer_rels
-            for src, iri, dst in infer_rel.gen_triples(self, pipe, debug = debug)
+            for src, iri, dst in infer_rel.gen_triples(pipe, debug = debug)
         ]
 
         # update the graph
-        self._infer_rel_update_graph(inferred_edges)
+        pipe.edges.extend(inferred_edges)
 
         return inferred_edges
 
@@ -603,6 +604,10 @@ stack-rank the nodes so that entities have priority over lemmas.
 
 Phrase ranks are normalized to sum to 1.0 and these now represent
 the ranked entities extracted from the document.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.collect_graph_elements()`
         """
         for node in self.nodes.values():
             nx_node = self.lemma_graph.nodes[node.node_id]
@@ -636,6 +641,10 @@ the ranked entities extracted from the document.
         ) -> typing.Iterator[ dict ]:
         """
 Return the entities extracted from the document.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.calc_phrase_ranks()`
         """
         for node in sorted(
                 [
@@ -665,5 +674,9 @@ Return the entities extracted from the document.
         ) -> pd.DataFrame:
         """
 Return the ranked extracted entities as a `pandas.DataFrame`
+
+Make sure to call beforehand:
+
+  * `TextGraphs.calc_phrase_ranks()`
         """
         return pd.DataFrame.from_dict(self.get_phrases(pipe))

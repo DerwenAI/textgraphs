@@ -179,17 +179,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 st.write(f"entity linking: {round(duration, 3)} sec")
 
 
-            ## construct the _lemma graph_
-            start_time = time.time()
-
-            tg.construct_lemma_graph(
-                debug = False,
-            )
-
-            duration = round(time.time() - start_time, 3)
-            st.write(f"construct graph: {round(duration, 3)} sec")
-
-
             ## perform relation extraction
             if infer_rel:
                 st.subheader("infer relations", divider = "rainbow")
@@ -220,6 +209,17 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
                 st.dataframe(df_rel)
                 st.write(f"relation extraction: {round(duration, 3)} sec, {len(df_rel)} edges")
+
+
+            ## construct the _lemma graph_
+            start_time = time.time()
+
+            tg.construct_lemma_graph(
+                debug = False,
+            )
+
+            duration = round(time.time() - start_time, 3)
+            st.write(f"construct graph: {round(duration, 3)} sec")
 
 
             ## rank the extracted entities

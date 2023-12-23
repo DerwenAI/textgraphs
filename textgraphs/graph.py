@@ -199,6 +199,10 @@ with parallel edges.
 Dump the _lemma graph_ as a JSON string in _node-link_ format,
 suitable for serialization and subsequent use in JavaScript,
 Neo4j, Graphistry, etc.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.calc_phrase_ranks()`
         """
         # populate the optional node properties
         for node in self.nodes.values():

@@ -101,17 +101,6 @@ After the war, Werner fled to America to become famous.
         print(f"{duration:7.3f} sec: entity linking")
 
 
-        ## construct the _lemma graph_
-        start_time = time.time()
-
-        tg.construct_lemma_graph(
-            debug = debug,
-        )
-
-        duration = round(time.time() - start_time, 3)
-        print(f"{duration:7.3f} sec: construct graph")
-
-
         ## perform concurrent relation extraction
         start_time = time.time()
 
@@ -150,6 +139,17 @@ After the war, Werner fled to America to become famous.
         ])
 
         ic(df_rel)
+
+
+        ## construct the _lemma graph_
+        start_time = time.time()
+
+        tg.construct_lemma_graph(
+            debug = debug,
+        )
+
+        duration = round(time.time() - start_time, 3)
+        print(f"{duration:7.3f} sec: construct graph")
 
 
         ## rank phrases

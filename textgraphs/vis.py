@@ -94,6 +94,10 @@ Constructor.
         """
 Prepare the structure of the `NetworkX` graph to use for building
 and returning a `PyVis` network to render.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.calc_phrase_ranks()`
         """
         for node in self.nodes.values():
             nx_node = self.lemma_graph.nodes[node.node_id]
@@ -151,6 +155,10 @@ and returning a `PyVis` network to render.
 Cluster the communities in the _lemma graph_, then draw a
 `NetworkX` graph of the notes with a specific color for each
 community.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.calc_phrase_ranks()`
         """
         # cluster the communities, using girvan-newman
         comm_iter: typing.Generator = nx.community.girvan_newman(
@@ -208,6 +216,10 @@ community.
         ) -> wordcloud.WordCloud:
         """
 Generate a tag cloud from the given phrases.
+
+Make sure to call beforehand:
+
+  * `TextGraphs.calc_phrase_ranks()`
         """
         terms: dict = {}
         max_weight: float = 0.0
