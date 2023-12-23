@@ -455,7 +455,7 @@ Convert markdown to plain text.
         return soup.get_text().strip()
 
 
-    def _wikidata_search (
+    def wikidata_search (
         self,
         query: str,
         *,
@@ -507,7 +507,7 @@ Query the Wikidata search API.
         return None
 
 
-    def _dbpedia_search_entity (  # pylint: disable=R0914
+    def dbpedia_search_entity (  # pylint: disable=R0914
         self,
         query: str,
         *,
@@ -588,7 +588,7 @@ Perform a DBPedia API search.
             return None
 
 
-    def _dbpedia_sparql_query (
+    def dbpedia_sparql_query (
         self,
         sparql: str,
         *,
@@ -628,7 +628,7 @@ Perform a SPARQL query on DBPedia.
         return dat
 
 
-    def _dbpedia_wikidata_equiv (
+    def dbpedia_wikidata_equiv (
         self,
         dbpedia_iri: str,
         *,
@@ -650,7 +650,7 @@ WHERE {{
 LIMIT 1000
         """.strip().replace("\n", " ").format(dbpedia_iri)
 
-        dat: dict = self._dbpedia_sparql_query(
+        dat: dict = self.dbpedia_sparql_query(
             sparql,
             debug = debug,
         )
@@ -719,7 +719,7 @@ text with _entity linking_
                     count: int = int(ent._.dbpedia_raw_result["@support"])
 
                     if tok.pos == "PROPN" and prob >= self.min_similarity:
-                        kg_ent: typing.Optional[ KGSearchHit ] = self._dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
+                        kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                             ent.text,
                             debug = debug,
                         )
@@ -765,7 +765,7 @@ _entity linking_.
 
         for i, node in enumerate(node_list):
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
-                kg_ent: typing.Optional[ KGSearchHit ] = self._dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
+                kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                     node.text,
                     debug = debug,
                 )
@@ -859,7 +859,7 @@ otherwise construct a new node for this linked entity.
         """
 Perform secondary _entity linking_, e.g., based on Wikidata API.
         """
-        wd_ent: typing.Optional[ KGSearchHit ] = self._wikidata_search(  # type: ignore
+        wd_ent: typing.Optional[ KGSearchHit ] = self.wikidata_search(  # type: ignore
             link.kg_ent.label,
             debug = debug,
         )
@@ -948,7 +948,7 @@ if __name__ == "__main__":
     for test_query in query_list:
         start_time = time.time()
 
-        _kg_ent: KGSearchHit = kg._dbpedia_search_entity(  # type: ignore  # pylint: disable=W0212
+        _kg_ent: KGSearchHit = kg.dbpedia_search_entity(  # type: ignore  # pylint: disable=W0212
             test_query,
             debug = True,
         )
@@ -969,7 +969,7 @@ if __name__ == "__main__":
     for dbp_iri in dbp_iri_list:
         start_time = time.time()
 
-        wd_iri: str = kg._dbpedia_wikidata_equiv(  # pylint: disable=W0212
+        wd_iri: str = kg.dbpedia_wikidata_equiv(  # pylint: disable=W0212
             kg.normalize_prefix(dbp_iri, debug = False),  # type: ignore
             debug = False,
         )

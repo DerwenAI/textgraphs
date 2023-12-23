@@ -188,4 +188,7 @@ After the war, Werner fled to America to become famous.
     ## EXPERIMENT
     #sys.exit(0)
 
-    #print(tg.dump_lemma_graph())
+
+    ## output lemma graph as JSON
+    with open("lemma.json", "w", encoding = "utf-8") as fp:
+        fp.write(tg.dump_lemma_graph())
