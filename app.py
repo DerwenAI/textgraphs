@@ -222,8 +222,8 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             st.write(f"construct graph: {round(duration, 3)} sec")
 
 
-            ## rank the extracted entities
-            st.subheader("rank the extracted entities", divider = "rainbow")
+            ## rank the extracted phrases
+            st.subheader("rank the extracted phrases", divider = "rainbow")
             start_time = time.time()
 
             tg.calc_phrase_ranks(
@@ -231,7 +231,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 debug = False,
             )
 
-            df_ent: pd.DataFrame = tg.get_phrases_as_df(pipe)
+            df_ent: pd.DataFrame = tg.get_phrases_as_df(tg.factory.kg)
 
             duration = round(time.time() - start_time, 3)
             st.write(f"extract: {round(duration, 3)} sec, {len(df_ent)} entities")
@@ -341,11 +341,11 @@ While Nayak was working with entities extracted from "chunks" of text, not with 
 
 
             ## download lemma graph
-            st.subheader("download the lemma graph", divider = "rainbow")
+            st.subheader("download the results", divider = "rainbow")
             st.markdown(
                 """
 Download a serialized <em>lemma graph</em> in
-<a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a> format.
+<a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a> format, suitable for import to Neo4j, NetworkX, KùzuDB, etc.
                 """,
                 unsafe_allow_html = True,
             )

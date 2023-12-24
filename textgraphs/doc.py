@@ -31,6 +31,7 @@ import transformers  # pylint: disable=E0401
 from .defaults import PAGERANK_ALPHA
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
+from .kg import KnowledgeGraph
 from .pipe import Pipeline, PipelineFactory
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
@@ -104,12 +105,12 @@ for each text input, which are typically paragraph-length.
         debug: bool = False,
         ) -> typing.Iterator[ Node ]:
         """
-Extract phrases from the parsed document to build nodes in the
+Extract phrases from a parsed document to build nodes in the
 _lemma graph_, while giving priority to:
 
   1. NER entities+labels
   2. lemmatized nouns and verbs
-  3. noun chunks intersecting with entities
+  3. noun chunks that overlap with entities
         """
         # extract entities using NER
         ent_seq: typing.List[ spacy.tokens.span.Span ] = list(sent.ents)
@@ -637,7 +638,7 @@ Make sure to call beforehand:
 
     def get_phrases (
         self,
-        pipe: Pipeline,
+        kg: KnowledgeGraph,  # pylint: disable=C0103
         ) -> typing.Iterator[ dict ]:
         """
 Return the entities extracted from the document.
@@ -656,7 +657,7 @@ Make sure to call beforehand:
                 reverse = True,
             ):
 
-            label: str = pipe.kg.normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
+            label: str = kg.normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
 
             yield {
                 "node_id": node.node_id,
@@ -670,7 +671,7 @@ Make sure to call beforehand:
 
     def get_phrases_as_df (
         self,
-        pipe: Pipeline,
+        kg: KnowledgeGraph,  # pylint: disable=C0103
         ) -> pd.DataFrame:
         """
 Return the ranked extracted entities as a `pandas.DataFrame`
@@ -679,4 +680,4 @@ Make sure to call beforehand:
 
   * `TextGraphs.calc_phrase_ranks()`
         """
-        return pd.DataFrame.from_dict(self.get_phrases(pipe))
+        return pd.DataFrame.from_dict(self.get_phrases(kg))

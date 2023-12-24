@@ -38,6 +38,17 @@ Constructor.
         self.lemma_graph: nx.MultiDiGraph = nx.MultiDiGraph()
 
 
+    def reset (
+        self
+        ) -> None:
+        """
+Re-initialize the data structures, resetting all but the configuration.
+        """
+        self.nodes = OrderedDict()
+        self.edges = {}
+        self.lemma_graph = nx.MultiDiGraph()
+
+
     def make_node (  # pylint: disable=R0913
         self,
         tokens: typing.List[ Node ],

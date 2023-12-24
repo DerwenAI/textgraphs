@@ -152,7 +152,7 @@ After the war, Werner fled to America to become famous.
         print(f"{duration:7.3f} sec: construct graph")
 
 
-        ## rank phrases
+        ## rank the extracted phrases
         start_time = time.time()
 
         tg.calc_phrase_ranks(
@@ -165,7 +165,7 @@ After the war, Werner fled to America to become famous.
 
 
         ## show the results
-        ic(tg.get_phrases_as_df(pipe))
+        ic(tg.get_phrases_as_df(tg.factory.kg))
 
         if debug:  # pylint: disable=W0101
             for key, node in tg.nodes.items():

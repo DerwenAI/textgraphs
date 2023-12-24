@@ -27,12 +27,28 @@ python3 -m pip install -u textgraphs
 python3 -m pip install git+https://github.com/thunlp/OpenNRE
 ```
 
-NB: both the spaCy and PyPi teams cause packagine errors
-because they have "opinionated" views against following
-the Python packaging standards.
+NB: both the spaCy and PyPi teams induce packaging errors
+because they have "opinionated" views which conflict against
+each other and also don't quite follow the Python packaging
+standards.
 
 
-## install locally:
+## run demos locally:
+
+```bash
+python3 demo.py
+```
+
+```bash
+./venv/bin/jupyter lab
+```
+
+```bash
+streamlit run app.py
+```
+
+
+## install library locally:
 
 ```bash
 python3 -m venv venv
@@ -50,30 +66,17 @@ python3 -m pip install -r requirements-dev.txt
 pre-commit install --hook-type pre-commit
 ```
 
-## test locally:
+## test library locally:
 
 ```bash
 python3 -m pytest
 ```
 
 
-## run locally:
+## publish library:
 
 ```bash
-python3 demo.py
-```
-
-```bash
-./venv/bin/jupyter lab
-```
-
-```bash
-streamlit run app.py
-```
-
-## to publish:
-
-```bash
+rm dist/*
 python3 -m build
 twine check dist/*
 twine upload ./dist/* --verbose
