@@ -31,9 +31,9 @@ import transformers  # pylint: disable=E0401
 from .defaults import PAGERANK_ALPHA
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
-from .kg import KnowledgeGraph
 from .pipe import Pipeline, PipelineFactory
 from .util import calc_quantile_bins, root_mean_square, stripe_column
+from .vis import RenderPyVis
 
 
 ######################################################################
@@ -90,6 +90,18 @@ for each text input, which are typically paragraph-length.
         """
         return self.factory.create_pipeline(
             text_input,
+        )
+
+
+    def create_render (
+        self
+        ) -> RenderPyVis:
+        """
+Create an object for rendering the graph in `PyVis` HTML+JavaScript.
+        """
+        return RenderPyVis(
+            self,
+            self.factory.kg,
         )
 
 
@@ -637,8 +649,7 @@ Make sure to call beforehand:
 
 
     def get_phrases (
-        self,
-        kg: KnowledgeGraph,  # pylint: disable=C0103
+        self
         ) -> typing.Iterator[ dict ]:
         """
 Return the entities extracted from the document.
@@ -657,7 +668,7 @@ Make sure to call beforehand:
                 reverse = True,
             ):
 
-            label: str = kg.normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
+            label: str = self.factory.kg.normalize_prefix(node.get_linked_label())  # type: ignore  # pylint: disable=C0301
 
             yield {
                 "node_id": node.node_id,
@@ -670,8 +681,7 @@ Make sure to call beforehand:
 
 
     def get_phrases_as_df (
-        self,
-        kg: KnowledgeGraph,  # pylint: disable=C0103
+        self
         ) -> pd.DataFrame:
         """
 Return the ranked extracted entities as a `pandas.DataFrame`
@@ -680,4 +690,4 @@ Make sure to call beforehand:
 
   * `TextGraphs.calc_phrase_ranks()`
         """
-        return pd.DataFrame.from_dict(self.get_phrases(kg))
+        return pd.DataFrame.from_dict(self.get_phrases())

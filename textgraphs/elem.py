@@ -117,7 +117,7 @@ A data class representing one node, i.e., an extracted phrase.
 
 
     def get_linked_label (
-        self,
+        self
         ) -> typing.Optional[ str ]:
         """
 When this node has a linked entity, return that IRI.
@@ -129,8 +129,22 @@ Otherwise return is `label` value.
         return self.label
 
 
+    def get_name (
+        self
+        ) -> str:
+        """
+Return a brief name for the graphical depiction of this Node.
+        """
+        if self.kind == NodeEnum.IRI:
+            return self.label  # type: ignore
+        if self.kind == NodeEnum.LEM:
+            return self.key
+
+        return self.text
+
+
     def get_stacked_count (
-        self,
+        self
         ) -> int:
         """
 Return a modified count, to redact verbs and linked entities from
@@ -143,7 +157,7 @@ the stack-rank partitions.
 
 
     def get_pos (
-        self,
+        self
         ) -> typing.Tuple[ int, int ]:
         """
 Generate a position span for OpenNRE.

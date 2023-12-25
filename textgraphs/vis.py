@@ -18,8 +18,9 @@ import networkx as nx  # pylint: disable=E0401
 import pyvis  # pylint: disable=E0401
 import wordcloud  # pylint: disable=E0401
 
-from .elem import Edge, Node, NodeEnum, RelEnum
-from .pipe import Pipeline
+from .elem import NodeEnum, RelEnum
+from .graph import SimpleGraph
+from .pipe import KnowledgeGraph
 
 
 ######################################################################
@@ -73,21 +74,18 @@ Render the _lemma graph_ as a `PyVis` network.
 
     def __init__ (
         self,
-        nodes: typing.Dict[ str, Node ],
-        edges: typing.Dict[ str, Edge ],
-        lemma_graph: nx.MultiDiGraph,
+        graph: SimpleGraph,
+        kg: KnowledgeGraph,  # pylint: disable=C0103
         ) -> None:
         """
 Constructor.
         """
-        self.nodes: typing.Dict[ str, Node ] = nodes
-        self.edges: typing.Dict[ str, Edge ] = edges
-        self.lemma_graph: nx.MultiDiGraph = lemma_graph
+        self.graph: SimpleGraph = graph
+        self.kg: KnowledgeGraph = kg  #pylint: disable=C0103
 
 
     def render_lemma_graph (
         self,
-        pipe: Pipeline,
         *,
         debug: bool = True,
         ) -> pyvis.network.Network:
@@ -99,8 +97,8 @@ Make sure to call beforehand:
 
   * `TextGraphs.calc_phrase_ranks()`
         """
-        for node in self.nodes.values():
-            nx_node = self.lemma_graph.nodes[node.node_id]
+        for node in self.graph.nodes.values():
+            nx_node = self.graph.lemma_graph.nodes[node.node_id]
             nx_node["shape"] = NODE_STYLES[node.kind].shape
             nx_node["color"] = NODE_STYLES[node.kind].color
 
@@ -108,7 +106,7 @@ Make sure to call beforehand:
                 nx_node["label"] = ""
             elif node.kind in [ NodeEnum.IRI ]:
                 nx_node["title"] = node.text
-                nx_node["label"] = pipe.kg.normalize_prefix(node.label)  # type: ignore
+                nx_node["label"] = self.kg.normalize_prefix(node.label)  # type: ignore
             else:
                 nx_node["label"] = node.text
 
@@ -121,12 +119,12 @@ Make sure to call beforehand:
         # prepare the edge labels
         edge_labels: dict = {}
 
-        for edge in self.edges.values():
+        for edge in self.graph.edges.values():
             edge_labels[(edge.src_node, edge.dst_node,)] = ( edge.kind, edge.rel, )
 
         # build the network
         pv_graph: pyvis.network.Network = pyvis.network.Network()
-        pv_graph.from_nx(self.lemma_graph)
+        pv_graph.from_nx(self.graph.lemma_graph)
 
         for pv_edge in pv_graph.get_edges():
             edge_key = ( pv_edge["from"], pv_edge["to"], )
@@ -162,7 +160,7 @@ Make sure to call beforehand:
         """
         # cluster the communities, using girvan-newman
         comm_iter: typing.Generator = nx.community.girvan_newman(
-            self.lemma_graph,
+            self.graph.lemma_graph,
         )
 
         _ = next(comm_iter)
@@ -183,20 +181,20 @@ Make sure to call beforehand:
 
         colors: typing.List[ str ] = [
             xkcd_colors[comm_map[n]]
-            for n in list(self.lemma_graph.nodes())
+            for n in list(self.graph.lemma_graph.nodes())
         ]
 
         # prep the labels
         labels: typing.Dict[ int, str ] = {
-            node.node_id: node.text
-            for node in self.nodes.values()
+            node.node_id: self.kg.normalize_prefix(node.get_name())
+            for node in self.graph.nodes.values()
         }
 
         # ¡dibuja, hombre!
         nx.draw_networkx(
-            self.lemma_graph,
+            self.graph.lemma_graph,
             pos = nx.spring_layout(
-                self.lemma_graph,
+                self.graph.lemma_graph,
                 k = spring_distance / len(communities),
             ),
             labels = labels,
@@ -224,7 +222,7 @@ Make sure to call beforehand:
         terms: dict = {}
         max_weight: float = 0.0
 
-        for node in self.nodes.values():
+        for node in self.graph.nodes.values():
             if node.weight > 0.0:
                 phrase: str = node.text.replace(" ", "_")
                 max_weight = max(max_weight, node.weight)

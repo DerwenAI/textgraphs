@@ -231,7 +231,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
                 debug = False,
             )
 
-            df_ent: pd.DataFrame = tg.get_phrases_as_df(tg.factory.kg)
+            df_ent: pd.DataFrame = tg.get_phrases_as_df()
 
             duration = round(time.time() - start_time, 3)
             st.write(f"extract: {round(duration, 3)} sec, {len(df_ent)} entities")
@@ -242,12 +242,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             ## generate a word cloud
             st.subheader("generate a word cloud", divider = "rainbow")
 
-            render: textgraphs.RenderPyVis = textgraphs.RenderPyVis(
-                tg.nodes,
-                tg.edges,
-                tg.lemma_graph,
-            )
-
+            render: textgraphs.RenderPyVis = tg.create_render()
             wordcloud = render.generate_wordcloud()
 
             st.image(
@@ -270,7 +265,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
             )
 
             pv_graph: pyvis.network.Network = render.render_lemma_graph(
-                pipe,
                 debug = False,
             )
 
