@@ -42,5 +42,5 @@ __author__ = """\n""".join([
     "derwen.ai <info@derwen.ai>"
 ])
 
-__version__ = "0.1.2"
-__release__ = "0.1.2"
+__release__ = "0.2.3"
+__version__ = __release__

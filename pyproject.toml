@@ -22,7 +22,7 @@ home = "https://huggingface.co/spaces/DerwenAI/textgraphs"
 [project]
 
 name = "textgraphs"
-version = "0.1.2"
+version = "0.2.3"
 
 authors = [
     { name = "derwen.ai", email = "info@derwen.ai" },
