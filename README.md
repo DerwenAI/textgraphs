@@ -73,6 +73,20 @@ python3 -m pytest
 ```
 
 
+## update code on GitHub:
+
+```bash
+git remote set-url origin https://github.com/DerwenAI/textgraphs.git
+```
+
+
+## update code on Hugging Face:
+
+```bash
+git remote set-url origin https://huggingface.co/spaces/DerwenAI/textgraphs
+```
+
+
 ## publish library:
 
 ```bash
