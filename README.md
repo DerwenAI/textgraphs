@@ -77,6 +77,7 @@ python3 -m pytest
 
 ```bash
 git remote set-url origin https://github.com/DerwenAI/textgraphs.git
+git push
 ```
 
 
@@ -84,6 +85,7 @@ git remote set-url origin https://github.com/DerwenAI/textgraphs.git
 
 ```bash
 git remote set-url origin https://huggingface.co/spaces/DerwenAI/textgraphs
+git push
 ```
 
 

@@ -17,6 +17,8 @@ packages = [ "textgraphs" ]
 [project.urls]
 
 home = "https://huggingface.co/spaces/DerwenAI/textgraphs"
+GitHub = "https://github.com/DerwenAI/textgraphs"
+PyPi = "https://pypi.org/project/textgraphs/"
 
 
 [project]
