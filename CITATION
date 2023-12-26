@@ -1,0 +1,8 @@
+@software{TextGraphs,
+  author = {Paco Nathan},
+  title = {{TextGraphs + LLMs + graph ML for entity extraction, linking, ranking, and constructing a lemma graph}},
+  year = 2023,
+  publisher = {Derwen},
+  doi = {10.5281/zenodo.10431783},
+  url = {https://github.com/DerwenAI/textgraphs}
+}

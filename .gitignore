@@ -1,8 +1,9 @@
 # local files
 *~
+chromedriver
 lemma.json
 vis.html
-s2v_*/
+s2v_old/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -20,17 +20,17 @@ license: mit
 ![sponsor](https://img.shields.io/github/sponsors/ceteri)
 
 
-## project info:
+## project info
 
 see <https://huggingface.co/spaces/DerwenAI/textgraphs>
 
 
-## requirements:
+## requirements
 
   * Python 3.10+
 
 
-## deploy library from PyPi:
+## deploy library from PyPi
 
 ```bash
 python3 -m pip install -u textgraphs
@@ -43,7 +43,7 @@ each other and also don't quite follow the Python packaging
 standards.
 
 
-## run demos locally:
+## run demos locally
 
 ```bash
 python3 demo.py
@@ -58,7 +58,7 @@ streamlit run app.py
 ```
 
 
-## install library locally:
+## install library locally
 
 ```bash
 python3 -m venv venv
@@ -76,14 +76,14 @@ python3 -m pip install -r requirements-dev.txt
 pre-commit install --hook-type pre-commit
 ```
 
-## test library locally:
+## test library locally
 
 ```bash
 python3 -m pytest
 ```
 
 
-## update code on GitHub:
+## update repo on GitHub
 
 ```bash
 git remote set-url origin https://github.com/DerwenAI/textgraphs.git
@@ -91,7 +91,7 @@ git push
 ```
 
 
-## update code on Hugging Face:
+## update repo+demo on Hugging Face
 
 ```bash
 git remote set-url origin https://huggingface.co/spaces/DerwenAI/textgraphs
@@ -99,13 +99,19 @@ git push
 ```
 
 
-## publish library:
+## publish library
 
 ```bash
-rm dist/*
-python3 -m build
-twine check dist/*
-twine upload ./dist/* --verbose
+./bin/push_pypi.sh
+```
+
+
+## build online documentation
+
+```bash
+./bin/nb_md.sh
+./pkg_doc.py docs/ref.md
+mkdocs build
 ```
 
 

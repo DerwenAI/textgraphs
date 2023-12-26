@@ -1,0 +1,51 @@
+site_name: TextGraphs
+site_description: TextGraphs + LLMs + Graph ML
+site_url: https://github.com/DerwenAI/textgraphs
+site_author: TextGraphs contributors, with Derwen, Inc.
+
+repo_url: https://github.com/DerwenAI/textgraphs
+repo_name: DerwenAI/textgraphs
+
+copyright: Source code and documentation are <strong><a href="https://github.com/DerwenAI/textgraphs/blob/main/LICENSE" target="_blank">licensed</a></strong> under an MIT License; Copyright &copy; 2023-2024 <strong><a href="https://derwen.ai/" target="_blank">Derwen, Inc.</a></strong>
+
+nav:
+    - Home: index.md
+
+    - Tutorial:
+        - Example Usage: tutorial.md
+
+    - Technical Reference:
+        - Package Reference: ref.md
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  favicon: assets/favicon.png
+  logo: assets/logo.png
+  features:
+    - navigation.instant
+
+plugins:
+  - mknotebooks
+  - git-revision-date
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/config.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+use_directory_urls: true
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - pymdownx.arithmatex:
+      generic: true
+  - toc:
+      toc_depth: 3
+      permalink: true

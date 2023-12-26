@@ -6,9 +6,5 @@ include setup.py
 include tests/*.py
 include textgraphs/*.py
 prune .ipynb_checkpoints
-prune .mypy_cache
-prune .pre-commit-config.yaml
 prune docs
-prune lib
-prune s2v_old
 prune venv
