@@ -19,6 +19,7 @@ packages = [ "textgraphs" ]
 home = "https://huggingface.co/spaces/DerwenAI/textgraphs"
 GitHub = "https://github.com/DerwenAI/textgraphs"
 PyPi = "https://pypi.org/project/textgraphs/"
+DOI = "https://zenodo.org/doi/10.5281/zenodo.10431783"
 
 
 [project]
@@ -30,7 +31,7 @@ authors = [
     { name = "derwen.ai", email = "info@derwen.ai" },
 ]
 
-description = "Using textgraphs + LLM + graph ML for entity extraction, linking, and ranking"
+description = "TextGraphs + LLMs + graph ML for entity extraction, linking, ranking, and constructing a lemma graph"
 readme = "README.md"
 license = { file = "LICENSE" }
 

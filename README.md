@@ -10,6 +10,16 @@ pinned: false
 license: mit
 ---
 
+[![DOI](https://zenodo.org/badge/735568863.svg)](https://zenodo.org/doi/10.5281/zenodo.10431783)
+![Licence](https://img.shields.io/github/license/DerwenAI/textgraphs)
+![CI](https://github.com/DerwenAI/textgraphs/workflows/CI/badge.svg)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/DerwenAI/textgraphs?style=plastic)
+![Repo size](https://img.shields.io/github/repo-size/DerwenAI/textgraphs)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
+![downloads](https://img.shields.io/pypi/dm/textgraphs)
+![sponsor](https://img.shields.io/github/sponsors/ceteri)
+
+
 ## project info:
 
 see <https://huggingface.co/spaces/DerwenAI/textgraphs>
@@ -110,3 +120,24 @@ which is succinct and simplifies use in commercial applications.
 
 All materials herein are Copyright &copy; 2023 Derwen, Inc.
 </details>
+
+<details>
+  <summary>Attribution</summary>
+Please use the following BibTeX entry for citing **TextGraphs** if you
+use it in your research or software:
+```bibtex
+@software{TextGraphs,
+  author = {Paco Nathan},
+  title = {{TextGraphs + LLMs + graph ML for entity extraction, linking, ranking, and constructing a lemma graph}},
+  year = 2023,
+  publisher = {Derwen},
+  doi = {10.5281/zenodo.10431783},
+  url = {https://github.com/DerwenAI/textgraphs}
+}
+```
+</details>
+
+
+## star history
+
+[![Star History Chart](https://api.star-history.com/svg?repos=derwenai/textgraphs&type=Date)](https://star-history.com/#derwenai/textgraphs&Date)
