@@ -29,18 +29,20 @@ from .rel import InferRel_OpenNRE, InferRel_Rebel
 
 from .util import calc_quantile_bins, root_mean_square, stripe_column
 
+from .version import get_repo_version, \
+    __version__, __version_major__, __version_minor__, __version_patch__
+
 from .vis import RenderPyVis
 
 
+__release__ = __version__
+
 __title__ = "TextGraphs: raw texts, LLMs, and KGs, oh my!"
 
-__description__ = "TextGraphs + LLM + graph ML for entity extraction, linking, ranking, and constructing a lemma graph"  # pylint: disable=C0301
+__description__ = "TextGraphs + LLMs + graph ML for entity extraction, linking, ranking, and constructing a lemma graph"  # pylint: disable=C0301
 
 __copyright__ = "2023, Derwen, Inc."
 
 __author__ = """\n""".join([
     "derwen.ai <info@derwen.ai>"
 ])
-
-__release__ = "0.2.3"
-__version__ = __release__

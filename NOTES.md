@@ -1,16 +1,16 @@
 TODO:
 
-  * are the label/title values correct in PyVis?
-
-  * SPARQL the DBPedia/Wikidata equivs
-
-  * link entities for noun chunks using MediaWiki lookups?
-
-
-
   * build a _graph of relations_ topology transform
     * transformed graph
     * calculate affinities
+
+  * `mkrefs` docs
+
+  * SPARQL the DBPedia/Wikidata equivs
+
+  * link entities for lemmas, noun chunks using MediaWiki lookups?
+  * default semantics: `owl:Thing`, `skos:related`
+
 
   * use community detection to condense nodes
   k-medoids? https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
@@ -25,5 +25,4 @@ TODO:
   * link `sense2vec` synonyms; make affordances for UI to annotate synonyms
 
   * add conda packaging
-  * publish on PyPi and Conda
-  * `mkrefs` docs
+

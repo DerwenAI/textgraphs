@@ -53,7 +53,7 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 
     results: list = [
         ( row["text"], row["pos"], )
-        for _, row in tg.get_phrases_as_df(pipe).iterrows()
+        for _, row in tg.get_phrases_as_df().iterrows()
     ]
 
     # top-k, k=4

@@ -24,7 +24,7 @@ PyPi = "https://pypi.org/project/textgraphs/"
 [project]
 
 name = "textgraphs"
-version = "0.2.3"
+version = "0.2.4"
 
 authors = [
     { name = "derwen.ai", email = "info@derwen.ai" },
@@ -59,6 +59,7 @@ classifiers = [
 
 dependencies = [
     "beautifulsoup4 >= 4.12",
+    "GitPython >= 3.1",
     "icecream >= 2.1",
     "markdown2 >= 2.4",
     "matplotlib >= 3.8",
