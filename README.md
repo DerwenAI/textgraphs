@@ -12,10 +12,11 @@ license: mit
 
 [![DOI](https://zenodo.org/badge/735568863.svg)](https://zenodo.org/doi/10.5281/zenodo.10431783)
 ![Licence](https://img.shields.io/github/license/DerwenAI/textgraphs)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 ![CI](https://github.com/DerwenAI/textgraphs/workflows/CI/badge.svg)
+<br/>
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/DerwenAI/textgraphs?style=plastic)
 ![Repo size](https://img.shields.io/github/repo-size/DerwenAI/textgraphs)
-[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 ![downloads](https://img.shields.io/pypi/dm/textgraphs)
 ![sponsor](https://img.shields.io/github/sponsors/ceteri)
 
