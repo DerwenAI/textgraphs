@@ -109,20 +109,17 @@ twine upload ./dist/* --verbose
 ```
 
 
-## administrivia
-
-<details>
-  <summary>License and Copyright</summary>
+## license and copyright
 
 Source code for **TextGraphs** plus its logo, documentation, and
 examples have an [MIT license](https://spdx.org/licenses/MIT.html)
 which is succinct and simplifies use in commercial applications.
 
 All materials herein are Copyright &copy; 2023 Derwen, Inc.
-</details>
 
-<details>
-  <summary>Attribution</summary>
+
+## attribution
+
 Please use the following BibTeX entry for citing **TextGraphs** if you
 use it in your research or software:
 ```bibtex
@@ -135,7 +132,6 @@ use it in your research or software:
   url = {https://github.com/DerwenAI/textgraphs}
 }
 ```
-</details>
 
 
 ## star history
