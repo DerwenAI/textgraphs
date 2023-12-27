@@ -49,7 +49,7 @@ Re-initialize the data structures, resetting all but the configuration.
         self.lemma_graph = nx.MultiDiGraph()
 
 
-    def make_node (  # pylint: disable=R0913
+    def make_node (  # pylint: disable=R0913,R0914
         self,
         tokens: typing.List[ Node ],
         key: str,
@@ -69,11 +69,20 @@ Lookup and return a `Node` object:
     * default: link matching keys into the same node
     * instantiate a new node if it does not exist already
         """
+        token_id: int = 0
+        token_text: str = key
+        token_pos: str = "PROPN"
+
+        if span is not None:
+            token_id = span.i
+            token_text = span.text
+            token_pos = span.pos_
+
         location: typing.List[ int ] = [  # type: ignore
             text_id,
             para_id,
             sent_id,
-            span.i,
+            token_id,
         ]
 
         if not linked:
@@ -100,8 +109,8 @@ Lookup and return a `Node` object:
                 len(self.nodes),
                 key,
                 span,
-                span.text,
-                span.pos_,
+                token_text,
+                token_pos,
                 kind,
                 loc = [ location ],
                 label = label,
