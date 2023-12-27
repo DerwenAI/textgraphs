@@ -327,7 +327,7 @@ expensive operations with `spaCy`
 [*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L319)
 
 ```python
-__init__(spacy_model="en_core_web_sm", ner=None, kg=<textgraphs.pipe.KnowledgeGraph object at 0x12175f310>, infer_rels=[])
+__init__(spacy_model="en_core_web_sm", ner=None, kg=<textgraphs.pipe.KnowledgeGraph object at 0x1237659f0>, infer_rels=[])
 ```
 Constructor which instantiates the `spaCy` pipelines:
 

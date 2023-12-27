@@ -13,12 +13,15 @@ nav:
 
     - User Guide:
         - TL;DR: tldr.md
+        - Technical Details: details.md
 
     - Tutorial:
         - Example Usage: ex0_0.md
 
     - Technical Reference:
         - Package Reference: ref.md
+
+    - Bibliography: biblio.md
 
 theme:
   name: material

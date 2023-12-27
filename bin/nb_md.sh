@@ -8,6 +8,8 @@ for notebook_path in examples/*.ipynb; do
 
     cp $notebook_path docs/$notebook
     jupyter nbconvert docs/$notebook --to markdown
+    #exit 0
+
     python3 bin/vis_doc.py docs/"$stem".md
     rm docs/$notebook
 done

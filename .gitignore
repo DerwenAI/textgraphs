@@ -2,7 +2,7 @@
 *~
 chromedriver
 lemma.json
-vis.html
+examples/tmp.*.html
 s2v_old/
 
 # Byte-compiled / optimized / DLL files
