@@ -10,12 +10,13 @@ pinned: false
 license: mit
 ---
 
+# TextGraphs
+
 [![DOI](https://zenodo.org/badge/735568863.svg)](https://zenodo.org/doi/10.5281/zenodo.10431783)
 ![Licence](https://img.shields.io/github/license/DerwenAI/textgraphs)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 ![CI](https://github.com/DerwenAI/textgraphs/workflows/CI/badge.svg)
 <br/>
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/DerwenAI/textgraphs?style=plastic)
 ![Repo size](https://img.shields.io/github/repo-size/DerwenAI/textgraphs)
 ![downloads](https://img.shields.io/pypi/dm/textgraphs)
 ![sponsor](https://img.shields.io/github/sponsors/ceteri)
@@ -26,9 +27,14 @@ license: mit
  width="231"
 />
 
+
 ## project info
 
-see <https://huggingface.co/spaces/DerwenAI/textgraphs>
+See the project home at: <https://huggingface.co/spaces/DerwenAI/textgraphs>
+
+See the full documentation at: <https://derwen.ai/docs/txg/>
+
+Sample code is provided in `demo.py`
 
 
 ## requirements
@@ -38,13 +44,15 @@ see <https://huggingface.co/spaces/DerwenAI/textgraphs>
 
 ## deploy library from PyPi
 
+To install from [PyPi](https://pypi.python.org/pypi/textgraphs):
+
 ```bash
 python3 -m pip install -u textgraphs
 python3 -m pip install git+https://github.com/thunlp/OpenNRE
 ```
 
 NB: both the spaCy and PyPi teams induce packaging errors
-because they have "opinionated" views which conflict against
+since they have "opinionated" views which conflict against
 each other and also don't quite follow the Python packaging
 standards.
 
@@ -64,7 +72,7 @@ streamlit run app.py
 ```
 
 
-## install library locally
+## install library from a source code repo locally
 
 ```bash
 python3 -m venv venv
@@ -72,56 +80,14 @@ source venv/bin/activate
 
 python3 -m pip install -U pip wheel setuptools
 python3 -m pip install -r requirements.txt
+python3 -m pip install git+https://github.com/thunlp/OpenNRE
 ```
 
-to run the Streamlit or JupyterLab demos, or prior to working
-locally on the development and testing of this repo:
+to run the Streamlit or JupyterLab demos, also install:
 
 ```bash
 python3 -m pip install -r requirements-dev.txt
-pre-commit install --hook-type pre-commit
 ```
-
-## test library locally
-
-```bash
-python3 -m pytest
-```
-
-
-## update repo on GitHub
-
-```bash
-git remote set-url origin https://github.com/DerwenAI/textgraphs.git
-git push
-```
-
-
-## update repo+demo on Hugging Face
-
-```bash
-git remote set-url origin https://huggingface.co/spaces/DerwenAI/textgraphs
-git push
-```
-
-
-## publish library
-
-```bash
-./bin/push_pypi.sh
-```
-
-
-## build online documentation
-
-```bash
-./bin/nb_md.sh
-./pkg_doc.py docs/ref.md
-mkdocs build
-```
-
-Then run `./bin/preview.py` and load <http://127.0.0.1:8000/docs/>
-in your browser to preview the documentation.
 
 
 ## license and copyright

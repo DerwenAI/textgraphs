@@ -1,8 +1,9 @@
 # local files
 *~
 chromedriver
-lemma.json
+txg.tgz
 examples/tmp.*.html
+lemma.json
 s2v_old/
 
 # Byte-compiled / optimized / DLL files

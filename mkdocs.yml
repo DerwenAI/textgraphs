@@ -14,6 +14,7 @@ nav:
     - User Guide:
         - TL;DR: tldr.md
         - Technical Details: details.md
+        - Build Instructions: build.md
 
     - Tutorial:
         - Example Usage: ex0_0.md
