@@ -11,8 +11,11 @@ copyright: Source code and documentation are <strong><a href="https://github.com
 nav:
     - Home: index.md
 
+    - User Guide:
+        - TL;DR: tldr.md
+
     - Tutorial:
-        - Example Usage: tutorial.md
+        - Example Usage: ex0_0.md
 
     - Technical Reference:
         - Package Reference: ref.md

@@ -115,6 +115,9 @@ git push
 mkdocs build
 ```
 
+Then run `./bin/preview.py` and load <http://127.0.0.1:8000/docs/>
+in your browser to preview the documentation.
+
 
 ## license and copyright
 
