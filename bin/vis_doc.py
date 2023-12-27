@@ -26,9 +26,18 @@ HTML/Markdown conversion
     PAT_SOURCE = re.compile(r"\s+src\=\"(\S+)\"")
     REPLACEMENT_HEADER: str = """
 !!! note
-    To run this notebook in JupyterLab, load [`examples/{}.ipynb`](https://github.com/DerwenAI/textgraphs/blob/main/examples/{}.ipynb)
+    To run this notebook in JupyterLab, load [`examples/{}.ipynb`]({}/examples/{}.ipynb)
 
     """
+
+    def __init__ (
+        self,
+        src_url: str,
+        ) -> None:
+        """
+Constructor.
+        """
+        self.src_url: str = src_url
 
 
     def replace_sys_header (
@@ -50,7 +59,7 @@ Replace the initial cell in a tutorial notebook.
                 ic(m_header)
 
             if m_header:
-                header: str = self.REPLACEMENT_HEADER.format(stem, stem)
+                header: str = self.REPLACEMENT_HEADER.format(stem, self.src_url, stem)
                 output.append(header)
             else:
                 output.append(chunk)
@@ -150,7 +159,9 @@ Substitute static images for the rendered graphs.
 
 if __name__ == "__main__":
     try:
-        conv: Converter = Converter()
+        conv: Converter = Converter(
+            "https://github.com/DerwenAI/textgraphs/blob/main",
+        )
 
         filename: pathlib.Path = pathlib.Path(sys.argv[1])
         _parent: pathlib.Path = filename.parent

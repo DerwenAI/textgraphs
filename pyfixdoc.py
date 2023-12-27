@@ -11,13 +11,13 @@ don't.
 In particular, this library...
 
   * is aware of type annotations (PEP 484, etc.)
-  * provides non-bassackwards parameter descriptions (eyes on *you*, GOOG)
+  * fixes Py version bugs related to `typing` and `inspect`
   * handles forward references (prior to Python 3.8)
-  * links to source lines in a Git repo
-  * fixes bugs in `typing` and `inspect`
+  * links to source lines in a GitHub repo
+  * provides non-bassackwards parameter descriptions (eyes on *you*, GOOG)
   * does not require use of a plugin
   * uses `icecream` for debugging
-  * exists b/c Sphinx sucks
+  * exists b/c Sphinx really sucks
 
 You're welcome.
 """

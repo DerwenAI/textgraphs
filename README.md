@@ -20,6 +20,11 @@ license: mit
 ![downloads](https://img.shields.io/pypi/dm/textgraphs)
 ![sponsor](https://img.shields.io/github/sponsors/ceteri)
 
+<img
+ alt="TextGraphs logo"
+ src="https://github.com/DerwenAI/textgraphs/blob/main/docs/assets/logo.png"
+ width="231"
+/>
 
 ## project info
 
