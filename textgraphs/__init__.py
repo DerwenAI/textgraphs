@@ -17,6 +17,8 @@ from .doc import TextGraphs
 
 from .elem import Edge, KGSearchHit, LinkedEntity, Node, NodeEnum, NounChunk, RelEnum
 
+from .gor import Affinity, GraphOfRelations, RelDir, SheafSeed, TransArc
+
 from .graph import SimpleGraph
 
 from .kg import KGWikiMedia

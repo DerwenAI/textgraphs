@@ -96,7 +96,7 @@ Source code for **TextGraphs** plus its logo, documentation, and
 examples have an [MIT license](https://spdx.org/licenses/MIT.html)
 which is succinct and simplifies use in commercial applications.
 
-All materials herein are Copyright &copy; 2023 Derwen, Inc.
+All materials herein are Copyright &copy; 2023-2024 Derwen, Inc.
 
 
 ## attribution
