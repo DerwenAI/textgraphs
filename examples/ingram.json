@@ -1,0 +1,38 @@
+{
+    "rels": [
+        "Directed",
+        "Profession",
+        "ActedIn",
+        "LivedIn",
+        "BornIn",
+        "Nationality"
+    ],
+
+    "ents": {
+        "Steven_Spielberg": [
+            [ "Profession", "Director" ],
+            [ "Directed", "Catch_Me_If_Can" ],
+            [ "Directed", "Saving_Private_Ryan" ]
+        ],
+        "Tom_Hanks": [
+            [ "ActedIn", "Catch_Me_If_Can" ],
+            [ "ActedIn", "Saving_Private_Ryan" ],
+            [ "Profession", "Actor" ]
+        ],
+        "Mark_Hamil": [
+            [ "Profession", "Actor" ],
+            [ "ActedIn", "Star_Wars" ],
+            [ "BornIn", "California" ]
+        ],
+        "Brad_Pitt": [
+            [ "Nationality", "USA" ],
+            [ "BornIn", "USA" ],
+            [ "LivedIn", "California" ]
+        ],
+        "Clint_Eastwood": [
+            [ "BornIn", "San_Francisco" ],
+            [ "LivedIn", "San_Francisco" ],
+            [ "LivedIn", "California" ]
+        ]
+    }
+}
