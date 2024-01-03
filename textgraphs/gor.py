@@ -16,6 +16,7 @@ import typing
 
 from icecream import ic  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
+import pandas as pd  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
@@ -416,20 +417,23 @@ Reproduce metrics based on the example published in _InGram_
     def trace_metrics (
         self,
         scores: typing.Dict[ tuple, float ],
-        ) -> None:
+        ) -> pd.DataFrame:
         """
 Compare the calculated affinity scores with results from a published
 example.
         """
-        for pair_key, aff in sorted(scores.items()):
-            pub: typing.Optional[ float ] = self.pub_score.get(pair_key)
-            diff: float = 0.0
+        df_compare: pd.DataFrame = pd.DataFrame.from_dict([
+            {
+                "pair": pair_key,
+                "rel_a": self.rel_list[pair_key[0]],
+                "rel_b": self.rel_list[pair_key[1]],
+                "affinity": round(aff, 2),
+                "expected": self.pub_score.get(pair_key)
+            }
+            for pair_key, aff in sorted(scores.items())
+        ])
 
-            if pub is not None:
-                diff = (pub - aff) / pub
-
-            print(pair_key, self.rel_list[pair_key[0]], self.rel_list[pair_key[1]])
-            print("", round(aff, 2), self.pub_score.get(pair_key), diff)
+        return df_compare
 
 
     def render_gor (

@@ -9,7 +9,9 @@ then transform it into a _graph of relations_
 import pathlib
 import typing
 
+from icecream import ic  # pylint: disable=E0401
 import matplotlib.pyplot as plt  # pylint: disable=E0401
+import pandas as pd  # pylint: disable=E0401
 
 import textgraphs
 
@@ -38,7 +40,8 @@ if __name__ == "__main__":
         debug = True,  # False
     )
 
-    graph.trace_metrics(_scores)
+    df: pd.DataFrame = graph.trace_metrics(_scores)
+    ic(df)
 
     graph.render_gor(_scores)
     plt.show()
