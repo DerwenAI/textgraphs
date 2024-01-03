@@ -15,7 +15,9 @@ import textgraphs
 
 
 if __name__ == "__main__":
-    graph: textgraphs.GraphOfRelations = textgraphs.GraphOfRelations()
+    graph: textgraphs.GraphOfRelations = textgraphs.GraphOfRelations(
+        textgraphs.SimpleGraph()
+    )
 
     graph.load_ingram(
         pathlib.Path("examples/ingram.json"),

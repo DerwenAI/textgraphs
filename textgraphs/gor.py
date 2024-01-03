@@ -83,7 +83,7 @@ illustrates the process -- for research and debugging.
     tally: int = 0
 
 
-class GraphOfRelations (SimpleGraph):
+class GraphOfRelations:  # pylint: disable=R0902
     """
 Attempt to reproduce results published in
 "INGRAM: Inductive Knowledge Graph Embedding via Relation Graphs"
@@ -91,13 +91,13 @@ Attempt to reproduce results published in
     """
 
     def __init__ (
-        self
+        self,
+        source: SimpleGraph
         ) -> None:
         """
 Constructor.
         """
-        super().__init__()
-
+        self.source: SimpleGraph = source
         self.rel_list: typing.List[ str ] = []
 
         self.node_list: typing.List[ Node ] = []
@@ -139,7 +139,7 @@ Load data for a source graph, as illustrated in _InGram_
 
             # build the src node of the triple
             for src_name, links in dat["ents"].items():
-                src_node: Node = self.make_node(
+                src_node: Node = self.source.make_node(
                     [],
                     src_name,
                     None,
@@ -156,7 +156,7 @@ Load data for a source graph, as illustrated in _InGram_
                         sys.exit(-1)
 
                     # build the dst node of the triple
-                    dst_node: Node = self.make_node(
+                    dst_node: Node = self.source.make_node(
                         [],
                         dst_name,
                         None,
@@ -167,7 +167,7 @@ Load data for a source graph, as illustrated in _InGram_
                     )
 
                     # create an edge between src/dst
-                    edge: Edge = self.make_edge(  # type: ignore  # pylint: disable=W0612,W0621
+                    edge: Edge = self.source.make_edge(  # type: ignore  # pylint: disable=W0612,W0621
                         src_node,
                         dst_node,
                         RelEnum.SYN,
@@ -176,8 +176,8 @@ Load data for a source graph, as illustrated in _InGram_
                     )
 
         if debug:
-            print(self.nodes)
-            print(self.edges)
+            print(self.source.nodes)
+            print(self.source.edges)
             print(self.rel_list)
 
 
@@ -189,13 +189,13 @@ Load data for a source graph, as illustrated in _InGram_
         """
 Prep data for the topological transform illustrated in _InGram_
         """
-        self.node_list = list(self.nodes.values())
-        self.edge_list = list(self.edges.values())
+        self.node_list = list(self.source.nodes.values())
+        self.edge_list = list(self.source.edges.values())
 
         if debug:
             print("\n--- triples in source graph ---")
 
-        for edge in self.edges.values():
+        for edge in self.source.edges.values():
             rel_id: int = self.rel_list.index(edge.rel)
 
             if debug:
@@ -227,7 +227,7 @@ Output a "seed" representation of the source graph.
         """
         print("\n--- nodes in source graph ---")
 
-        for node in self.nodes.values():
+        for node in self.source.nodes.values():
             # CONFIRMED: correct according to examples in the paper
             print(f"n: {node.node_id:2}, {node.text}")
 
