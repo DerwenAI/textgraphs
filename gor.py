@@ -38,5 +38,7 @@ if __name__ == "__main__":
         debug = True,  # False
     )
 
+    graph.trace_metrics(_scores)
+
     graph.render_gor(_scores)
     plt.show()

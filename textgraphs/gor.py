@@ -196,6 +196,9 @@ Prep data for the topological transform illustrated in _InGram_
             print("\n--- triples in source graph ---")
 
         for edge in self.source.edges.values():
+            if edge.rel not in self.rel_list:
+                self.rel_list.append(edge.rel)
+
             rel_id: int = self.rel_list.index(edge.rel)
 
             if debug:
@@ -407,18 +410,26 @@ Reproduce metrics based on the example published in _InGram_
                 pair_key: tuple = tuple(sorted([ rel_a, rel_b ]))
                 scores[pair_key] = pair_affin / 2.0
 
-                if debug:
-                    pub: typing.Optional[ float ] = self.pub_score.get(pair_key)
-                    diff: float = 0.0
-
-                    if pub is not None:
-                        diff = (pub - scores[pair_key] ) / pub
-
-                    #ic(rel_a, rel_b)
-                    print(pair_key, self.rel_list[rel_a], self.rel_list[rel_b])
-                    print("", round(scores[pair_key], 2), self.pub_score.get(pair_key), diff)
-
         return scores
+
+
+    def trace_metrics (
+        self,
+        scores: typing.Dict[ tuple, float ],
+        ) -> None:
+        """
+Compare the calculated affinity scores with results from a published
+example.
+        """
+        for pair_key, aff in sorted(scores.items()):
+            pub: typing.Optional[ float ] = self.pub_score.get(pair_key)
+            diff: float = 0.0
+
+            if pub is not None:
+                diff = (pub - aff) / pub
+
+            print(pair_key, self.rel_list[pair_key[0]], self.rel_list[pair_key[1]])
+            print("", round(aff, 2), self.pub_score.get(pair_key), diff)
 
 
     def render_gor (
