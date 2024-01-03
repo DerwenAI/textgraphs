@@ -374,9 +374,6 @@ Reproduce metrics based on the example published in _InGram_
         """
         self._collect_tallies(debug = debug)
 
-        if debug:
-            print("\n--- reproduce affinity scores ---")
-
         scores: typing.Dict[ tuple, float ] = {}
         n_rels: int = len(self.rel_list)
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# pylint: disable=C0302
 
 """
 This class provides a wrapper for access to a _knowledge graph_, which
@@ -204,6 +205,7 @@ Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
 
             if iri is not None:
                 return iri["iri"]
+
         except TypeError as ex:
             ic(ex)
             print(f"unknown label: {label}")
@@ -346,6 +348,10 @@ Defaults to the `WikiMedia` graphs.
             # update the cache
             self.iri_cache[rel] = iri
             return iri
+
+        except requests.exceptions.ConnectionError as r_ex:
+            ic(r_ex)
+            return None
         except Exception as ex:  # pylint: disable=W0718
             ic(ex)
             traceback.print_exc()
@@ -381,6 +387,7 @@ Raises various untrapped exceptions, to be handled by caller.
         response: requests.models.Response = requests.get(
             self.wikidata_api,
             params = params,
+            verify = False,
             headers = {
                 "Accept": "application/json",
             },
@@ -500,6 +507,8 @@ Query the Wikidata search API.
 
             return wiki_ent
 
+        except requests.exceptions.ConnectionError as r_ex:
+            ic(r_ex)
         except Exception as ex:  # pylint: disable=W0718
             ic(ex)
             traceback.print_exc()
@@ -533,6 +542,7 @@ Perform a DBPedia API search.
             response: requests.models.Response = requests.get(
                 self.dbpedia_search_api,
                 params = params,
+                verify = False,
                 headers = {
                     "Accept": "application/json",
                 },
@@ -582,6 +592,9 @@ Perform a DBPedia API search.
             self.ent_cache[key] = ent
             return ent
 
+        except requests.exceptions.ConnectionError as r_ex:
+            ic(r_ex)
+            return None
         except Exception as ex:  # pylint: disable=W0718
             ic(ex)
             traceback.print_exc()
@@ -610,6 +623,7 @@ Perform a SPARQL query on DBPedia.
             response: requests.models.Response = requests.get(
                 self.dbpedia_sparql_api,
                 params = params,
+                verify = False,
                 headers = {
                     "Accept": "application/json",
                 },
@@ -621,6 +635,9 @@ Perform a SPARQL query on DBPedia.
             # check for failed API calls
             if http.HTTPStatus.OK == response.status_code:
                 dat = response.json()
+
+        except requests.exceptions.ConnectionError as r_ex:
+            ic(r_ex)
         except Exception as ex:  # pylint: disable=W0718
             ic(ex)
             traceback.print_exc()

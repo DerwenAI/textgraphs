@@ -11,9 +11,11 @@ import asyncio
 import sys  # pylint: disable=W0611
 import traceback
 import time
+import typing
 
 from icecream import ic  # pylint: disable=E0401
 from pyinstrument import Profiler  # pylint: disable=E0401
+import matplotlib.pyplot as plt  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 
 import textgraphs
@@ -179,15 +181,35 @@ After the war, Werner fled to America to become famous.
         traceback.print_exc()
 
 
+    ## EXPERIMENT
+
+    graph: textgraphs.GraphOfRelations = textgraphs.GraphOfRelations(
+        tg,
+    )
+
+    graph.seeds(
+        debug = False,  # True
+    )
+
+    graph.construct_gor(
+        debug = False,  # True
+    )
+
+    _scores: typing.Dict[ tuple, float ] = graph.get_affinity_scores(
+        debug = False,  # True
+    )
+
+    graph.render_gor(_scores)
+    plt.show()
+
+    #sys.exit(0)
+
+
+    ######################################################################
     ## stack profiler report
     if profile:
         profiler.stop()
         profiler.print()
-
-
-    ## EXPERIMENT
-    #sys.exit(0)
-
 
     ## output lemma graph as JSON
     with open("lemma.json", "w", encoding = "utf-8") as fp:

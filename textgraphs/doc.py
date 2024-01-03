@@ -27,6 +27,7 @@ import pandas as pd  # pylint: disable=E0401
 import pulp  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
+import urllib3  # pylint: disable=E0401
 
 from .defaults import PAGERANK_ALPHA
 from .elem import Edge, Node, NodeEnum, RelEnum
@@ -52,6 +53,9 @@ os.environ["TOKENIZERS_PARALLELISM"] = "0"
 
 # override: `OpenNRE` uses `word2vec` which has noisy logging
 logging.disable(logging.INFO)
+
+# override: WikedMedia and others allow their SSL certs to expire
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 ######################################################################
