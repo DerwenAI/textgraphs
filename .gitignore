@@ -1,9 +1,11 @@
 # local files
 *~
 chromedriver
-txg.tgz
-examples/tmp.*.html
 lemma.json
+examples/tmp.*.html
+vis.html
+gor.html
+txg.tgz
 s2v_old/
 
 # Byte-compiled / optimized / DLL files

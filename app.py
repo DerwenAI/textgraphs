@@ -334,6 +334,49 @@ While Nayak was working with entities extracted from "chunks" of text, not with 
                 st.write(f"cluster: {round(duration, 3)} sec, {max(comm_map.values()) + 1} clusters")
 
 
+            ## transform a graph of relations
+            st.subheader("transform as a graph of relations", divider = "rainbow")
+            st.markdown(
+                """
+Using the topological transform given in `lee2023ingram`, construct a
+_graph of relations_ for making enhanced graph inference:
+                """
+            )
+
+            start_time = time.time()
+
+            gor: textgraphs.GraphOfRelations = textgraphs.GraphOfRelations(tg)
+            gor.seeds()
+            gor.construct_gor()
+
+            scores: typing.Dict[ tuple, float ] = gor.get_affinity_scores()
+            pv_graph = gor.render_gor_pyvis(scores)
+
+            pv_graph.force_atlas_2based(
+                gravity = -38,
+                central_gravity = 0.01,
+                spring_length = 231,
+                spring_strength = 0.7,
+                damping = 0.8,
+                overlap = 0,
+            )
+
+            pv_graph.show_buttons(filter_ = [ "physics" ])
+            pv_graph.toggle_physics(True)
+
+            py_html = pathlib.Path("gor.html")
+            pv_graph.save_graph(py_html.as_posix())
+
+            st.components.v1.html(
+                py_html.read_text(encoding = "utf-8"),
+                height = render.HTML_HEIGHT_WITH_CONTROLS,
+                scrolling = False,
+            )
+
+            duration = round(time.time() - start_time, 3)
+            st.write(f"transform: {round(duration, 3)} sec, {len(gor.rel_list)} relations")
+
+
             ## download lemma graph
             st.subheader("download the results", divider = "rainbow")
             st.markdown(

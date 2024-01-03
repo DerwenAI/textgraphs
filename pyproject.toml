@@ -25,7 +25,7 @@ DOI = "https://zenodo.org/doi/10.5281/zenodo.10431783"
 [project]
 
 name = "textgraphs"
-version = "0.2.4"
+version = "0.3.0"
 
 authors = [
     { name = "derwen.ai", email = "info@derwen.ai" },

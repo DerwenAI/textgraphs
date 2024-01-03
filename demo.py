@@ -199,7 +199,7 @@ After the war, Werner fled to America to become famous.
         debug = False,  # True
     )
 
-    graph.render_gor(_scores)
+    graph.render_gor_plt(_scores)
     plt.show()
 
     #sys.exit(0)

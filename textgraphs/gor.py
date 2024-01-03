@@ -17,6 +17,7 @@ import typing
 from icecream import ic  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
+import pyvis  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
@@ -433,12 +434,13 @@ example.
         return df_compare
 
 
-    def render_gor (
+    def _build_nx_graph (
         self,
         scores: typing.Dict[ tuple, float ],
-        ) -> None:
+        ) -> nx.Graph:
         """
-Visualize the _graph of relations_.
+Construct a network representation of the _graph of relations_
+in `NetworkX`
         """
         vis_graph: nx.Graph = nx.Graph()
 
@@ -446,7 +448,7 @@ Visualize the _graph of relations_.
             (
                 rel_id,
                 {
-                    "title": rel,
+                    "label": rel,
                 },
             )
             for rel_id, rel in enumerate(self.rel_list)
@@ -462,6 +464,18 @@ Visualize the _graph of relations_.
             )
             for (rel_a, rel_b), affinity in scores.items()
         ])
+
+        return vis_graph
+
+
+    def render_gor_plt (
+        self,
+        scores: typing.Dict[ tuple, float ],
+        ) -> None:
+        """
+Visualize the _graph of relations_ using `matplotlib`
+        """
+        vis_graph: nx.Graph = self._build_nx_graph(scores)
 
         node_labels: typing.Dict[ int, str ] = dict(enumerate(self.rel_list))
 
@@ -490,3 +504,25 @@ Visualize the _graph of relations_.
             pos,
             edge_labels = edge_labels,
         )
+
+
+    def render_gor_pyvis (
+        self,
+        scores: typing.Dict[ tuple, float ],
+        ) -> pyvis.network.Network:
+        """
+Visualize the _graph of relations_ interactively using `PyVis`
+        """
+        pv_graph: pyvis.network.Network = pyvis.network.Network()
+        pv_graph.from_nx(self._build_nx_graph(scores))
+
+        for pv_edge in pv_graph.get_edges():
+            pair_key: tuple = ( pv_edge["from"], pv_edge["to"], )
+            aff: typing.Optional[ float ] = scores.get(pair_key)
+
+            if aff is not None:
+                pv_edge["title"] = round(aff, 2)
+                pv_edge["label"] = round(aff, 2)
+                pv_edge["width"] = int(aff * 10.0)
+
+        return pv_graph

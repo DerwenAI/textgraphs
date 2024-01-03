@@ -43,5 +43,5 @@ if __name__ == "__main__":
     df: pd.DataFrame = graph.trace_metrics(_scores)
     ic(df)
 
-    graph.render_gor(_scores)
+    graph.render_gor_plt(_scores)
     plt.show()
