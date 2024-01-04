@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 requires = [
     "setuptools >= 69.0",
-    "setuptools-scm",
+    "setuptools_scm[toml] >= 6.2",
     "wheel >= 0.42",
 ]
 
@@ -14,10 +14,16 @@ requires = [
 packages = [ "textgraphs" ]
 
 
+[tool.setuptools_scm]
+
+# empty is fine
+
+
 [project.urls]
 
 home = "https://huggingface.co/spaces/DerwenAI/textgraphs"
-GitHub = "https://github.com/DerwenAI/textgraphs"
+docs = "https://derwen.ai/docs/txg/"
+code = "https://github.com/DerwenAI/textgraphs"
 PyPi = "https://pypi.org/project/textgraphs/"
 DOI = "https://zenodo.org/doi/10.5281/zenodo.10431783"
 
@@ -25,7 +31,7 @@ DOI = "https://zenodo.org/doi/10.5281/zenodo.10431783"
 [project]
 
 name = "textgraphs"
-version = "0.3.0"
+dynamic = ["version"]
 
 authors = [
     { name = "derwen.ai", email = "info@derwen.ai" },
@@ -54,7 +60,6 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
 ]
 

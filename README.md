@@ -23,16 +23,16 @@ license: mit
 
 <img
  alt="TextGraphs logo"
- src="https://github.com/DerwenAI/textgraphs/blob/main/docs/assets/logo.png"
+ src="https://raw.githubusercontent.com/DerwenAI/textgraphs/main/docs/assets/logo.png"
  width="231"
 />
 
 
 ## project info
 
-See the project home at: <https://huggingface.co/spaces/DerwenAI/textgraphs>
+Project home: <https://huggingface.co/spaces/DerwenAI/textgraphs>
 
-See the full documentation at: <https://derwen.ai/docs/txg/>
+Full documentation: <https://derwen.ai/docs/txg/>
 
 Sample code is provided in `demo.py`
 
@@ -64,7 +64,7 @@ python3 demo.py
 ```
 
 ```bash
-./venv/bin/jupyter lab
+./venv/bin/jupyter-lab
 ```
 
 ```bash

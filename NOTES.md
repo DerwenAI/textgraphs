@@ -1,8 +1,10 @@
 TODO:
 
-  * build a _graph of relations_ topology transform
-    * transformed graph
-    * calculate affinities
+  * push live on https://derwen.ai/docs/txg
+
+  * extend GOR to replicate NodePiece/ULTRA ?
+
+  * load RDF, to bootstrap/iterate analysis
 
   * reify GOR, then use FastRP to generate embeddings?
   https://github.com/Knorreman/fastRP

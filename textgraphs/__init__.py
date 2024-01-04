@@ -43,7 +43,7 @@ __title__ = "TextGraphs: raw texts, LLMs, and KGs, oh my!"
 
 __description__ = "TextGraphs + LLMs + graph ML for entity extraction, linking, ranking, and constructing a lemma graph"  # pylint: disable=C0301
 
-__copyright__ = "2023, Derwen, Inc."
+__copyright__ = "2023-2024, Derwen, Inc."
 
 __author__ = """\n""".join([
     "derwen.ai <info@derwen.ai>"

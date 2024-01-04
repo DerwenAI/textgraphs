@@ -35,13 +35,12 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     with st.container():
         st.title("demo: TextGraphs + LLMs to construct a 'lemma graph'")
         st.markdown(
-            "_TextGraphs_ library is intended for iterating through a sequence of paragraphs.",
-        )
+            """
+_TextGraphs_ library is intended for iterating through a sequence of paragraphs.
 
-        blurb_1: pathlib.Path = pathlib.Path("docs/demo/blurb.1.html")
-
-        st.markdown(
-            blurb_1.read_text(encoding = "utf-8"),
+docs: <https://derwen.ai/docs/txg/>
+DOI: 10.5281/zenodo.10431783
+            """,
             unsafe_allow_html = True,
         )
 
