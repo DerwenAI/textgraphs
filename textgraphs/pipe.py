@@ -44,6 +44,9 @@ Abstract base class for a `spaCy` pipeline component.
         ) -> None:
         """
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
+
+    factory:
+a `PipelineFactory` used to configure components
         """
         raise NotImplementedError
 
@@ -59,6 +62,9 @@ Base class for a _knowledge graph_ interface.
         ) -> None:
         """
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
+
+    factory:
+a `PipelineFactory` used to configure components
         """
         pass  # pylint: disable=W0107
 
@@ -69,6 +75,12 @@ Encapsulate a `spaCy` call to `add_pipe()` configuration.
         ) -> typing.Optional[ str ]:
         """
 Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
+
+    label:
+input NER label, an `OntoTypes4` value
+
+    returns:
+an IRI for the named entity
         """
         return label
 
@@ -81,6 +93,15 @@ Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
         ) -> str:
         """
 Normalize the given IRI to use standard namespace prefixes.
+
+    iri:
+input IRI, in fully-qualified domain representation
+
+    debug:
+debugging flag
+
+    returns:
+the compact IRI representation, using an RDF namespace prefix
         """
         return iri
 
@@ -94,6 +115,15 @@ Normalize the given IRI to use standard namespace prefixes.
         ) -> None:
         """
 Perform _entity linking_ based on "spotlight" and other services.
+
+    graph:
+source graph
+
+    pipe:
+configured pipeline for the current document
+
+    debug:
+debugging flag
         """
         pass  # pylint: disable=W0107
 
@@ -108,6 +138,18 @@ Perform _entity linking_ based on "spotlight" and other services.
         """
 Resolve a `rel` string from a _relation extraction_ model which has
 been trained on this knowledge graph.
+
+    rel:
+relation label, generation these source from Wikidata for many RE projects
+
+    lang:
+language identifier
+
+    debug:
+debugging flag
+
+    returns:
+a resolved IRI
         """
         return rel
 
@@ -126,6 +168,15 @@ Abstract base class for a _relation extraction_ model wrapper.
         ) -> typing.Iterator[typing.Tuple[ Node, str, Node ]]:
         """
 Infer relations as triples through a generator _iteratively_.
+
+    pipe:
+configured pipeline for the current document
+
+    debug:
+debugging flag
+
+    yields:
+generated triples
         """
         raise NotImplementedError
 
@@ -139,6 +190,15 @@ Infer relations as triples through a generator _iteratively_.
         ) -> None:
         """
 Infer relations as triples produced to a queue _concurrently_.
+
+    pipe:
+configured pipeline for the current document
+
+    queue:
+queue of inference tasks to be performed
+
+    debug:
+debugging flag
         """
         for src, iri, dst in self.gen_triples(pipe, debug = debug):
             await queue.put(( src, iri, dst, ))
@@ -160,6 +220,24 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
         ) -> None:
         """
 Constructor.
+
+    text_input:
+raw text to be parsed
+
+    tok_pipe:
+the `spaCy.Language` pipeline used for tallying individual tokens
+
+    ner_pipe:
+the `spaCy.Language` pipeline used for tallying named entities
+
+    aux_pipe:
+the `spaCy.Language` pipeline used for auxiliary components (e.g., `DBPedia Spotlight`)
+
+    kg:
+knowledge graph used for entity linking
+
+    infer_rels:
+a list of components for inferring relations
         """
         self.text: str = text_input
 
@@ -191,6 +269,15 @@ Constructor.
         ) -> str:
         """
 Compose a unique, invariant lemma key for the given span.
+
+    span:
+span of tokens within the lemma
+
+    placeholder:
+flag for whether to create a placeholder
+
+    returns:
+a composed lemma key
         """
         if isinstance(span, spacy.tokens.token.Token):
             terms: typing.List[ str ] = [
@@ -219,6 +306,9 @@ Compose a unique, invariant lemma key for the given span.
         ) -> typing.Iterator[ typing.Tuple[ str, int ]]:
         """
 Iterate through the fully qualified lemma keys for an extracted entity.
+
+    yields:
+the lemma keys within an extracted entity
         """
         for ent in self.tok_doc.ents:
             yield self.get_lemma_key(ent), len(ent)
@@ -232,6 +322,15 @@ Iterate through the fully qualified lemma keys for an extracted entity.
         ) -> typing.List[ NounChunk ]:
         """
 Link any noun chunks which are not already subsumed by named entities.
+
+    nodes:
+dictionary of `Node` objects in the graph
+
+    debug:
+debugging flag
+
+    returns:
+a list of identified noun chunks which are novel
         """
         chunks: typing.List[ NounChunk ] = []
 
@@ -276,6 +375,18 @@ Link any noun chunks which are not already subsumed by named entities.
         ) -> typing.Iterator[ typing.Tuple[ Node, Node ]]:
         """
 Iterator for entity pairs for which the algorithm infers relations.
+
+    pipe_graph:
+a `networkx.MultiGraph` representation of the graph, reused for graph algorithms
+
+    max_skip:
+maximum distance between entities for inferred relations
+
+    debug:
+debugging flag
+
+    yields:
+pairs of entities within a range, e.g., to use for relation extraction
         """
         ent_list: typing.List[ Node ] = [
             node
@@ -330,6 +441,20 @@ Constructor which instantiates the `spaCy` pipelines:
   * `tok_pipe` -- regular generator for parsed tokens
   * `ner_pipe` -- with entities merged
   * `aux_pipe` -- spotlight entity linking
+
+which will be needed for parsing and entity linking.
+
+    spacy_model:
+the specific model to use in `spaCy` pipelines
+
+    ner:
+optional custom NER component
+
+    kg:
+knowledge graph used for entity linking
+
+    infer_rels:
+a list of components for inferring relations
         """
         self.ner: typing.Optional[ Component ] = ner
         self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
@@ -382,6 +507,12 @@ Constructor which instantiates the `spaCy` pipelines:
         ) -> Pipeline:
         """
 Instantiate the document pipelines needed to parse the input text.
+
+    text_input:
+raw text to be parsed
+
+    returns:
+a configured `Pipeline` object
         """
         pipe: Pipeline = Pipeline(
             text_input,

@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Experiment with transform graph data into a _graph of relations_.
+This class handles toplogical transforms of graph data into a
+_graph of relations_ dual representation.
+
+see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
 from collections import Counter, defaultdict
@@ -22,6 +25,9 @@ import pyvis  # pylint: disable=E0401
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
 
+
+######################################################################
+## class definitions
 
 class RelDir (enum.IntEnum):
     """
@@ -98,6 +104,9 @@ Attempt to reproduce results published in
         ) -> None:
         """
 Constructor.
+
+    source:
+source graph to be transformed
         """
         self.source: SimpleGraph = source
         self.rel_list: typing.List[ str ] = []
@@ -110,27 +119,24 @@ Constructor.
         self.head_affin: typing.Dict[ int, Affinity ] = defaultdict(Affinity)
         self.tail_affin: typing.Dict[ int, Affinity ] = defaultdict(Affinity)
 
-        # NB: should load these from the dataset?
-        self.pub_score: typing.Dict[ tuple, float ] = {
-            (0, 1): .22,
-            (0, 2): .50,
-            (1, 2): .33,
-            (1, 4): .11,
-            (2, 4): .11,
-            (3, 4): .81,
-            (3, 5): .11,
-            (4, 5): .36,
-        }
+        # to be loaded from the dataset
+        self.pub_score: typing.Dict[ tuple, float ] = {}
 
 
-    def load_ingram (
+    def load_ingram (  # pylint: disable=R0914
         self,
         json_file: pathlib.Path,
         *,
         debug: bool = False,
         ) -> None:
         """
-Load data for a source graph, as illustrated in _InGram_
+Load data for a source graph, as illustrated in _lee2023ingram_
+
+    json_file:
+path for the JSON dataset to load
+
+    debug:
+debugging flag
         """
         with open(json_file, "r", encoding = "utf-8") as fp:  # pylint: disable=C0103,W0621
             dat: dict = json.load(fp)
@@ -177,10 +183,16 @@ Load data for a source graph, as illustrated in _InGram_
                         1.0,
                     )
 
+            # load the expected score values
+            for rel_a, rel_b, score in dat["scores"]:
+                pair_key: tuple = (rel_a, rel_b)
+                self.pub_score[pair_key] = score
+
         if debug:
             print(self.source.nodes)
             print(self.source.edges)
             print(self.rel_list)
+            print(self.pub_score)
 
 
     def seeds (
@@ -189,7 +201,10 @@ Load data for a source graph, as illustrated in _InGram_
         debug: bool = False,
         ) -> None:
         """
-Prep data for the topological transform illustrated in _InGram_
+Prep data for the topological transform illustrated in _lee2023ingram_
+
+    debug:
+debugging flag
         """
         self.node_list = list(self.source.nodes.values())
         self.edge_list = list(self.source.edges.values())
@@ -265,6 +280,12 @@ Output a "seed" representation of the source graph.
         ) -> typing.Iterator[ TransArc ]:
         """
 Generate the transformed triples for a _graph of relations_.
+
+    debug:
+debugging flag
+
+    yields:
+transformed triples
         """
         for node_id, seeds in sorted(self.seed_links.items()):
             if debug:
@@ -294,13 +315,17 @@ Generate the transformed triples for a _graph of relations_.
         debug: bool = False,
         ) -> None:
         """
-Perform the topological transform described by _InGram_, constructing
-a _graph of relations_ (GOR) and calculating _affinity scores_ between
-entities in the GOR based on their definitions:
+Perform the topological transform described by _lee2023ingram_,
+constructing a _graph of relations_ (GOR) and calculating
+_affinity scores_ between entities in the GOR based on their
+definitions:
 
 > we measure the affinity between two relations by considering how many
 entities are shared between them and how frequently they share the same
 entity
+
+    debug:
+debugging flag
         """
         if debug:
             print("\n--- transformed triples ---")
@@ -328,6 +353,12 @@ entity
         ) -> int:
         """
 Tally the frequency of shared entities.
+
+    counter:
+`counter` data collection for the rel_b/entity pairs
+
+    returns:
+tallied values for one relation
         """
         sum_freq: int = counter.total()  # type: ignore
 
@@ -344,6 +375,9 @@ Tally the frequency of shared entities.
         ) -> None:
         """
 Collect tallies, in preparation for calculating the affinity scores.
+
+    debug:
+debugging flag
         """
         if debug:
             print("\n--- collect shared entity tallies ---")
@@ -371,7 +405,13 @@ Collect tallies, in preparation for calculating the affinity scores.
         debug: bool = False,
         ) -> typing.Dict[ tuple, float ]:
         """
-Reproduce metrics based on the example published in _InGram_
+Reproduce metrics based on the example published in _lee2023ingram_
+
+    debug:
+debugging flag
+
+    returns:
+the calculated affinity scores
         """
         self._collect_tallies(debug = debug)
 
@@ -419,6 +459,12 @@ Reproduce metrics based on the example published in _InGram_
         """
 Compare the calculated affinity scores with results from a published
 example.
+
+    scores:
+the calculated affinity scores between pairs of relations (i.e., observed values)
+
+    returns:
+a `pandas.DataFrame` where the rows compare expected vs. observed affinity scores
         """
         df_compare: pd.DataFrame = pd.DataFrame.from_dict([
             {
@@ -441,6 +487,12 @@ example.
         """
 Construct a network representation of the _graph of relations_
 in `NetworkX`
+
+    scores:
+the calculated affinity scores between pairs of relations (i.e., observed values)
+
+    returns:
+a `networkx.Graph` representation of the transformed graph
         """
         vis_graph: nx.Graph = nx.Graph()
 
@@ -474,6 +526,9 @@ in `NetworkX`
         ) -> None:
         """
 Visualize the _graph of relations_ using `matplotlib`
+
+    scores:
+the calculated affinity scores between pairs of relations (i.e., observed values)
         """
         vis_graph: nx.Graph = self._build_nx_graph(scores)
 
@@ -512,6 +567,12 @@ Visualize the _graph of relations_ using `matplotlib`
         ) -> pyvis.network.Network:
         """
 Visualize the _graph of relations_ interactively using `PyVis`
+
+    scores:
+the calculated affinity scores between pairs of relations (i.e., observed values)
+
+    returns:
+a `pyvis.networkNetwork` representation of the transformed graph
         """
         pv_graph: pyvis.network.Network = pyvis.network.Network()
         pv_graph.from_nx(self._build_nx_graph(scores))

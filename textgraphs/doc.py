@@ -74,6 +74,9 @@ then extract ranked phrases using a `textgraph` algorithm.
         ) -> None:
         """
 Constructor.
+
+    factory:
+optional `PipelineFactory` used to configure components
         """
         super().__init__()
 
@@ -91,6 +94,12 @@ Constructor.
         """
 Use the pipeline factory to create a pipeline (e.g., `spaCy.Document`)
 for each text input, which are typically paragraph-length.
+
+    text_input:
+raw text to be parsed by this pipeline
+
+    returns:
+a configured pipeline
         """
         return self.factory.create_pipeline(
             text_input,
@@ -102,6 +111,9 @@ for each text input, which are typically paragraph-length.
         ) -> RenderPyVis:
         """
 Create an object for rendering the graph in `PyVis` HTML+JavaScript.
+
+    returns:
+a configured `RenderPyVis` object for generating graph visualizations
         """
         return RenderPyVis(
             self,
@@ -122,11 +134,37 @@ Create an object for rendering the graph in `PyVis` HTML+JavaScript.
         ) -> typing.Iterator[ Node ]:
         """
 Extract phrases from a parsed document to build nodes in the
-_lemma graph_, while giving priority to:
+_lemma graph_, while considering:
 
   1. NER entities+labels
   2. lemmatized nouns and verbs
   3. noun chunks that overlap with entities
+
+as the ordered priorities.
+
+    pipe:
+configured pipeline for this document
+
+    sent_id:
+sentence identifier
+
+    sent:
+token span for the parsed sentence
+
+    text_id:
+text (top-level document) identifier
+
+    para_id:
+paragraph identitifer
+
+    lemma_iter:
+iterator for parsed lemmas
+
+    debug:
+debugging flag
+
+    yields:
+extracted entities represented as `Node` objects in the graph
         """
         # extract entities using NER
         ent_seq: typing.List[ spacy.tokens.span.Span ] = list(sent.ents)
@@ -199,6 +237,18 @@ _lemma graph_, while giving priority to:
         """
 Identify the unique noun chunks, i.e., those which differ from the
 entities and lemmas that have already been linked in the lemma graph.
+
+    pipe:
+configured pipeline for this document
+
+    text_id:
+text (top-level document) identifier
+
+    para_id:
+paragraph identitifer
+
+    debug:
+debugging flag
         """
         # scan the noun chunks for uniqueness
         for chunk in pipe.link_noun_chunks(self.nodes):
@@ -261,9 +311,19 @@ Collect the elements of a _lemma graph_ from the results of running
 the `textgraph` algorithm. These elements include: parse dependencies,
 lemmas, entities, and noun chunks.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.create_pipeline()`
 
-  * `TextGraphs.create_pipeline()`
+    pipe:
+configured pipeline for this document
+
+    text_id:
+text (top-level document) identifier
+
+    para_id:
+paragraph identitifer
+
+    debug:
+debugging flag
         """
         # parse each sentence
         lemma_iter: typing.Iterator[ typing.Tuple[ str, int ]] = pipe.get_ent_lemma_keys()
@@ -333,9 +393,13 @@ Make sure to call beforehand:
         """
 Perform _entity linking_ based on the `KnowledgeGraph` object.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+    pipe:
+configured pipeline for this document
+
+    debug:
+debugging flag
         """
         pipe.kg.perform_entity_linking(
             self,
@@ -357,6 +421,21 @@ Make sure to call beforehand:
         ) -> Edge:
         """
 Create an edge for the linked IRI, based on the input triple.
+
+    src:
+source node in the triple
+
+    iri:
+predicate IRI in the triple
+
+    dst:
+destination node in the triple
+
+    debug:
+debugging flag
+
+    returns:
+the constructed `Edge` object
         """
         edge = self.make_edge(  # type: ignore
             src,
@@ -382,6 +461,15 @@ Create an edge for the linked IRI, based on the input triple.
         ) -> None:
         """
 Consume from queue: inferred relations represented as triples.
+
+    queue:
+queue of inference tasks to be performed
+
+    inferred_edges:
+a list collecting the `Edge` objects inferred during this processing
+
+    debug:
+debugging flag
         """
         while True:
             src, iri, dst = await queue.get()
@@ -409,9 +497,16 @@ Gather triples representing inferred relations and build edges,
 concurrently by running an async queue.
 <https://stackoverflow.com/questions/52582685/using-asyncio-queue-for-producer-consumer-flow>
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+    pipe:
+configured pipeline for this document
+
+    debug:
+debugging flag
+
+    returns:
+a list of the inferred `Edge` objects
         """
         inferred_edges: typing.List[ Edge ] = []
         queue: asyncio.Queue = asyncio.Queue()
@@ -464,9 +559,16 @@ Make sure to call beforehand:
         """
 Gather triples representing inferred relations and build edges.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+    pipe:
+configured pipeline for this document
+
+    debug:
+debugging flag
+
+    returns:
+a list of the inferred `Edge` objects
         """
         inferred_edges: typing.List[ Edge ] = [
             self._infer_rel_construct_edge(src, iri, dst, debug = debug)
@@ -495,6 +597,24 @@ Make sure to call beforehand:
         ) -> typing.Tuple[ float, float ]:
         """
 Solve for the rank coefficients using a `pulp` linear programming model.
+
+    sum_e:
+sum of the entity ranks
+
+    sum_l:
+sum of the lemma ranks
+
+    min_e:
+minimum among the entity ranks
+
+    max_l:
+maximum among the entity ranks
+
+    debug:
+debugging flag
+
+    returns:
+the calculated rank coefficients
         """
         coef0: pulp.LpVariable = pulp.LpVariable("coef0", 0)  # coef for ranked entities
         coef1: pulp.LpVariable = pulp.LpVariable("coef1", 0)  # coef for ranked lemmas
@@ -529,6 +649,15 @@ Solve for the rank coefficients using a `pulp` linear programming model.
         ) -> typing.List[ float ]:
         """
 Stack-rank the nodes so that entities have priority over lemmas.
+
+    ranks:
+list of calculated ranks per node
+
+    debug:
+debugging flag
+
+    returns:
+ordered list of re-stacked nodes
         """
         # build a dataframe of node ranks and counts
         df1: pd.DataFrame = pd.DataFrame.from_dict([
@@ -622,9 +751,13 @@ stack-rank the nodes so that entities have priority over lemmas.
 Phrase ranks are normalized to sum to 1.0 and these now represent
 the ranked entities extracted from the document.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+    pr_alpha:
+optional `alpha` parameter for the PageRank algorithm
+
+    debug:
+debugging flag
         """
         for node in self.nodes.values():
             nx_node = self.lemma_graph.nodes[node.node_id]
@@ -658,9 +791,10 @@ Make sure to call beforehand:
         """
 Return the entities extracted from the document.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+    yields:
+extracted entities
         """
         for node in sorted(
                 [
@@ -688,10 +822,11 @@ Make sure to call beforehand:
         self
         ) -> pd.DataFrame:
         """
-Return the ranked extracted entities as a `pandas.DataFrame`
+Return the ranked extracted entities as a dataframe.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+    returns:
+a `pandas.DataFrame` of the extracted entities
         """
         return pd.DataFrame.from_dict(self.get_phrases())

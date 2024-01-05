@@ -26,6 +26,9 @@ Configures a `spaCy` pipeline component for `SpanMarkerNER`
         ) -> None:
         """
 Constructor.
+
+    ner_model:
+model to be used in `SpanMarker`
         """
         self.ner_model: str = ner_model
 
@@ -36,6 +39,9 @@ Constructor.
         ) -> None:
         """
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
+
+    factory:
+the `PipelineFactory` used to configure this pipeline component
         """
         factory.tok_pipe.add_pipe(
             "span_marker",

@@ -79,6 +79,12 @@ Render the _lemma graph_ as a `PyVis` network.
         ) -> None:
         """
 Constructor.
+
+    graph:
+source graph to be visualized
+
+    kg:
+knowledge graph used for entity linking
         """
         self.graph: SimpleGraph = graph
         self.kg: KnowledgeGraph = kg  #pylint: disable=C0103
@@ -93,9 +99,13 @@ Constructor.
 Prepare the structure of the `NetworkX` graph to use for building
 and returning a `PyVis` network to render.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+    debug:
+debugging flag
+
+    returns:
+a `pyvis.network.Network` interactive visualization
         """
         for node in self.graph.nodes.values():
             nx_node = self.graph.lemma_graph.nodes[node.node_id]
@@ -154,9 +164,16 @@ Cluster the communities in the _lemma graph_, then draw a
 `NetworkX` graph of the notes with a specific color for each
 community.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+    spring_distance:
+`NetworkX` parameter used to separate clusters visually
+
+    debug:
+debugging flag
+
+    returns:
+a map of the calculated communities
         """
         # cluster the communities, using girvan-newman
         comm_iter: typing.Generator = nx.community.girvan_newman(
@@ -215,9 +232,13 @@ Make sure to call beforehand:
         """
 Generate a tag cloud from the given phrases.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+    background:
+background color for the rendering
+
+    returns:
+the rendering as a `wordcloud.WordCloud` object, which can be used to generate PNG images, etc.
         """
         terms: dict = {}
         max_weight: float = 0.0

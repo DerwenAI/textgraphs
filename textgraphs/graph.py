@@ -64,10 +64,42 @@ Re-initialize the data structures, resetting all but the configuration.
         linked: bool = True,
         ) -> Node:
         """
-Lookup and return a `Node` object:
+Lookup and return a `Node` object.
+By default, link matching keys into the same node.
+Otherwise instantiate a new node if it does not exist already.
 
-    * default: link matching keys into the same node
-    * instantiate a new node if it does not exist already
+    tokens:
+list of parsed tokens
+
+    key:
+lemma key (invariant)
+
+    span:
+token span for the parsed entity
+
+    kind:
+the kind of this `Node` object
+
+    text_id:
+text (top-level document) identifier
+
+    para_id:
+paragraph identitifer
+
+    sent_id:
+sentence identifier
+
+    label:
+node label (for a new object)
+
+    length:
+length of token span
+
+    linked:
+flag for whether this links to an entity
+
+    returns:
+the constructed `Node` object
         """
         token_id: int = 0
         token_text: str = key
@@ -139,6 +171,27 @@ Lookup and return a `Node` object:
         """
 Lookup an edge, creating a new one if it does not exist already,
 and increment the count if it does.
+
+    src_node:
+source node in the triple
+
+    dst_node:
+destination node in the triple
+
+    kind:
+the kind of this `Edge` object
+
+    rel:
+relation label
+
+    prob:
+probability of this `Edge` within the graph
+
+    debug:
+debugging flag
+
+    returns:
+the constructed `Edge` object; this may be `None` if the input parameters indicate skipping the edge
         """
         key: str = ".".join([
             str(src_node.node_id),
@@ -178,6 +231,9 @@ and increment the count if it does.
 Construct the base level of the _lemma graph_ from the collected
 elements. This gets represented in `NetworkX` as a directed graph
 with parallel edges.
+
+    debug:
+debugging flag
         """
         # add the nodes
         self.lemma_graph.add_nodes_from([
@@ -220,9 +276,10 @@ Dump the _lemma graph_ as a JSON string in _node-link_ format,
 suitable for serialization and subsequent use in JavaScript,
 Neo4j, Graphistry, etc.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+    returns:
+a JSON representation of the exported _lemma graph_
         """
         # populate the optional node properties
         for node in self.nodes.values():

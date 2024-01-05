@@ -1,10 +1,12 @@
 TODO:
 
-  * push live on https://derwen.ai/docs/txg
-
   * extend GOR to replicate NodePiece/ULTRA ?
 
   * load RDF, to bootstrap/iterate analysis
+
+  * download ZIP: KuzuDB node-link
+  https://neo4j.com/docs/getting-started/data-import/csv-import/
+
 
   * reify GOR, then use FastRP to generate embeddings?
   https://github.com/Knorreman/fastRP
@@ -15,9 +17,6 @@ TODO:
 
   * also eval community detection to condense nodes using k-medoids?
   https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
-
-  * download ZIP: KuzuDB node-link
-  https://neo4j.com/docs/getting-started/data-import/csv-import/
 
   * add conda packaging - but what about OpenNRE ?
   https://conda.github.io/grayskull/
@@ -30,5 +29,3 @@ TODO:
   * check out https://github.com/wikipedia2vec/wikipedia2vec
 
   * link `sense2vec` synonyms; make affordances for UI to annotate synonyms
-
-

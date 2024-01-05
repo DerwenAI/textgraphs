@@ -82,6 +82,9 @@ Enumeration for the kinds of node categories
         ) -> str:
         """
 Codec for representing as a string.
+
+    returns:
+decoded string representation of the enumerated value
         """
         decoder: typing.List[ str ] = [
             "dep",
@@ -121,7 +124,10 @@ A data class representing one node, i.e., an extracted phrase.
         ) -> typing.Optional[ str ]:
         """
 When this node has a linked entity, return that IRI.
-Otherwise return is `label` value.
+Otherwise return its `label` value.
+
+    returns:
+a label for the linked entity
         """
         if len(self.entity) > 0:
             return self.entity[0].iri
@@ -134,6 +140,9 @@ Otherwise return is `label` value.
         ) -> str:
         """
 Return a brief name for the graphical depiction of this Node.
+
+    returns:
+brief label to be used in a graph
         """
         if self.kind == NodeEnum.IRI:
             return self.label  # type: ignore
@@ -149,6 +158,9 @@ Return a brief name for the graphical depiction of this Node.
         """
 Return a modified count, to redact verbs and linked entities from
 the stack-rank partitions.
+
+    returns:
+count, used for re-ranking extracted entities
         """
         if self.pos == "VERB" or self.kind == NodeEnum.IRI:
             return 0
@@ -160,7 +172,10 @@ the stack-rank partitions.
         self
         ) -> typing.Tuple[ int, int ]:
         """
-Generate a position span for OpenNRE.
+Generate a position span for `OpenNRE`.
+
+    returns:
+a position span needed for `OpenNRE` relation extraction
         """
         position: typing.Tuple[ int, int ] = ( self.span.idx, self.span.idx + len(self.text) - 1, )
         return position
@@ -181,6 +196,9 @@ Enumeration for the kinds of edge relations
         ) -> str:
         """
 Codec for representing as a string.
+
+    returns:
+decoded string representation of the enumerated value
         """
         decoder: typing.List[ str ] = [
             "dep",

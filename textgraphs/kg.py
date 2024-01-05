@@ -159,6 +159,30 @@ Manage access to WikiMedia-related APIs.
         ) -> None:
         """
 Constructor.
+
+    spotlight_api:
+`DBPedia Spotlight` API or equivalent local service
+
+    dbpedia_search_api:
+`DBPedia Search` API or equivalent local service
+
+    dbpedia_sparql_api:
+`DBPedia SPARQL` API or equivalent local service
+
+    wikidata_api:
+`Wikidata Search` API or equivalent local service
+
+    ner_map:
+named entity map for standardizing IRIs
+
+    ns_prefix:
+RDF namespace prefixes
+
+    min_alias:
+minimum alias probability threshold for accepting linked entities
+
+    min_similarity:
+minimum label similarity threshold for accepting linked entities
         """
         self.spotlight_api: str = spotlight_api
         self.dbpedia_search_api: str = dbpedia_search_api
@@ -181,6 +205,9 @@ Constructor.
         ) -> None:
         """
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
+
+    factory:
+a `PipelineFactory` used to configure components
         """
         factory.aux_pipe.add_pipe(
             "dbpedia_spotlight",
@@ -196,6 +223,12 @@ Encapsulate a `spaCy` call to `add_pipe()` configuration.
         ) -> typing.Optional[ str ]:
         """
 Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
+
+    label:
+input NER label, an `OntoTypes4` value
+
+    returns:
+an IRI for the named entity
         """
         if label is None:
             return None
@@ -221,6 +254,15 @@ Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
         ) -> str:
         """
 Normalize the given IRI to use the standard DBPedia namespace prefixes.
+
+    iri:
+input IRI, in fully-qualified domain representation
+
+    debug:
+debugging flag
+
+    returns:
+the compact IRI representation, using an RDF namespace prefix
         """
         iri_parse: urllib.parse.ParseResult = urllib.parse.urlparse(iri)
 
@@ -252,6 +294,15 @@ Normalize the given IRI to use the standard DBPedia namespace prefixes.
         ) -> None:
         """
 Perform _entity linking_ based on `DBPedia Spotlight` and other services.
+
+    graph:
+source graph
+
+    pipe:
+configured pipeline for the current document
+
+    debug:
+debugging flag
         """
         # first pass: use "spotlight" API to markup text
         iter_ents: typing.Iterator[ LinkedEntity ] = self._link_spotlight_entities(
@@ -307,9 +358,20 @@ Perform _entity linking_ based on `DBPedia Spotlight` and other services.
         ) -> typing.Optional[ str ]:
         """
 Resolve a `rel` string from a _relation extraction_ model which has
-been trained on this _knowledge graph_.
+been trained on this _knowledge graph_, which defaults to using the
+`WikiMedia` graphs.
 
-Defaults to the `WikiMedia` graphs.
+    rel:
+relation label, generation these source from Wikidata for many RE projects
+
+    lang:
+language identifier
+
+    debug:
+debugging flag
+
+    returns:
+a resolved IRI
         """
         # first, check the cache
         if rel in self.iri_cache:
@@ -372,6 +434,18 @@ Defaults to the `WikiMedia` graphs.
         """
 Call a generic endpoint for Wikidata API.
 Raises various untrapped exceptions, to be handled by caller.
+
+    query:
+query string
+
+    search_type:
+search type
+
+    lang:
+language identifier
+
+    debug:
+debugging flag
         """
         hit: dict = {}
 
@@ -417,6 +491,18 @@ Raises various untrapped exceptions, to be handled by caller.
         ) -> typing.Tuple[ float, str ]:
         """
 Find the best-matching aliases for a search term.
+
+    query:
+query string
+
+    label:
+entity label to be matched against the available aliases
+
+    aliases:
+list of the available aliases
+
+    debug:
+debugging flag
         """
         # best case scenario: the label is an exact match
         if query == label.lower():
@@ -453,6 +539,12 @@ Find the best-matching aliases for a search term.
         """
 Convert markdown to plain text.
 <https://stackoverflow.com/questions/761824/python-how-to-convert-markdown-formatted-text-to-text>
+
+    md_text:
+markdown text (unrendered)
+
+    returns:
+rendered plain text as a string
         """
         soup: BeautifulSoup = BeautifulSoup(
             self.markdowner.convert(md_text),
@@ -471,6 +563,18 @@ Convert markdown to plain text.
         ) -> typing.Optional[ KGSearchHit ]:
         """
 Query the Wikidata search API.
+
+    query:
+query string
+
+    lang:
+language identifier
+
+    debug:
+debugging flag
+
+    returns:
+search hit, if any
         """
         try:
             hit: dict = self._wikidata_endpoint(
@@ -525,6 +629,18 @@ Query the Wikidata search API.
         ) -> typing.Optional[ KGSearchHit ]:
         """
 Perform a DBPedia API search.
+
+    query:
+query string
+
+    lang:
+language identifier
+
+    debug:
+debugging flag
+
+    returns:
+search hit, if any
         """
         # first, check the cache
         key: str = "dbpedia:" + query.lower()
@@ -609,6 +725,15 @@ Perform a DBPedia API search.
         ) -> dict:
         """
 Perform a SPARQL query on DBPedia.
+
+    sparql:
+SPARQL query string
+
+    debug:
+debugging flag
+
+    returns:
+dictionary of query results
         """
         dat: dict = {}
 
@@ -653,6 +778,15 @@ Perform a SPARQL query on DBPedia.
         ) -> typing.Optional[ str ]:
         """
 Perform a SPARQL query on DBPedia to find an equivalent Wikidata entity.
+
+    dbpedia_iri:
+IRI in DBpedia
+
+    debug:
+debugging flag
+
+    returns:
+equivalent IRI in Wikidata
         """
         # first, check the cache
         if dbpedia_iri in self.iri_cache:
@@ -705,6 +839,15 @@ LIMIT 1000
         """
 Iterator for the results of using `DBPedia Spotlight` to markup
 text with _entity linking_
+
+    pipe:
+configured pipeline for the current document
+
+    debug:
+debugging flag
+
+    yields:
+candidates linked entities
         """
         ents: typing.List[ spacy.tokens.span.Span ] = list(pipe.aux_doc.ents)
 
@@ -777,6 +920,15 @@ text with _entity linking_
         """
 Iterator for the results of using `DBPedia Search` directly for
 _entity linking_.
+
+    graph:
+source graph
+
+    debug:
+debugging flag
+
+    yields:
+search hits
         """
         node_list: list = list(graph.nodes.values())
 
@@ -816,6 +968,24 @@ _entity linking_.
         """
 Link to previously constructed entity node;
 otherwise construct a new node for this linked entity.
+
+    graph:
+source graph
+
+    pipe:
+configured pipeline for the current document
+
+    link:
+entity to be linked
+
+    rel:
+relation label
+
+    debug:
+debugging flag
+
+    returns:
+the constructed `Node` object
         """
         if debug:
             ic(link)
@@ -878,6 +1048,21 @@ otherwise construct a new node for this linked entity.
         ) -> typing.Optional[ Edge ]:
         """
 Perform secondary _entity linking_, e.g., based on Wikidata API.
+
+    graph:
+source graph
+
+    pipe:
+configured pipeline for the current document
+
+    link:
+entity to be linked
+
+    debug:
+debugging flag
+
+    returns:
+the constructed `Edge` object
         """
         wd_ent: typing.Optional[ KGSearchHit ] = self.wikidata_search(  # type: ignore
             link.kg_ent.label,

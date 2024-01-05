@@ -52,5 +52,8 @@ def get_repo_version (
     """
 Access the Git repository information and return items to identify
 the version/commit running in production.
+
+    returns:
+version tag and commit hash
     """
     return __version__, REPO_HASH

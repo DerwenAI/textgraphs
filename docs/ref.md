@@ -12,7 +12,7 @@ then extract ranked phrases using a `textgraph` algorithm.
 
 ---
 #### [`infer_relations_async` method](#textgraphs.TextGraphs.infer_relations_async)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L401)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L489)
 
 ```python
 infer_relations_async(pipe, debug=False)
@@ -21,9 +21,16 @@ Gather triples representing inferred relations and build edges,
 concurrently by running an async queue.
 <https://stackoverflow.com/questions/52582685/using-asyncio-queue-for-producer-consumer-flow>
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+  * `pipe` : `textgraphs.pipe.Pipeline`
+configured pipeline for this document
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.List[textgraphs.elem.Edge]`
+a list of the inferred `Edge` objects
 
 
 
@@ -36,11 +43,14 @@ __init__(factory=None)
 ```
 Constructor.
 
+  * `factory` : `typing.Optional[textgraphs.pipe.PipelineFactory]`
+optional `PipelineFactory` used to configure components
+
 
 
 ---
 #### [`create_pipeline` method](#textgraphs.TextGraphs.create_pipeline)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L87)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L90)
 
 ```python
 create_pipeline(text_input)
@@ -48,22 +58,31 @@ create_pipeline(text_input)
 Use the pipeline factory to create a pipeline (e.g., `spaCy.Document`)
 for each text input, which are typically paragraph-length.
 
+  * `text_input` : `str`
+raw text to be parsed by this pipeline
+
+  * *returns* : `textgraphs.pipe.Pipeline`
+a configured pipeline
+
 
 
 ---
 #### [`create_render` method](#textgraphs.TextGraphs.create_render)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L100)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L109)
 
 ```python
 create_render()
 ```
 Create an object for rendering the graph in `PyVis` HTML+JavaScript.
 
+  * *returns* : `textgraphs.vis.RenderPyVis`
+a configured `RenderPyVis` object for generating graph visualizations
+
 
 
 ---
 #### [`collect_graph_elements` method](#textgraphs.TextGraphs.collect_graph_elements)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L251)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L301)
 
 ```python
 collect_graph_elements(pipe, text_id=0, para_id=0, debug=False)
@@ -72,45 +91,66 @@ Collect the elements of a _lemma graph_ from the results of running
 the `textgraph` algorithm. These elements include: parse dependencies,
 lemmas, entities, and noun chunks.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.create_pipeline()`
 
-  * `TextGraphs.create_pipeline()`
+  * `pipe` : `textgraphs.pipe.Pipeline`
+configured pipeline for this document
+
+  * `text_id` : `int`
+text (top-level document) identifier
+
+  * `para_id` : `int`
+paragraph identitifer
+
+  * `debug` : `bool`
+debugging flag
 
 
 
 ---
 #### [`perform_entity_linking` method](#textgraphs.TextGraphs.perform_entity_linking)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L327)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L387)
 
 ```python
 perform_entity_linking(pipe, debug=False)
 ```
 Perform _entity linking_ based on the `KnowledgeGraph` object.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+  * `pipe` : `textgraphs.pipe.Pipeline`
+configured pipeline for this document
+
+  * `debug` : `bool`
+debugging flag
 
 
 
 ---
 #### [`infer_relations` method](#textgraphs.TextGraphs.infer_relations)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L458)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L553)
 
 ```python
 infer_relations(pipe, debug=False)
 ```
 Gather triples representing inferred relations and build edges.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+  * `pipe` : `textgraphs.pipe.Pipeline`
+configured pipeline for this document
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.List[textgraphs.elem.Edge]`
+a list of the inferred `Edge` objects
 
 
 
 ---
 #### [`calc_phrase_ranks` method](#textgraphs.TextGraphs.calc_phrase_ranks)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L612)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L741)
 
 ```python
 calc_phrase_ranks(pr_alpha=0.85, debug=False)
@@ -121,39 +161,45 @@ stack-rank the nodes so that entities have priority over lemmas.
 Phrase ranks are normalized to sum to 1.0 and these now represent
 the ranked entities extracted from the document.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-  * `TextGraphs.collect_graph_elements()`
+  * `pr_alpha` : `float`
+optional `alpha` parameter for the PageRank algorithm
+
+  * `debug` : `bool`
+debugging flag
 
 
 
 ---
 #### [`get_phrases` method](#textgraphs.TextGraphs.get_phrases)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L655)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L788)
 
 ```python
 get_phrases()
 ```
 Return the entities extracted from the document.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+  * *yields* :
+extracted entities
 
 
 
 ---
 #### [`get_phrases_as_df` method](#textgraphs.TextGraphs.get_phrases_as_df)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L687)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L821)
 
 ```python
 get_phrases_as_df()
 ```
-Return the ranked extracted entities as a `pandas.DataFrame`
+Return the ranked extracted entities as a dataframe.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+  * *returns* : `pandas.core.frame.DataFrame`
+a `pandas.DataFrame` of the extracted entities
 
 
 
@@ -190,16 +236,48 @@ Re-initialize the data structures, resetting all but the configuration.
 ```python
 make_node(tokens, key, span, kind, text_id, para_id, sent_id, label=None, length=1, linked=True)
 ```
-Lookup and return a `Node` object:
+Lookup and return a `Node` object.
+By default, link matching keys into the same node.
+Otherwise instantiate a new node if it does not exist already.
 
-    * default: link matching keys into the same node
-    * instantiate a new node if it does not exist already
+  * `tokens` : `typing.List[textgraphs.elem.Node]`
+list of parsed tokens
+
+  * `key` : `str`
+lemma key (invariant)
+
+  * `span` : `spacy.tokens.token.Token`
+token span for the parsed entity
+
+  * `kind` : `<enum 'NodeEnum'>`
+the kind of this `Node` object
+
+  * `text_id` : `int`
+text (top-level document) identifier
+
+  * `para_id` : `int`
+paragraph identitifer
+
+  * `sent_id` : `int`
+sentence identifier
+
+  * `label` : `typing.Optional[str]`
+node label (for a new object)
+
+  * `length` : `int`
+length of token span
+
+  * `linked` : `bool`
+flag for whether this links to an entity
+
+  * *returns* : `textgraphs.elem.Node`
+the constructed `Node` object
 
 
 
 ---
 #### [`make_edge` method](#textgraphs.SimpleGraph.make_edge)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/graph.py#L129)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/graph.py#L161)
 
 ```python
 make_edge(src_node, dst_node, kind, rel, prob, debug=False)
@@ -207,11 +285,32 @@ make_edge(src_node, dst_node, kind, rel, prob, debug=False)
 Lookup an edge, creating a new one if it does not exist already,
 and increment the count if it does.
 
+  * `src_node` : `textgraphs.elem.Node`
+source node in the triple
+
+  * `dst_node` : `textgraphs.elem.Node`
+destination node in the triple
+
+  * `kind` : `<enum 'RelEnum'>`
+the kind of this `Edge` object
+
+  * `rel` : `str`
+relation label
+
+  * `prob` : `float`
+probability of this `Edge` within the graph
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Optional[textgraphs.elem.Edge]`
+the constructed `Edge` object; this may be `None` if the input parameters indicate skipping the edge
+
 
 
 ---
 #### [`construct_lemma_graph` method](#textgraphs.SimpleGraph.construct_lemma_graph)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/graph.py#L172)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/graph.py#L225)
 
 ```python
 construct_lemma_graph(debug=False)
@@ -220,11 +319,14 @@ Construct the base level of the _lemma graph_ from the collected
 elements. This gets represented in `NetworkX` as a directed graph
 with parallel edges.
 
+  * `debug` : `bool`
+debugging flag
+
 
 
 ---
 #### [`dump_lemma_graph` method](#textgraphs.SimpleGraph.dump_lemma_graph)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/graph.py#L215)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/graph.py#L271)
 
 ```python
 dump_lemma_graph()
@@ -233,9 +335,10 @@ Dump the _lemma graph_ as a JSON string in _node-link_ format,
 suitable for serialization and subsequent use in JavaScript,
 Neo4j, Graphistry, etc.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+  * *returns* : `str`
+a JSON representation of the exported _lemma graph_
 
 
 
@@ -253,30 +356,36 @@ __repr__()
 
 ---
 #### [`get_linked_label` method](#textgraphs.Node.get_linked_label)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L119)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L122)
 
 ```python
 get_linked_label()
 ```
 When this node has a linked entity, return that IRI.
-Otherwise return is `label` value.
+Otherwise return its `label` value.
+
+  * *returns* : `typing.Optional[str]`
+a label for the linked entity
 
 
 
 ---
 #### [`get_name` method](#textgraphs.Node.get_name)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L132)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L138)
 
 ```python
 get_name()
 ```
 Return a brief name for the graphical depiction of this Node.
 
+  * *returns* : `str`
+brief label to be used in a graph
+
 
 
 ---
 #### [`get_stacked_count` method](#textgraphs.Node.get_stacked_count)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L146)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L155)
 
 ```python
 get_stacked_count()
@@ -284,16 +393,22 @@ get_stacked_count()
 Return a modified count, to redact verbs and linked entities from
 the stack-rank partitions.
 
+  * *returns* : `int`
+count, used for re-ranking extracted entities
+
 
 
 ---
 #### [`get_pos` method](#textgraphs.Node.get_pos)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L159)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/elem.py#L171)
 
 ```python
 get_pos()
 ```
-Generate a position span for OpenNRE.
+Generate a position span for `OpenNRE`.
+
+  * *returns* : `typing.Tuple[int, int]`
+a position span needed for `OpenNRE` relation extraction
 
 
 
@@ -324,10 +439,10 @@ expensive operations with `spaCy`
 
 ---
 #### [`__init__` method](#textgraphs.PipelineFactory.__init__)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L319)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L430)
 
 ```python
-__init__(spacy_model="en_core_web_sm", ner=None, kg=<textgraphs.pipe.KnowledgeGraph object at 0x1215019f0>, infer_rels=[])
+__init__(spacy_model="en_core_web_sm", ner=None, kg=<textgraphs.pipe.KnowledgeGraph object at 0x12b2759c0>, infer_rels=[])
 ```
 Constructor which instantiates the `spaCy` pipelines:
 
@@ -335,16 +450,36 @@ Constructor which instantiates the `spaCy` pipelines:
   * `ner_pipe` -- with entities merged
   * `aux_pipe` -- spotlight entity linking
 
+which will be needed for parsing and entity linking.
+
+  * `spacy_model` : `str`
+the specific model to use in `spaCy` pipelines
+
+  * `ner` : `typing.Optional[textgraphs.pipe.Component]`
+optional custom NER component
+
+  * `kg` : `textgraphs.pipe.KnowledgeGraph`
+knowledge graph used for entity linking
+
+  * `infer_rels` : `typing.List[textgraphs.pipe.InferRel]`
+a list of components for inferring relations
+
 
 
 ---
 #### [`create_pipeline` method](#textgraphs.PipelineFactory.create_pipeline)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L379)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L504)
 
 ```python
 create_pipeline(text_input)
 ```
 Instantiate the document pipelines needed to parse the input text.
+
+  * `text_input` : `str`
+raw text to be parsed
+
+  * *returns* : `textgraphs.pipe.Pipeline`
+a configured `Pipeline` object
 
 
 
@@ -354,56 +489,107 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
 
 ---
 #### [`__init__` method](#textgraphs.Pipeline.__init__)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L152)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L212)
 
 ```python
 __init__(text_input, tok_pipe, ner_pipe, aux_pipe, kg, infer_rels)
 ```
 Constructor.
 
+  * `text_input` : `str`
+raw text to be parsed
+
+  * `tok_pipe` : `spacy.language.Language`
+the `spaCy.Language` pipeline used for tallying individual tokens
+
+  * `ner_pipe` : `spacy.language.Language`
+the `spaCy.Language` pipeline used for tallying named entities
+
+  * `aux_pipe` : `spacy.language.Language`
+the `spaCy.Language` pipeline used for auxiliary components (e.g., `DBPedia Spotlight`)
+
+  * `kg` : `textgraphs.pipe.KnowledgeGraph`
+knowledge graph used for entity linking
+
+  * `infer_rels` : `typing.List[textgraphs.pipe.InferRel]`
+a list of components for inferring relations
+
 
 
 ---
 #### [`get_lemma_key` classmethod](#textgraphs.Pipeline.get_lemma_key)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L185)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L263)
 
 ```python
 get_lemma_key(span, placeholder=False)
 ```
 Compose a unique, invariant lemma key for the given span.
 
+  * `span` : `typing.Union[spacy.tokens.span.Span, spacy.tokens.token.Token]`
+span of tokens within the lemma
+
+  * `placeholder` : `bool`
+flag for whether to create a placeholder
+
+  * *returns* : `str`
+a composed lemma key
+
 
 
 ---
 #### [`get_ent_lemma_keys` method](#textgraphs.Pipeline.get_ent_lemma_keys)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L217)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L304)
 
 ```python
 get_ent_lemma_keys()
 ```
 Iterate through the fully qualified lemma keys for an extracted entity.
 
+  * *yields* :
+the lemma keys within an extracted entity
+
 
 
 ---
 #### [`link_noun_chunks` method](#textgraphs.Pipeline.link_noun_chunks)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L227)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L317)
 
 ```python
 link_noun_chunks(nodes, debug=False)
 ```
 Link any noun chunks which are not already subsumed by named entities.
 
+  * `nodes` : `dict`
+dictionary of `Node` objects in the graph
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.List[textgraphs.elem.NounChunk]`
+a list of identified noun chunks which are novel
+
 
 
 ---
 #### [`iter_entity_pairs` method](#textgraphs.Pipeline.iter_entity_pairs)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L270)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L369)
 
 ```python
 iter_entity_pairs(pipe_graph, max_skip, debug=True)
 ```
 Iterator for entity pairs for which the algorithm infers relations.
+
+  * `pipe_graph` : `networkx.classes.multigraph.MultiGraph`
+a `networkx.MultiGraph` representation of the graph, reused for graph algorithms
+
+  * `max_skip` : `int`
+maximum distance between entities for inferred relations
+
+  * `debug` : `bool`
+debugging flag
+
+  * *yields* :
+pairs of entities within a range, e.g., to use for relation extraction
 
 
 
@@ -420,6 +606,9 @@ augment_pipe(factory)
 ```
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
 
+  * `factory` : `PipelineFactory`
+a `PipelineFactory` used to configure components
+
 
 
 ## [`NERSpanMarker` class](#NERSpanMarker)
@@ -435,16 +624,22 @@ __init__(ner_model="tomaarsen/span-marker-roberta-large-ontonotes5")
 ```
 Constructor.
 
+  * `ner_model` : `str`
+model to be used in `SpanMarker`
+
 
 
 ---
 #### [`augment_pipe` method](#textgraphs.NERSpanMarker.augment_pipe)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/ner.py#L33)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/ner.py#L36)
 
 ```python
 augment_pipe(factory)
 ```
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
+
+  * `factory` : `textgraphs.pipe.PipelineFactory`
+the `PipelineFactory` used to configure this pipeline component
 
 
 
@@ -466,57 +661,96 @@ Base class for a _knowledge graph_ interface.
 
 ---
 #### [`augment_pipe` method](#textgraphs.KnowledgeGraph.augment_pipe)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L56)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L59)
 
 ```python
 augment_pipe(factory)
 ```
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
 
+  * `factory` : `PipelineFactory`
+a `PipelineFactory` used to configure components
+
 
 
 ---
 #### [`remap_ner` method](#textgraphs.KnowledgeGraph.remap_ner)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L66)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L72)
 
 ```python
 remap_ner(label)
 ```
 Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
 
+  * `label` : `typing.Optional[str]`
+input NER label, an `OntoTypes4` value
+
+  * *returns* : `typing.Optional[str]`
+an IRI for the named entity
+
 
 
 ---
 #### [`normalize_prefix` method](#textgraphs.KnowledgeGraph.normalize_prefix)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L76)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L88)
 
 ```python
 normalize_prefix(iri, debug=False)
 ```
 Normalize the given IRI to use standard namespace prefixes.
 
+  * `iri` : `str`
+input IRI, in fully-qualified domain representation
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `str`
+the compact IRI representation, using an RDF namespace prefix
+
 
 
 ---
 #### [`perform_entity_linking` method](#textgraphs.KnowledgeGraph.perform_entity_linking)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L88)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L109)
 
 ```python
 perform_entity_linking(graph, pipe, debug=False)
 ```
 Perform _entity linking_ based on "spotlight" and other services.
 
+  * `graph` : `textgraphs.graph.SimpleGraph`
+source graph
+
+  * `pipe` : `Pipeline`
+configured pipeline for the current document
+
+  * `debug` : `bool`
+debugging flag
+
 
 
 ---
 #### [`resolve_rel_iri` method](#textgraphs.KnowledgeGraph.resolve_rel_iri)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L101)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L131)
 
 ```python
 resolve_rel_iri(rel, lang="en", debug=False)
 ```
 Resolve a `rel` string from a _relation extraction_ model which has
 been trained on this knowledge graph.
+
+  * `rel` : `str`
+relation label, generation these source from Wikidata for many RE projects
+
+  * `lang` : `str`
+language identifier
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Optional[str]`
+a resolved IRI
 
 
 
@@ -545,107 +779,211 @@ __init__(spotlight_api="https://api.dbpedia-spotlight.org/en", dbpedia_search_ap
 ```
 Constructor.
 
+  * `spotlight_api` : `str`
+`DBPedia Spotlight` API or equivalent local service
+
+  * `dbpedia_search_api` : `str`
+`DBPedia Search` API or equivalent local service
+
+  * `dbpedia_sparql_api` : `str`
+`DBPedia SPARQL` API or equivalent local service
+
+  * `wikidata_api` : `str`
+`Wikidata Search` API or equivalent local service
+
+  * `ner_map` : `dict`
+named entity map for standardizing IRIs
+
+  * `ns_prefix` : `dict`
+RDF namespace prefixes
+
+  * `min_alias` : `float`
+minimum alias probability threshold for accepting linked entities
+
+  * `min_similarity` : `float`
+minimum label similarity threshold for accepting linked entities
+
 
 
 ---
 #### [`augment_pipe` method](#textgraphs.KGWikiMedia.augment_pipe)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L178)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L202)
 
 ```python
 augment_pipe(factory)
 ```
 Encapsulate a `spaCy` call to `add_pipe()` configuration.
 
+  * `factory` : `textgraphs.pipe.PipelineFactory`
+a `PipelineFactory` used to configure components
+
 
 
 ---
 #### [`remap_ner` method](#textgraphs.KGWikiMedia.remap_ner)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L193)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L220)
 
 ```python
 remap_ner(label)
 ```
 Remap the OntoTypes4 values from NER output to more general-purpose IRIs.
 
+  * `label` : `typing.Optional[str]`
+input NER label, an `OntoTypes4` value
+
+  * *returns* : `typing.Optional[str]`
+an IRI for the named entity
+
 
 
 ---
 #### [`normalize_prefix` method](#textgraphs.KGWikiMedia.normalize_prefix)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L216)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L249)
 
 ```python
 normalize_prefix(iri, debug=False)
 ```
 Normalize the given IRI to use the standard DBPedia namespace prefixes.
 
+  * `iri` : `str`
+input IRI, in fully-qualified domain representation
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `str`
+the compact IRI representation, using an RDF namespace prefix
+
 
 
 ---
 #### [`perform_entity_linking` method](#textgraphs.KGWikiMedia.perform_entity_linking)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L246)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L288)
 
 ```python
 perform_entity_linking(graph, pipe, debug=False)
 ```
 Perform _entity linking_ based on `DBPedia Spotlight` and other services.
 
+  * `graph` : `textgraphs.graph.SimpleGraph`
+source graph
+
+  * `pipe` : `textgraphs.pipe.Pipeline`
+configured pipeline for the current document
+
+  * `debug` : `bool`
+debugging flag
+
 
 
 ---
 #### [`resolve_rel_iri` method](#textgraphs.KGWikiMedia.resolve_rel_iri)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L301)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L352)
 
 ```python
 resolve_rel_iri(rel, lang="en", debug=False)
 ```
 Resolve a `rel` string from a _relation extraction_ model which has
-been trained on this _knowledge graph_.
+been trained on this _knowledge graph_, which defaults to using the
+`WikiMedia` graphs.
 
-Defaults to the `WikiMedia` graphs.
+  * `rel` : `str`
+relation label, generation these source from Wikidata for many RE projects
+
+  * `lang` : `str`
+language identifier
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Optional[str]`
+a resolved IRI
 
 
 
 ---
 #### [`wikidata_search` method](#textgraphs.KGWikiMedia.wikidata_search)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L465)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L557)
 
 ```python
 wikidata_search(query, lang="en", debug=False)
 ```
 Query the Wikidata search API.
 
+  * `query` : `str`
+query string
+
+  * `lang` : `str`
+language identifier
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Optional[textgraphs.elem.KGSearchHit]`
+search hit, if any
+
 
 
 ---
 #### [`dbpedia_search_entity` method](#textgraphs.KGWikiMedia.dbpedia_search_entity)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L519)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L623)
 
 ```python
 dbpedia_search_entity(query, lang="en", debug=False)
 ```
 Perform a DBPedia API search.
 
+  * `query` : `str`
+query string
+
+  * `lang` : `str`
+language identifier
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Optional[textgraphs.elem.KGSearchHit]`
+search hit, if any
+
 
 
 ---
 #### [`dbpedia_sparql_query` method](#textgraphs.KGWikiMedia.dbpedia_sparql_query)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L604)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L720)
 
 ```python
 dbpedia_sparql_query(sparql, debug=False)
 ```
 Perform a SPARQL query on DBPedia.
 
+  * `sparql` : `str`
+SPARQL query string
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `dict`
+dictionary of query results
+
 
 
 ---
 #### [`dbpedia_wikidata_equiv` method](#textgraphs.KGWikiMedia.dbpedia_wikidata_equiv)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L648)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L773)
 
 ```python
 dbpedia_wikidata_equiv(dbpedia_iri, debug=False)
 ```
 Perform a SPARQL query on DBPedia to find an equivalent Wikidata entity.
+
+  * `dbpedia_iri` : `str`
+IRI in DBpedia
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Optional[str]`
+equivalent IRI in Wikidata
 
 
 
@@ -667,23 +1005,41 @@ Abstract base class for a _relation extraction_ model wrapper.
 
 ---
 #### [`gen_triples_async` method](#textgraphs.InferRel.gen_triples_async)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L133)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L184)
 
 ```python
 gen_triples_async(pipe, queue, debug=False)
 ```
 Infer relations as triples produced to a queue _concurrently_.
 
+  * `pipe` : `Pipeline`
+configured pipeline for the current document
+
+  * `queue` : `asyncio.queues.Queue`
+queue of inference tasks to be performed
+
+  * `debug` : `bool`
+debugging flag
+
 
 
 ---
 #### [`gen_triples` method](#textgraphs.InferRel.gen_triples)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L120)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L162)
 
 ```python
 gen_triples(pipe, debug=False)
 ```
 Infer relations as triples through a generator _iteratively_.
+
+  * `pipe` : `Pipeline`
+configured pipeline for the current document
+
+  * `debug` : `bool`
+debugging flag
+
+  * *yields* :
+generated triples
 
 
 
@@ -701,17 +1057,35 @@ __init__(model="wiki80_cnn_softmax", max_skip=11, min_prob=0.9)
 ```
 Constructor.
 
+  * `model` : `str`
+the specific model to be used in `OpenNRE`
+
+  * `max_skip` : `int`
+maximum distance between entities for inferred relations
+
+  * `min_prob` : `float`
+minimum probability threshold for accepting an inferred relation
+
 
 
 ---
 #### [`gen_triples` method](#textgraphs.InferRel_OpenNRE.gen_triples)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L49)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L58)
 
 ```python
 gen_triples(pipe, debug=False)
 ```
 Iterate on entity pairs to drive `OpenNRE`, inferring relations
 represented as triples which get produced by a generator.
+
+  * `pipe` : `textgraphs.pipe.Pipeline`
+configured pipeline for the current document
+
+  * `debug` : `bool`
+debugging flag
+
+  * *yields* :
+generated triples as candidates for inferred relations
 
 
 
@@ -723,46 +1097,73 @@ Perform relation extraction based on the `REBEL` model.
 
 ---
 #### [`__init__` method](#textgraphs.InferRel_Rebel.__init__)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L103)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L121)
 
 ```python
 __init__(lang="en_XX", mrebel_model="Babelscape/mrebel-large")
 ```
 Constructor.
 
+  * `lang` : `str`
+language identifier
+
+  * `mrebel_model` : `str`
+tokenizer model to be used
+
 
 
 ---
 #### [`tokenize_sent` method](#textgraphs.InferRel_Rebel.tokenize_sent)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L121)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L145)
 
 ```python
 tokenize_sent(text)
 ```
 Apply the tokenizer manually, since we need to extract special tokens.
 
+  * `text` : `str`
+input text for the sentence to be tokenized
+
+  * *returns* : `str`
+extracted tokens
+
 
 
 ---
 #### [`extract_triplets_typed` method](#textgraphs.InferRel_Rebel.extract_triplets_typed)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L144)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L174)
 
 ```python
 extract_triplets_typed(text)
 ```
 Parse the generated text and extract its triplets.
 
+  * `text` : `str`
+input text for the sentence to use in inference
+
+  * *returns* : `list`
+a list of extracted triples
+
 
 
 ---
 #### [`gen_triples` method](#textgraphs.InferRel_Rebel.gen_triples)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L223)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/rel.py#L259)
 
 ```python
 gen_triples(pipe, debug=False)
 ```
 Drive `REBEL` to infer relations for each sentence, represented as
 triples which get produced by a generator.
+
+  * `pipe` : `textgraphs.pipe.Pipeline`
+configured pipeline for the current document
+
+  * `debug` : `bool`
+debugging flag
+
+  * *yields* :
+generated triples as candidates for inferred relations
 
 
 
@@ -779,11 +1180,17 @@ __init__(graph, kg)
 ```
 Constructor.
 
+  * `graph` : `textgraphs.graph.SimpleGraph`
+source graph to be visualized
+
+  * `kg` : `textgraphs.pipe.KnowledgeGraph`
+knowledge graph used for entity linking
+
 
 
 ---
 #### [`render_lemma_graph` method](#textgraphs.RenderPyVis.render_lemma_graph)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/vis.py#L87)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/vis.py#L93)
 
 ```python
 render_lemma_graph(debug=True)
@@ -791,15 +1198,19 @@ render_lemma_graph(debug=True)
 Prepare the structure of the `NetworkX` graph to use for building
 and returning a `PyVis` network to render.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `pyvis.network.Network`
+a `pyvis.network.Network` interactive visualization
 
 
 
 ---
 #### [`draw_communities` method](#textgraphs.RenderPyVis.draw_communities)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/vis.py#L146)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/vis.py#L156)
 
 ```python
 draw_communities(spring_distance=1.4, debug=False)
@@ -808,24 +1219,35 @@ Cluster the communities in the _lemma graph_, then draw a
 `NetworkX` graph of the notes with a specific color for each
 community.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+  * `spring_distance` : `float`
+`NetworkX` parameter used to separate clusters visually
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Dict[int, int]`
+a map of the calculated communities
 
 
 
 ---
 #### [`generate_wordcloud` method](#textgraphs.RenderPyVis.generate_wordcloud)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/vis.py#L210)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/vis.py#L227)
 
 ```python
 generate_wordcloud(background="black")
 ```
 Generate a tag cloud from the given phrases.
 
-Make sure to call beforehand:
+Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
-  * `TextGraphs.calc_phrase_ranks()`
+  * `background` : `str`
+background color for the rendering
+
+  * *returns* : `wordcloud.wordcloud.WordCloud`
+the rendering as a `wordcloud.WordCloud` object, which can be used to generate PNG images, etc.
 
 
 
@@ -839,6 +1261,219 @@ Dataclass used for styling PyVis nodes.
 
 ```python
 __setattr__(name, value)
+```
+
+## [`GraphOfRelations` class](#GraphOfRelations)
+
+Attempt to reproduce results published in
+"INGRAM: Inductive Knowledge Graph Embedding via Relation Graphs"
+<https://arxiv.org/abs/2305.19987>
+
+---
+#### [`__init__` method](#textgraphs.GraphOfRelations.__init__)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L101)
+
+```python
+__init__(source)
+```
+Constructor.
+
+  * `source` : `textgraphs.graph.SimpleGraph`
+source graph to be transformed
+
+
+
+---
+#### [`load_ingram` method](#textgraphs.GraphOfRelations.load_ingram)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L126)
+
+```python
+load_ingram(json_file, debug=False)
+```
+Load data for a source graph, as illustrated in _lee2023ingram_
+
+  * `json_file` : `pathlib.Path`
+path for the JSON dataset to load
+
+  * `debug` : `bool`
+debugging flag
+
+
+
+---
+#### [`seeds` method](#textgraphs.GraphOfRelations.seeds)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L198)
+
+```python
+seeds(debug=False)
+```
+Prep data for the topological transform illustrated in _lee2023ingram_
+
+  * `debug` : `bool`
+debugging flag
+
+
+
+---
+#### [`trace_source_graph` method](#textgraphs.GraphOfRelations.trace_source_graph)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L242)
+
+```python
+trace_source_graph()
+```
+Output a "seed" representation of the source graph.
+
+
+
+---
+#### [`construct_gor` method](#textgraphs.GraphOfRelations.construct_gor)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L312)
+
+```python
+construct_gor(debug=False)
+```
+Perform the topological transform described by _lee2023ingram_,
+constructing a _graph of relations_ (GOR) and calculating
+_affinity scores_ between entities in the GOR based on their
+definitions:
+
+> we measure the affinity between two relations by considering how many
+entities are shared between them and how frequently they share the same
+entity
+
+  * `debug` : `bool`
+debugging flag
+
+
+
+---
+#### [`tally_frequencies` classmethod](#textgraphs.GraphOfRelations.tally_frequencies)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L349)
+
+```python
+tally_frequencies(counter)
+```
+Tally the frequency of shared entities.
+
+  * `counter` : `collections.Counter`
+`counter` data collection for the rel_b/entity pairs
+
+  * *returns* : `int`
+tallied values for one relation
+
+
+
+---
+#### [`get_affinity_scores` method](#textgraphs.GraphOfRelations.get_affinity_scores)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L402)
+
+```python
+get_affinity_scores(debug=False)
+```
+Reproduce metrics based on the example published in _lee2023ingram_
+
+  * `debug` : `bool`
+debugging flag
+
+  * *returns* : `typing.Dict[tuple, float]`
+the calculated affinity scores
+
+
+
+---
+#### [`trace_metrics` method](#textgraphs.GraphOfRelations.trace_metrics)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L455)
+
+```python
+trace_metrics(scores)
+```
+Compare the calculated affinity scores with results from a published
+example.
+
+  * `scores` : `typing.Dict[tuple, float]`
+the calculated affinity scores between pairs of relations (i.e., observed values)
+
+  * *returns* : `pandas.core.frame.DataFrame`
+a `pandas.DataFrame` where the rows compare expected vs. observed affinity scores
+
+
+
+---
+#### [`render_gor_plt` method](#textgraphs.GraphOfRelations.render_gor_plt)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L523)
+
+```python
+render_gor_plt(scores)
+```
+Visualize the _graph of relations_ using `matplotlib`
+
+  * `scores` : `typing.Dict[tuple, float]`
+the calculated affinity scores between pairs of relations (i.e., observed values)
+
+
+
+---
+#### [`render_gor_pyvis` method](#textgraphs.GraphOfRelations.render_gor_pyvis)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/gor.py#L564)
+
+```python
+render_gor_pyvis(scores)
+```
+Visualize the _graph of relations_ interactively using `PyVis`
+
+  * `scores` : `typing.Dict[tuple, float]`
+the calculated affinity scores between pairs of relations (i.e., observed values)
+
+  * *returns* : `pyvis.network.Network`
+a `pyvis.networkNetwork` representation of the transformed graph
+
+
+
+## [`TransArc` class](#TransArc)
+
+A data class representing one transformed rel-node-rel triple in
+a _graph of relations_.
+
+---
+#### [`__repr__` method](#textgraphs.TransArc.__repr__)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/dataclasses.py#L232)
+
+```python
+__repr__()
+```
+
+## [`RelDir` class](#RelDir)
+
+Enumeration for the directions of a relation.
+
+## [`SheafSeed` class](#SheafSeed)
+
+A data class representing a node from the source graph plus its
+partial edge, based on a _Sheaf Theory_ decomposition of a graph.
+
+---
+#### [`__repr__` method](#textgraphs.SheafSeed.__repr__)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/dataclasses.py#L232)
+
+```python
+__repr__()
+```
+
+## [`Affinity` class](#Affinity)
+
+A data class representing the affinity scores from one entity
+in the transformed _graph of relations_.
+
+NB: there are much more efficient ways to calculate these
+_affinity scores_ using sparse tensor algebra; this approach
+illustrates the process -- for research and debugging.
+
+---
+#### [`__repr__` method](#textgraphs.Affinity.__repr__)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/dataclasses.py#L232)
+
+```python
+__repr__()
 ```
 
 ---
@@ -870,6 +1505,9 @@ get_repo_version()
 ```
 Access the Git repository information and return items to identify
 the version/commit running in production.
+
+  * *returns* : `typing.Tuple[str, str]`
+version tag and commit hash
 
 
 

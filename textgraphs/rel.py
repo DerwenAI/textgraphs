@@ -39,6 +39,15 @@ Perform relation extraction based on the `OpenNRE` model.
         ) -> None:
         """
 Constructor.
+
+    model:
+the specific model to be used in `OpenNRE`
+
+    max_skip:
+maximum distance between entities for inferred relations
+
+    min_prob:
+minimum probability threshold for accepting an inferred relation
         """
         self.max_skip: int = max_skip
         self.min_prob: float = min_prob
@@ -55,6 +64,15 @@ Constructor.
         """
 Iterate on entity pairs to drive `OpenNRE`, inferring relations
 represented as triples which get produced by a generator.
+
+    pipe:
+configured pipeline for the current document
+
+    debug:
+debugging flag
+
+    yields:
+generated triples as candidates for inferred relations
         """
         node_list: list = [
             node.node_id
@@ -108,6 +126,12 @@ Perform relation extraction based on the `REBEL` model.
         ) -> None:
         """
 Constructor.
+
+    lang:
+language identifier
+
+    mrebel_model:
+tokenizer model to be used
         """
         self.lang = lang
 
@@ -124,6 +148,12 @@ Constructor.
         ) -> str:
         """
 Apply the tokenizer manually, since we need to extract special tokens.
+
+    text:
+input text for the sentence to be tokenized
+
+    returns:
+extracted tokens
         """
         tokenized: list = self.hf_pipeline(
             text,
@@ -147,6 +177,12 @@ Apply the tokenizer manually, since we need to extract special tokens.
         ) -> list:
         """
 Parse the generated text and extract its triplets.
+
+    text:
+input text for the sentence to use in inference
+
+    returns:
+a list of extracted triples
         """
         triplets: list = []
         current: str = "x"
@@ -229,6 +265,15 @@ Parse the generated text and extract its triplets.
         """
 Drive `REBEL` to infer relations for each sentence, represented as
 triples which get produced by a generator.
+
+    pipe:
+configured pipeline for the current document
+
+    debug:
+debugging flag
+
+    yields:
+generated triples as candidates for inferred relations
         """
         for sent in pipe.ner_doc.sents:
             extract: str = self.tokenize_sent(str(sent).strip())

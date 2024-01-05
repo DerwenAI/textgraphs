@@ -338,8 +338,19 @@ While Nayak was working with entities extracted from "chunks" of text, not with 
             st.markdown(
                 """
 Using the topological transform given in `lee2023ingram`, construct a
-_graph of relations_ for making enhanced graph inference:
-                """
+_graph of relations_ for enhancing graph inference.
+
+<details>
+  <summary><strong>What does this transform provide?</strong></summary>
+  <p>
+By using a <em>graph of relations</em> dual representation of our graph data, first and foremost we obtain a more compact representation of the relations in the graph, and means of making inferences (e.g., <em>link prediction</em>) where there is substantially more invariance in the training data.
+  </p>
+  <p>
+Also recognize that for a parse graph of a paragraph in the English language, the most interesting nodes will probably be either subjects (<code>nsubj</code>) or direct objects (<code>pobj</code>). Here in the <em>graph of relations</em> we can see illustrated how the important details from <em>entity linking</em> tend to cluster near either <code>nsubj</code> or <code>pobj</code> entities, connected through punctuation. This aspect is not as readily observed in the earlier visualization of the <em>lemma graph</em>.
+  </p>
+</details>
+                """,
+                unsafe_allow_html = True,
             )
 
             start_time = time.time()
@@ -374,7 +385,6 @@ _graph of relations_ for making enhanced graph inference:
 
             duration = round(time.time() - start_time, 3)
             st.write(f"transform: {round(duration, 3)} sec, {len(gor.rel_list)} relations")
-
 
             ## download lemma graph
             st.subheader("download the results", divider = "rainbow")
