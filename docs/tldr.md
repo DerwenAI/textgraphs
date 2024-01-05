@@ -10,8 +10,10 @@ In other words, this hybrid approach integrates
 _NLP parsing_, _LLMs_, _graph algorithms_, _semantic inference_,
 _operations research_, and also provides UX affordances for including
 _human-in-the-loop_ practices.
-The following demo illustrates a small problem, and addresses a much
-broader class of AI problems in industry.
+
+The demo app and the Hugging Face space both illustrate a relatively
+small problem, although they address a much broader class of AI problems
+in industry.
 
 This step is a prelude before leveraging
 _topological transforms_, _large language models_, _graph representation learning_,
@@ -34,7 +36,7 @@ in which to prototype and evaluate abstractions based on
   * approximate a _pareto archive_ (hypervolume) to re-rank extracted entities with `pulp`
   * visualize the _lemma graph_ interactively in ` PyVis`
   * cluster communities within the _lemma graph_
-  * apply topological transforms to enhance embeddings (in progress)
+  * apply topological transforms to enhance graph ML and embeddings
   * run graph representation learning on the _graph of relations_ (in progress)
 
 **...**
