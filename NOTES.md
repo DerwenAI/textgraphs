@@ -1,11 +1,11 @@
 TODO:
 
-  * extend GOR to replicate NodePiece/ULTRA ?
-
   * load RDF, to bootstrap/iterate analysis
 
   * download ZIP: KuzuDB node-link
   https://neo4j.com/docs/getting-started/data-import/csv-import/
+
+  * extend GOR to replicate NodePiece/ULTRA ?
 
 
   * reify GOR, then use FastRP to generate embeddings?

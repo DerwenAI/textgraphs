@@ -13,7 +13,7 @@ nav:
 
     - User Guide:
         - TL;DR: tldr.md
-        - Technical Details: details.md
+        - Implementation Details: details.md
         - Build Instructions: build.md
 
     - Tutorial:

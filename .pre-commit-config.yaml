@@ -31,6 +31,6 @@ repos:
     hooks:
     -   id: codespell # spell-check source code
         args: ["-L", "textgraph,udo"] # comma separated stop words
-        exclude: ^README.md|^NOTES.md|^examples
+        exclude: ^README.md|^NOTES.md|^examples|^docs/biblio.md
         language: python
         types: [text]

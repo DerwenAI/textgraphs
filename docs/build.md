@@ -12,6 +12,7 @@ simply install based on the instructions in
 
 To set up the build environment locally:
 ```
+python3 -m pip install -r requirements.txt
 python3 -m pip install -r requirements-dev.txt
 ```
 

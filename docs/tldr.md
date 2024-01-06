@@ -1,5 +1,30 @@
 # TL;DR
 
+To install from [PyPi](https://pypi.python.org/pypi/textgraphs):
+
+```bash
+python3 -m pip install -u textgraphs
+python3 -m pip install git+https://github.com/thunlp/OpenNRE
+```
+
+NB: both the spaCy and PyPi teams induce packaging errors since they
+have "opinionated" views which conflict against each other and also
+don't quite follow the [Python packaging standards](https://peps.python.org/pep-0621/).
+Ergo, `OpenNRE` must be installed separately.
+
+To run the demos locally:
+
+```bash
+python3 demo.py
+```
+
+```bash
+streamlit run app.py
+```
+
+
+## Technical Approach
+
 Construct a _lemma graph_, then perform _entity linking_ based on:
 `spaCy`, `transformers`, `SpanMarkerNER`,
 `spaCy-DBpedia-Spotlight`, `REBEL`, `OpenNRE`,
@@ -27,17 +52,17 @@ In addition to providing a library for production use cases,
 in which to prototype and evaluate abstractions based on
 ["Graph Levels Of Detail"](https://blog.derwen.ai/graph-levels-of-detail-ea4226abba55)
 
-  * use `spaCy` to parse a document, with `SpanMarkerNER` LLM assist
-  * add noun chunks in parallel to entities, as "candidate" phrases for subsequent HITL
-  * perform _entity linking_: `spaCy-DBpedia-Spotlight`, `WikiMedia API`
-  * infer relations, plus graph inference: `REBEL`, `OpenNRE`, `qwikidata`
+  * use `spaCy` to parse a document, augmented by `SpanMarker` use of LLMs for NER
+  * add noun chunks in parallel to entities, as "candidate" phrases for subsequent HITL confirmation
+  * perform _entity linking_: `spaCy-DBpedia-Spotlight`, `WikiMedia API`, etc.
+  * infer relations, plus graph inference: `REBEL`, `OpenNRE`, `qwikidata`, etc.
   * build a _lemma graph_ in `NetworkX` from the parse results
   * run a modified `textrank` algorithm plus graph analytics
   * approximate a _pareto archive_ (hypervolume) to re-rank extracted entities with `pulp`
   * visualize the _lemma graph_ interactively in ` PyVis`
   * cluster communities within the _lemma graph_
   * apply topological transforms to enhance graph ML and embeddings
-  * run graph representation learning on the _graph of relations_ (in progress)
+  * build ML models based on the _graph of relations_ (in progress)
 
 **...**
 
