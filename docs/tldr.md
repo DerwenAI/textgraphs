@@ -1,18 +1,12 @@
 # TL;DR
 
-To install from [PyPi](https://pypi.python.org/pypi/textgraphs):
+Install from [PyPi](https://pypi.python.org/pypi/textgraphs):
 
 ```bash
 python3 -m pip install -u textgraphs
-python3 -m pip install git+https://github.com/thunlp/OpenNRE
 ```
 
-NB: both the spaCy and PyPi teams induce packaging errors since they
-have "opinionated" views which conflict against each other and also
-don't quite follow the [Python packaging standards](https://peps.python.org/pep-0621/).
-Ergo, `OpenNRE` must be installed separately.
-
-To run the demos locally:
+Run the demos locally:
 
 ```bash
 python3 demo.py

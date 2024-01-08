@@ -12,14 +12,17 @@ simply install based on the instructions in
 
 To set up the build environment locally:
 ```
-python3 -m pip install -r requirements.txt
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install -U pip wheel setuptools
+
+python3 -m pip install -e .
 python3 -m pip install -r requirements-dev.txt
 ```
 
 We use *pre-commit hooks* based on [`pre-commit`](https://pre-commit.com/)
 and to configure that locally:
 ```
-python3 -m pip install -r requirements-dev.txt
 pre-commit install --hook-type pre-commit
 ```
 
@@ -96,3 +99,32 @@ To update the [release on PyPi](https://pypi.org/project/textgraphs/):
 ```
 ./bin/push_pypi.sh
 ```
+
+
+## Packaging
+
+Both the spaCy and PyPi teams induce packaging errors since they
+have "opinionated" views which conflict against each other and also
+don't quite follow the [Python packaging standards](https://peps.python.org/pep-0621/).
+
+Moreover, the various dependencies here use a wide range of approaches
+for model downloads: quite appropriately, the spaCy team does not want
+to package their language models on PyPi.
+However, they don't use more contemporary means of model download,
+such as HF transformers, either -- and that triggers logging problems.
+Overall, logging approaches used by the dependencies here for errors/warnings
+are mostly ad-hoc.
+
+These three issues (packaging, model downloads, logging) pose a small nightmare
+for managing Python library packaging downstream.
+To that point, this project implements several workarounds so that
+applications can download from PyPi.
+
+Meanwhile keep watch on developments of the following dependencies,
+if they introduce breaking changes or move toward more standard
+packaging practices:
+
+  * `spaCy` -- model downloads, logging
+  * `OpenNRE` -- PyPi packaging, logging
+  * HF `transformers` and `tokenizers` -- logging
+  * WikiMedia APIs -- SSL certificate expiry

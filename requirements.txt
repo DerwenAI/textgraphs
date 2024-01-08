@@ -3,14 +3,13 @@
 spacy >= 3.7
 https://huggingface.co/spacy/en_core_web_sm/resolve/main/en_core_web_sm-any-py3-none-any.whl
 
-git+https://github.com/thunlp/OpenNRE
-
 beautifulsoup4 >= 4.12
 GitPython >= 3.1
 icecream >= 2.1
 markdown2 >= 2.4
 matplotlib >= 3.8
 networkx >= 3.2
+open-nre >= 0.1.1
 pulp >= 2.7
 pyinstrument >= 4.6
 pyvis >= 0.3

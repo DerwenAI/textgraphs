@@ -18,7 +18,7 @@ TODO:
   * also eval community detection to condense nodes using k-medoids?
   https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
 
-  * add conda packaging - but what about OpenNRE ?
+  * add conda packaging
   https://conda.github.io/grayskull/
 
 

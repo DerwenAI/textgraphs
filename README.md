@@ -44,17 +44,19 @@ Sample code is provided in `demo.py`
 
 ## deploy library from PyPi
 
-To install from [PyPi](https://pypi.python.org/pypi/textgraphs):
+Prepare the virtual environment:
 
 ```bash
-python3 -m pip install -u textgraphs
-python3 -m pip install git+https://github.com/thunlp/OpenNRE
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install -U pip wheel setuptools
 ```
 
-NB: both the spaCy and PyPi teams induce packaging errors
-since they have "opinionated" views which conflict against
-each other and also don't quite follow the Python packaging
-standards.
+Install from [PyPi](https://pypi.python.org/pypi/textgraphs):
+
+```bash
+python3 -m pip install -U textgraphs
+```
 
 
 ## run demos locally
@@ -64,26 +66,21 @@ python3 demo.py
 ```
 
 ```bash
-./venv/bin/jupyter-lab
-```
-
-```bash
 streamlit run app.py
 ```
 
 
-## install library from a source code repo locally
+## install library from source locally
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 
 python3 -m pip install -U pip wheel setuptools
-python3 -m pip install -r requirements.txt
-python3 -m pip install git+https://github.com/thunlp/OpenNRE
+python3 -m pip install -e .
 ```
 
-to run the Streamlit or JupyterLab demos, also install:
+To run the Streamlit or JupyterLab demos, also install:
 
 ```bash
 python3 -m pip install -r requirements-dev.txt

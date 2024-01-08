@@ -54,7 +54,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "0"
 # override: `OpenNRE` uses `word2vec` which has noisy logging
 logging.disable(logging.INFO)
 
-# override: WikedMedia and others allow their SSL certs to expire
+# override: WikidMedia and others allow their SSL certs to expire
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
