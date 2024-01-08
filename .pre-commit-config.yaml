@@ -9,6 +9,7 @@ repos:
     rev: v4.4.0
     hooks:
     -   id: trailing-whitespace
+        exclude: ^docs/
     -   id: check-builtin-literals
     -   id: check-executables-have-shebangs
     -   id: check-merge-conflict
