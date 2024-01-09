@@ -430,6 +430,7 @@ debugging flag
                 {
                     "kind": str(edge.kind),
                     "title": edge.rel,
+                    "key": edge_key,
                     "weight": float(edge.count),
                     "prob": edge.prob,
                     "count": edge.count,

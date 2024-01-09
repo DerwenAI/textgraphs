@@ -249,8 +249,28 @@ format
             nx_node["length"] = node.length
             nx_node["annotated"] = node.annotated
 
+        # emulate a node-link format serialization, since the call to
+        # `NetworkX.node_link_data()` drop some properties, such as `key`
+        edge_list: typing.List[ dict ] = []
+
+        for src, dst, props in self.lemma_graph.edges.data():
+            props["source"] = src
+            props["target"] = dst
+            edge_list.append(props)
+
+        node_link: dict = {
+            "directed": True,
+            "multigraph": True,
+            "nodes": [
+                props
+                for node_id, props in self.lemma_graph.nodes.data()
+            ],
+            "edges": edge_list,
+            "graph": {}
+        }
+
         return json.dumps(
-            nx.node_link_data(self.lemma_graph),
+            node_link,
             sort_keys = True,
             indent = 2,
             separators = ( ",", ":" ),
