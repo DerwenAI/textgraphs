@@ -122,10 +122,10 @@ the constructed `Node` object
             self.nodes[key] = Node(
                 len(self.nodes),
                 key,
-                span,
                 span.text,
                 span.pos_,
                 kind,
+                span = span,
                 loc = [ location ],
                 length = length,
             )
@@ -140,10 +140,10 @@ the constructed `Node` object
             self.nodes[key] = Node(
                 len(self.nodes),
                 key,
-                span,
                 token_text,
                 token_pos,
                 kind,
+                span = span,
                 loc = [ location ],
                 label = label,
                 length = length,
@@ -224,6 +224,7 @@ the constructed `Edge` object; this may be `None` if the input parameters indica
 
     def construct_lemma_graph (
         self,
+        kg: typing.Any,  # pylint: disable=C0103
         *,
         debug: bool = False,
         ) -> None:
@@ -231,6 +232,9 @@ the constructed `Edge` object; this may be `None` if the input parameters indica
 Construct the base level of the _lemma graph_ from the collected
 elements. This gets represented in `NetworkX` as a directed graph
 with parallel edges.
+
+    kg:
+knowledge graph used for entity linking
 
     debug:
 debugging flag
@@ -244,9 +248,16 @@ debugging flag
         # populate the minimum required node properties
         for node_key, node in self.nodes.items():
             nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["title"] = node_key
-            nx_node["size"] = node.count
-            nx_node["value"] = node.weight
+            nx_node["key"] = node_key
+            nx_node["count"] = node.count
+            nx_node["weight"] = node.weight
+
+            if node.kind in [ NodeEnum.DEP ]:
+                nx_node["label"] = ""
+            elif node.kind in [ NodeEnum.IRI ]:
+                nx_node["label"] = kg.normalize_prefix(node.label)  # type: ignore
+            else:
+                nx_node["label"] = node.text
 
             if debug:
                 ic(nx_node)
@@ -269,7 +280,7 @@ debugging flag
 
 
     def dump_lemma_graph (
-        self,
+        self
         ) -> str:
         """
 Dump the _lemma graph_ as a JSON string in _node-link_ format,
@@ -279,7 +290,9 @@ Neo4j, Graphistry, etc.
 Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
     returns:
-a JSON representation of the exported _lemma graph_
+a JSON representation of the exported _lemma graph_ in
+[_node-link_](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html)
+format
         """
         # populate the optional node properties
         for node in self.nodes.values():
@@ -290,10 +303,12 @@ a JSON representation of the exported _lemma graph_
             nx_node["subobj"] = node.sub_obj
             nx_node["pos"] = node.pos
             nx_node["loc"] = str(node.loc)
+            nx_node["length"] = node.length
+            nx_node["annotated"] = node.annotated
 
         return json.dumps(
             nx.node_link_data(self.lemma_graph),
             sort_keys = True,
-            indent =  2,
+            indent = 2,
             separators = ( ",", ":" ),
         )

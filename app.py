@@ -39,12 +39,16 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
 _TextGraphs_ library is intended for iterating through a sequence of paragraphs.
 
 docs: <https://derwen.ai/docs/txg/>
+&nbsp; &nbsp;
 DOI: 10.5281/zenodo.10431783
             """,
             unsafe_allow_html = True,
         )
 
+
         # collect input + config
+        st.subheader("configure", divider = "rainbow")
+
         text_input: str = st.text_area(
             "Source Text:",
             value = SRC_TEXT.strip(),
@@ -214,6 +218,7 @@ DOI: 10.5281/zenodo.10431783
             start_time = time.time()
 
             tg.construct_lemma_graph(
+                tg.factory.kg,
                 debug = False,
             )
 

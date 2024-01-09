@@ -147,6 +147,7 @@ After the war, Werner fled to America to become famous.
         start_time = time.time()
 
         tg.construct_lemma_graph(
+            tg.factory.kg,
             debug = debug,
         )
 
@@ -166,7 +167,7 @@ After the war, Werner fled to America to become famous.
         print(f"{duration:7.3f} sec: rank phrases")
 
 
-        ## show the results
+        ## show the extracted phrase results
         ic(tg.get_phrases_as_df())
 
         if debug:  # pylint: disable=W0101
@@ -181,7 +182,8 @@ After the war, Werner fled to America to become famous.
         traceback.print_exc()
 
 
-    ## EXPERIMENT
+    ## transform graph data to a _graph of relations_
+    start_time = time.time()
 
     graph: textgraphs.GraphOfRelations = textgraphs.GraphOfRelations(
         tg,
@@ -198,6 +200,9 @@ After the war, Werner fled to America to become famous.
     _scores: typing.Dict[ tuple, float ] = graph.get_affinity_scores(
         debug = False,  # True
     )
+
+    duration = round(time.time() - start_time, 3)
+    print(f"{duration:7.3f} sec: graph of relations")
 
     graph.render_gor_plt(_scores)
     plt.show()

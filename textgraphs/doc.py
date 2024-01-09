@@ -268,10 +268,10 @@ debugging flag
                     node = Node(
                         len(self.nodes),
                         chunk.lemma_key,
-                        chunk.span,
                         chunk.text,
                         "noun_chunk",
                         NodeEnum.CHU,
+                        span = chunk.span,
                         loc = [ location ],
                         length = chunk.length,
                         count = 1,
@@ -348,19 +348,19 @@ debugging flag
                 node.label = pipe.kg.remap_ner(node.label)
 
                 # link parse elements, based on the token's head
-                head_idx: int = node.span.head.i
+                head_idx: int = node.span.head.i  # type: ignore
 
                 if head_idx >= len(sent_nodes):
                     head_idx -= sent.start
 
                 if debug:
-                    ic(node, len(sent_nodes), node.span.head.i, node.span.head.text, head_idx)
+                    ic(node, len(sent_nodes), node.span.head.i, node.span.head.text, head_idx)  # type: ignore  # pylint: disable=C0301
 
                 edge: Edge = self.make_edge(  # type: ignore
                     node,
                     sent_nodes[head_idx],
                     RelEnum.DEP,
-                    node.span.dep_,
+                    node.span.dep_,  # type: ignore
                     1.0,
                     debug = debug,
                 )
@@ -369,7 +369,7 @@ debugging flag
                     pipe.edges.append(edge)
 
                 # annotate src nodes which are subjects or direct objects
-                if node.span.dep_ in [ "nsubj", "pobj" ]:
+                if node.span.dep_ in [ "nsubj", "pobj" ]:  # type: ignore
                     node.sub_obj = True
 
         # overlay unique noun chunks onto the parsed elements,

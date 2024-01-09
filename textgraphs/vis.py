@@ -105,23 +105,24 @@ Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 debugging flag
 
     returns:
-a `pyvis.network.Network` interactive visualization
+<a `pyvis.network.Network` interactive visualization
         """
         for node in self.graph.nodes.values():
             nx_node = self.graph.lemma_graph.nodes[node.node_id]
             nx_node["shape"] = NODE_STYLES[node.kind].shape
             nx_node["color"] = NODE_STYLES[node.kind].color
 
-            if node.kind in [ NodeEnum.DEP ]:
-                nx_node["label"] = ""
-            elif node.kind in [ NodeEnum.IRI ]:
+            nx_node["size"] = nx_node["count"]
+
+            if node.kind in [ NodeEnum.IRI ]:
                 nx_node["title"] = node.text
-                nx_node["label"] = self.kg.normalize_prefix(node.label)  # type: ignore
             else:
-                nx_node["label"] = node.text
+                nx_node["title"] = nx_node["key"]
 
             if node.kind in [ NodeEnum.CHU, NodeEnum.IRI ]:
                 nx_node["value"] = 0.0
+            else:
+                nx_node["value"] = nx_node["weight"]
 
             if debug:
                 ic(node.count, node, nx_node)

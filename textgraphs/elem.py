@@ -104,10 +104,10 @@ A data class representing one node, i.e., an extracted phrase.
     """
     node_id: int
     key: str
-    span: typing.Union[ spacy.tokens.span.Span, spacy.tokens.token.Token ]
     text: str
     pos: str
     kind: NodeEnum
+    span: typing.Optional[ typing.Union[ spacy.tokens.span.Span, spacy.tokens.token.Token ]] = None
     loc: typing.List[ typing.List[ int ] ] = field(default_factory = lambda: [])
     label: typing.Optional[ str ] = None
     length: int = 1
@@ -177,7 +177,7 @@ Generate a position span for `OpenNRE`.
     returns:
 a position span needed for `OpenNRE` relation extraction
         """
-        position: typing.Tuple[ int, int ] = ( self.span.idx, self.span.idx + len(self.text) - 1, )
+        position: typing.Tuple[ int, int ] = ( self.span.idx, self.span.idx + len(self.text) - 1, )  # type: ignore  # pylint: disable=C0301
         return position
 
 
