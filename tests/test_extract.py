@@ -45,7 +45,6 @@ Werner Herzog is a remarkable filmmaker and intellectual originally from Germany
     )
 
     tg.construct_lemma_graph(
-        tg.factory.kg,
         debug = False,
     )
 

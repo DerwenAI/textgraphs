@@ -147,7 +147,6 @@ After the war, Werner fled to America to become famous.
         start_time = time.time()
 
         tg.construct_lemma_graph(
-            tg.factory.kg,
             debug = debug,
         )
 

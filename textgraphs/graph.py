@@ -222,63 +222,6 @@ the constructed `Edge` object; this may be `None` if the input parameters indica
         return self.edges.get(key)
 
 
-    def construct_lemma_graph (
-        self,
-        kg: typing.Any,  # pylint: disable=C0103
-        *,
-        debug: bool = False,
-        ) -> None:
-        """
-Construct the base level of the _lemma graph_ from the collected
-elements. This gets represented in `NetworkX` as a directed graph
-with parallel edges.
-
-    kg:
-knowledge graph used for entity linking
-
-    debug:
-debugging flag
-        """
-        # add the nodes
-        self.lemma_graph.add_nodes_from([
-            node.node_id
-            for node in self.nodes.values()
-        ])
-
-        # populate the minimum required node properties
-        for node_key, node in self.nodes.items():
-            nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["key"] = node_key
-            nx_node["count"] = node.count
-            nx_node["weight"] = node.weight
-
-            if node.kind in [ NodeEnum.DEP ]:
-                nx_node["label"] = ""
-            elif node.kind in [ NodeEnum.IRI ]:
-                nx_node["label"] = kg.normalize_prefix(node.label)  # type: ignore
-            else:
-                nx_node["label"] = node.text
-
-            if debug:
-                ic(nx_node)
-
-        # add the edges and their properties
-        self.lemma_graph.add_edges_from([
-            (
-                edge.src_node,
-                edge.dst_node,
-                {
-                    "kind": str(edge.kind),
-                    "title": edge.rel,
-                    "weight": float(edge.count),
-                    "prob": edge.prob,
-                    "count": edge.count,
-                },
-            )
-            for edge_key, edge in self.edges.items()
-        ])
-
-
     def dump_lemma_graph (
         self
         ) -> str:

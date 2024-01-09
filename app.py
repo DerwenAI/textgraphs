@@ -218,7 +218,6 @@ DOI: 10.5281/zenodo.10431783
             start_time = time.time()
 
             tg.construct_lemma_graph(
-                tg.factory.kg,
                 debug = False,
             )
 
