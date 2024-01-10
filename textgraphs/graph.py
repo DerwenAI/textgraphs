@@ -166,6 +166,7 @@ the constructed `Node` object
         rel: str,
         prob: float,
         *,
+        key: typing.Optional[ str ] = None,
         debug: bool = False,
         ) -> typing.Optional[ Edge ]:
         """
@@ -187,13 +188,17 @@ relation label
     prob:
 probability of this `Edge` within the graph
 
+    key:
+lemma key (invariant); generate a key if this is not provided
+
     debug:
 debugging flag
 
     returns:
 the constructed `Edge` object; this may be `None` if the input parameters indicate skipping the edge
         """
-        key: str = ".".join([
+        if key is None:
+            key = ".".join([
             str(src_node.node_id),
             str(dst_node.node_id),
             rel.replace(" ", "_"),
@@ -247,6 +252,7 @@ format
             nx_node["pos"] = node.pos
             nx_node["loc"] = str(node.loc)
             nx_node["length"] = node.length
+            nx_node["hood"] = node.neighbors
             nx_node["anno"] = node.annotated
 
         # emulate a node-link format serialization, using the

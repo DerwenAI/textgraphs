@@ -197,9 +197,9 @@ Decoder values
         """
         return [
             "dep",
+            "chu",
             "inf",
             "syn",
-            "chu",
             "iri",
         ]
 

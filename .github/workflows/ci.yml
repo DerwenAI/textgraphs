@@ -31,7 +31,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e .
-          pip install git+https://github.com/thunlp/OpenNRE
           pip install pre-commit pytest
 
       - name: Run tests
