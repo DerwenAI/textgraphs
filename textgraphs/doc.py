@@ -408,7 +408,7 @@ debugging flag
         # populate the minimum required node properties
         for node_key, node in self.nodes.items():
             nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["key"] = node_key
+            nx_node["lemma"] = node_key
             nx_node["count"] = node.count
             nx_node["weight"] = node.weight
 
@@ -430,7 +430,7 @@ debugging flag
                 {
                     "kind": str(edge.kind),
                     "title": edge.rel,
-                    "key": edge_key,
+                    "lemma": edge_key,
                     "weight": float(edge.count),
                     "prob": edge.prob,
                     "count": edge.count,
@@ -723,7 +723,7 @@ ordered list of re-stacked nodes
             {
                 "weight": ranks[node.node_id],
                 "count": node.get_stacked_count(),
-                "neighbors": node.neighbors,
+                "hood": node.neighbors,
                 "subobj": int(node.sub_obj),
             }
             for node in self.nodes.values()
@@ -828,7 +828,7 @@ debugging flag
                 pass
             finally:
                 node.neighbors = neighbors
-                nx_node["neighbors"] = neighbors
+                nx_node["hood"] = neighbors
 
         # restack
         ranks: typing.List[ float ] = self._restack_ranks(

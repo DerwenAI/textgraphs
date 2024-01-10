@@ -17,10 +17,11 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 """
 
 from dataclasses import dataclass, field
-import enum
 import typing
 
 import spacy  # pylint: disable=E0401
+
+from .util import EnumBase
 
 
 ######################################################################
@@ -67,7 +68,7 @@ A data class representing one noun chunk, i.e., a candidate as an extracted phra
     start: int = 0
 
 
-class NodeEnum (enum.IntEnum):
+class NodeEnum (EnumBase):
     """
 Enumeration for the kinds of node categories
     """
@@ -77,24 +78,20 @@ Enumeration for the kinds of node categories
     CHU = 3  # noun chunk
     IRI = 4  # IRI for linked entity
 
-    def __str__ (
+    @property
+    def decoder (
         self
-        ) -> str:
+        ) -> typing.List[ str ]:
         """
-Codec for representing as a string.
-
-    returns:
-decoded string representation of the enumerated value
+Decoder values
         """
-        decoder: typing.List[ str ] = [
+        return [
             "dep",
             "lem",
             "ent",
             "chu",
             "iri",
         ]
-
-        return decoder[self.value]
 
 
 @dataclass(order=False, frozen=False)
@@ -181,7 +178,7 @@ a position span needed for `OpenNRE` relation extraction
         return position
 
 
-class RelEnum (enum.IntEnum):
+class RelEnum (EnumBase):
     """
 Enumeration for the kinds of edge relations
     """
@@ -191,24 +188,20 @@ Enumeration for the kinds of edge relations
     SYN = 3  # `sense2vec` inferred synonym
     IRI = 4  # `DBPedia` or `Wikidata` linked entity
 
-    def __str__ (
+    @property
+    def decoder (
         self
-        ) -> str:
+        ) -> typing.List[ str ]:
         """
-Codec for representing as a string.
-
-    returns:
-decoded string representation of the enumerated value
+Decoder values
         """
-        decoder: typing.List[ str ] = [
+        return [
             "dep",
             "inf",
             "syn",
             "chu",
             "iri",
         ]
-
-        return decoder[self.value]
 
 
 @dataclass(order=False, frozen=False)

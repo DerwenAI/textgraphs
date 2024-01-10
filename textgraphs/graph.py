@@ -247,10 +247,10 @@ format
             nx_node["pos"] = node.pos
             nx_node["loc"] = str(node.loc)
             nx_node["length"] = node.length
-            nx_node["annotated"] = node.annotated
+            nx_node["anno"] = node.annotated
 
-        # emulate a node-link format serialization, since the call to
-        # `NetworkX.node_link_data()` drop some properties, such as `key`
+        # emulate a node-link format serialization, using the
+        # default `NetworkX.node_link_data()` property names
         edge_list: typing.List[ dict ] = []
 
         for src, dst, props in self.lemma_graph.edges.data():
@@ -265,7 +265,7 @@ format
                 props
                 for node_id, props in self.lemma_graph.nodes.data()
             ],
-            "edges": edge_list,
+            "links": edge_list,
             "graph": {}
         }
 
