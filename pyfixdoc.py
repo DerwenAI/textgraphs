@@ -120,8 +120,14 @@ Build the apidocs documentation as markdown.
         self.md.extend(self.get_docstring(self.module_obj))
 
         # find and format the class definitions
-        for class_name in self.class_list:
-            self.format_class(todo_list, class_name)
+        try:
+            for class_name in self.class_list:
+                self.format_class(todo_list, class_name)
+        except Exception as ex:  # pylint: disable=W0718
+            print(class_name)
+            ic(ex)
+            traceback.print_exc()
+            sys.exit(-1)
 
         # format the function definitions and types
         self.format_functions()

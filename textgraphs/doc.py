@@ -393,9 +393,6 @@ with parallel edges.
 
 Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
 
-    kg:
-knowledge graph used for entity linking
-
     debug:
 debugging flag
         """
