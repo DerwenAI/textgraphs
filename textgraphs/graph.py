@@ -281,3 +281,58 @@ format
             indent = 2,
             separators = ( ",", ":" ),
         )
+
+
+    def load_lemma_graph (
+        self,
+        json_str: str,
+        ) -> None:
+        """
+Load from a JSON string in
+a JSON representation of the exported _lemma graph_ in
+[_node-link_](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html)
+format
+        """
+        dat: dict = json.loads(json_str)
+        tokens: typing.List[ Node ] = []
+
+        # deserialize the nodes
+        for nx_node in dat.get("nodes"):  # type: ignore
+            label: typing.Optional[ str ] = None
+            kind: NodeEnum = NodeEnum.decode(nx_node["kind"])  # type: ignore
+
+            if kind in [ NodeEnum.ENT ]:
+                label = nx_node["label"]
+
+            node: Node = self.make_node(
+                tokens,
+                nx_node["lemma"],
+                None,
+                kind,
+                0,
+                0,
+                0,
+                label = label,
+                length = nx_node["length"],
+            )
+
+            node.text = nx_node["name"]
+            node.pos = nx_node["pos"]
+            node.loc = eval(nx_node["loc"])  # pylint: disable=W0123
+            node.count = int(nx_node["count"])
+            node.neighbors = int(nx_node["hood"])
+
+        # deserialize the edges
+        node_list: typing.List[ Node ] = list(self.nodes.values())
+
+        for nx_edge in dat.get("links"):  # type: ignore
+            edge: Edge = self.make_edge(  # type: ignore
+                node_list[nx_edge["source"]],
+                node_list[nx_edge["target"]],
+                RelEnum.decode(nx_edge["kind"]),  # type: ignore
+                nx_edge["title"],
+                float(nx_edge["prob"]),
+                key = nx_edge["lemma"],
+            )
+
+            edge.count = int(nx_edge["count"])
