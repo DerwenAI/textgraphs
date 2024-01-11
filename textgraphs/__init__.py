@@ -29,7 +29,8 @@ from .pipe import Component, InferRel, KnowledgeGraph, Pipeline, PipelineFactory
 
 from .rel import InferRel_OpenNRE, InferRel_Rebel
 
-from .util import calc_quantile_bins, root_mean_square, stripe_column
+from .util import EnumBase, \
+    calc_quantile_bins, root_mean_square, stripe_column
 
 from .version import get_repo_version, \
     __version__, __version_major__, __version_minor__, __version_patch__

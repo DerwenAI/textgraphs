@@ -122,10 +122,10 @@ the constructed `Node` object
             self.nodes[key] = Node(
                 len(self.nodes),
                 key,
-                span,
                 span.text,
                 span.pos_,
                 kind,
+                span = span,
                 loc = [ location ],
                 length = length,
             )
@@ -140,10 +140,10 @@ the constructed `Node` object
             self.nodes[key] = Node(
                 len(self.nodes),
                 key,
-                span,
                 token_text,
                 token_pos,
                 kind,
+                span = span,
                 loc = [ location ],
                 label = label,
                 length = length,
@@ -166,6 +166,7 @@ the constructed `Node` object
         rel: str,
         prob: float,
         *,
+        key: typing.Optional[ str ] = None,
         debug: bool = False,
         ) -> typing.Optional[ Edge ]:
         """
@@ -187,13 +188,17 @@ relation label
     prob:
 probability of this `Edge` within the graph
 
+    key:
+lemma key (invariant); generate a key if this is not provided
+
     debug:
 debugging flag
 
     returns:
 the constructed `Edge` object; this may be `None` if the input parameters indicate skipping the edge
         """
-        key: str = ".".join([
+        if key is None:
+            key = ".".join([
             str(src_node.node_id),
             str(dst_node.node_id),
             rel.replace(" ", "_"),
@@ -222,54 +227,8 @@ the constructed `Edge` object; this may be `None` if the input parameters indica
         return self.edges.get(key)
 
 
-    def construct_lemma_graph (
-        self,
-        *,
-        debug: bool = False,
-        ) -> None:
-        """
-Construct the base level of the _lemma graph_ from the collected
-elements. This gets represented in `NetworkX` as a directed graph
-with parallel edges.
-
-    debug:
-debugging flag
-        """
-        # add the nodes
-        self.lemma_graph.add_nodes_from([
-            node.node_id
-            for node in self.nodes.values()
-        ])
-
-        # populate the minimum required node properties
-        for node_key, node in self.nodes.items():
-            nx_node = self.lemma_graph.nodes[node.node_id]
-            nx_node["title"] = node_key
-            nx_node["size"] = node.count
-            nx_node["value"] = node.weight
-
-            if debug:
-                ic(nx_node)
-
-        # add the edges and their properties
-        self.lemma_graph.add_edges_from([
-            (
-                edge.src_node,
-                edge.dst_node,
-                {
-                    "kind": str(edge.kind),
-                    "title": edge.rel,
-                    "weight": float(edge.count),
-                    "prob": edge.prob,
-                    "count": edge.count,
-                },
-            )
-            for edge_key, edge in self.edges.items()
-        ])
-
-
     def dump_lemma_graph (
-        self,
+        self
         ) -> str:
         """
 Dump the _lemma graph_ as a JSON string in _node-link_ format,
@@ -279,7 +238,9 @@ Neo4j, Graphistry, etc.
 Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
     returns:
-a JSON representation of the exported _lemma graph_
+a JSON representation of the exported _lemma graph_ in
+[_node-link_](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html)
+format
         """
         # populate the optional node properties
         for node in self.nodes.values():
@@ -290,10 +251,88 @@ a JSON representation of the exported _lemma graph_
             nx_node["subobj"] = node.sub_obj
             nx_node["pos"] = node.pos
             nx_node["loc"] = str(node.loc)
+            nx_node["length"] = node.length
+            nx_node["hood"] = node.neighbors
+            nx_node["anno"] = node.annotated
+
+        # emulate a node-link format serialization, using the
+        # default `NetworkX.node_link_data()` property names
+        edge_list: typing.List[ dict ] = []
+
+        for src, dst, props in self.lemma_graph.edges.data():
+            props["source"] = src
+            props["target"] = dst
+            edge_list.append(props)
+
+        node_link: dict = {
+            "directed": True,
+            "multigraph": True,
+            "nodes": [
+                props
+                for node_id, props in self.lemma_graph.nodes.data()
+            ],
+            "links": edge_list,
+            "graph": {}
+        }
 
         return json.dumps(
-            nx.node_link_data(self.lemma_graph),
+            node_link,
             sort_keys = True,
-            indent =  2,
+            indent = 2,
             separators = ( ",", ":" ),
         )
+
+
+    def load_lemma_graph (
+        self,
+        json_str: str,
+        ) -> None:
+        """
+Load from a JSON string in
+a JSON representation of the exported _lemma graph_ in
+[_node-link_](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html)
+format
+        """
+        dat: dict = json.loads(json_str)
+        tokens: typing.List[ Node ] = []
+
+        # deserialize the nodes
+        for nx_node in dat.get("nodes"):  # type: ignore
+            label: typing.Optional[ str ] = None
+            kind: NodeEnum = NodeEnum.decode(nx_node["kind"])  # type: ignore
+
+            if kind in [ NodeEnum.ENT ]:
+                label = nx_node["label"]
+
+            node: Node = self.make_node(
+                tokens,
+                nx_node["lemma"],
+                None,
+                kind,
+                0,
+                0,
+                0,
+                label = label,
+                length = nx_node["length"],
+            )
+
+            node.text = nx_node["name"]
+            node.pos = nx_node["pos"]
+            node.loc = eval(nx_node["loc"])  # pylint: disable=W0123
+            node.count = int(nx_node["count"])
+            node.neighbors = int(nx_node["hood"])
+
+        # deserialize the edges
+        node_list: typing.List[ Node ] = list(self.nodes.values())
+
+        for nx_edge in dat.get("links"):  # type: ignore
+            edge: Edge = self.make_edge(  # type: ignore
+                node_list[nx_edge["source"]],
+                node_list[nx_edge["target"]],
+                RelEnum.decode(nx_edge["kind"]),  # type: ignore
+                nx_edge["title"],
+                float(nx_edge["prob"]),
+                key = nx_edge["lemma"],
+            )
+
+            edge.count = int(nx_edge["count"])

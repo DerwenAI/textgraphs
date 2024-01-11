@@ -17,10 +17,11 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 """
 
 from dataclasses import dataclass, field
-import enum
 import typing
 
 import spacy  # pylint: disable=E0401
+
+from .util import EnumBase
 
 
 ######################################################################
@@ -67,7 +68,7 @@ A data class representing one noun chunk, i.e., a candidate as an extracted phra
     start: int = 0
 
 
-class NodeEnum (enum.IntEnum):
+class NodeEnum (EnumBase):
     """
 Enumeration for the kinds of node categories
     """
@@ -77,24 +78,20 @@ Enumeration for the kinds of node categories
     CHU = 3  # noun chunk
     IRI = 4  # IRI for linked entity
 
-    def __str__ (
+    @property
+    def decoder (
         self
-        ) -> str:
+        ) -> typing.List[ str ]:
         """
-Codec for representing as a string.
-
-    returns:
-decoded string representation of the enumerated value
+Decoder values
         """
-        decoder: typing.List[ str ] = [
+        return [
             "dep",
             "lem",
             "ent",
             "chu",
             "iri",
         ]
-
-        return decoder[self.value]
 
 
 @dataclass(order=False, frozen=False)
@@ -104,10 +101,10 @@ A data class representing one node, i.e., an extracted phrase.
     """
     node_id: int
     key: str
-    span: typing.Union[ spacy.tokens.span.Span, spacy.tokens.token.Token ]
     text: str
     pos: str
     kind: NodeEnum
+    span: typing.Optional[ typing.Union[ spacy.tokens.span.Span, spacy.tokens.token.Token ]] = None
     loc: typing.List[ typing.List[ int ] ] = field(default_factory = lambda: [])
     label: typing.Optional[ str ] = None
     length: int = 1
@@ -177,11 +174,11 @@ Generate a position span for `OpenNRE`.
     returns:
 a position span needed for `OpenNRE` relation extraction
         """
-        position: typing.Tuple[ int, int ] = ( self.span.idx, self.span.idx + len(self.text) - 1, )
+        position: typing.Tuple[ int, int ] = ( self.span.idx, self.span.idx + len(self.text) - 1, )  # type: ignore  # pylint: disable=C0301
         return position
 
 
-class RelEnum (enum.IntEnum):
+class RelEnum (EnumBase):
     """
 Enumeration for the kinds of edge relations
     """
@@ -191,24 +188,20 @@ Enumeration for the kinds of edge relations
     SYN = 3  # `sense2vec` inferred synonym
     IRI = 4  # `DBPedia` or `Wikidata` linked entity
 
-    def __str__ (
+    @property
+    def decoder (
         self
-        ) -> str:
+        ) -> typing.List[ str ]:
         """
-Codec for representing as a string.
-
-    returns:
-decoded string representation of the enumerated value
+Decoder values
         """
-        decoder: typing.List[ str ] = [
+        return [
             "dep",
+            "chu",
             "inf",
             "syn",
-            "chu",
             "iri",
         ]
-
-        return decoder[self.value]
 
 
 @dataclass(order=False, frozen=False)

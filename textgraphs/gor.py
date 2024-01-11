@@ -10,7 +10,6 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-import enum
 import itertools
 import pathlib
 import json
@@ -24,30 +23,30 @@ import pyvis  # pylint: disable=E0401
 
 from .elem import Edge, Node, NodeEnum, RelEnum
 from .graph import SimpleGraph
+from .util import EnumBase
 
 
 ######################################################################
 ## class definitions
 
-class RelDir (enum.IntEnum):
+class RelDir (EnumBase):
     """
 Enumeration for the directions of a relation.
     """
     HEAD = 0  # relation flows into node
     TAIL = 1  # relation flows out of node
 
-    def __str__ (
+    @property
+    def decoder (
         self
-        ) -> str:
+        ) -> typing.List[ str ]:
         """
-Codec for representing as a string.
+Decoder values
         """
-        decoder: typing.List[ str ] = [
+        return [
             "head",
             "tail",
         ]
-
-        return decoder[self.value]
 
 
 @dataclass(order=False, frozen=False)

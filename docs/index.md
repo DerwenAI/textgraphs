@@ -18,7 +18,7 @@ expensive process and poor results, relative to other methods.
 
 That said, are there other ways transformers might help augment
 natural language workflows?
-This project results from an ongoing pursuit of that line of inquiry.
+This project results from an ongoing pursuit along these lines of inquiry.
 With sufficiently narrowed task focus and ample software engineering,
 transformers can be used to augment specific _components_ of natural
 language workflows.

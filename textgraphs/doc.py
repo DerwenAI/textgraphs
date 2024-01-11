@@ -268,10 +268,10 @@ debugging flag
                     node = Node(
                         len(self.nodes),
                         chunk.lemma_key,
-                        chunk.span,
                         chunk.text,
                         "noun_chunk",
                         NodeEnum.CHU,
+                        span = chunk.span,
                         loc = [ location ],
                         length = chunk.length,
                         count = 1,
@@ -348,19 +348,19 @@ debugging flag
                 node.label = pipe.kg.remap_ner(node.label)
 
                 # link parse elements, based on the token's head
-                head_idx: int = node.span.head.i
+                head_idx: int = node.span.head.i  # type: ignore
 
                 if head_idx >= len(sent_nodes):
                     head_idx -= sent.start
 
                 if debug:
-                    ic(node, len(sent_nodes), node.span.head.i, node.span.head.text, head_idx)
+                    ic(node, len(sent_nodes), node.span.head.i, node.span.head.text, head_idx)  # type: ignore  # pylint: disable=C0301
 
                 edge: Edge = self.make_edge(  # type: ignore
                     node,
                     sent_nodes[head_idx],
                     RelEnum.DEP,
-                    node.span.dep_,
+                    node.span.dep_,  # type: ignore
                     1.0,
                     debug = debug,
                 )
@@ -369,7 +369,7 @@ debugging flag
                     pipe.edges.append(edge)
 
                 # annotate src nodes which are subjects or direct objects
-                if node.span.dep_ in [ "nsubj", "pobj" ]:
+                if node.span.dep_ in [ "nsubj", "pobj" ]:  # type: ignore
                     node.sub_obj = True
 
         # overlay unique noun chunks onto the parsed elements,
@@ -379,6 +379,65 @@ debugging flag
             para_id = para_id,
             debug = debug,
         )
+
+
+    def construct_lemma_graph (
+        self,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Construct the base level of the _lemma graph_ from the collected
+elements. This gets represented in `NetworkX` as a directed graph
+with parallel edges.
+
+Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
+
+    kg:
+knowledge graph used for entity linking
+
+    debug:
+debugging flag
+        """
+        # add the nodes
+        self.lemma_graph.add_nodes_from([
+            node.node_id
+            for node in self.nodes.values()
+        ])
+
+        # populate the minimum required node properties
+        for node_key, node in self.nodes.items():
+            nx_node = self.lemma_graph.nodes[node.node_id]
+            nx_node["lemma"] = node_key
+            nx_node["count"] = node.count
+            nx_node["weight"] = node.weight
+
+            if node.kind in [ NodeEnum.DEP ]:
+                nx_node["label"] = ""
+            elif node.kind in [ NodeEnum.IRI ]:
+                nx_node["label"] = self.factory.kg.normalize_prefix(node.label)  # type: ignore
+            else:
+                nx_node["label"] = node.text
+
+            if debug:
+                ic(nx_node)
+
+        # add the edges and their properties
+        self.lemma_graph.add_edges_from([
+            (
+                edge.src_node,
+                edge.dst_node,
+                {
+                    "kind": str(edge.kind),
+                    "title": edge.rel,
+                    "lemma": edge_key,
+                    "weight": float(edge.count),
+                    "prob": edge.prob,
+                    "count": edge.count,
+                },
+            )
+            for edge_key, edge in self.edges.items()
+        ])
 
 
     ######################################################################
@@ -664,7 +723,7 @@ ordered list of re-stacked nodes
             {
                 "weight": ranks[node.node_id],
                 "count": node.get_stacked_count(),
-                "neighbors": node.neighbors,
+                "hood": node.neighbors,
                 "subobj": int(node.sub_obj),
             }
             for node in self.nodes.values()
@@ -751,7 +810,7 @@ stack-rank the nodes so that entities have priority over lemmas.
 Phrase ranks are normalized to sum to 1.0 and these now represent
 the ranked entities extracted from the document.
 
-Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
+Make sure to call beforehand: `TextGraphs.construct_lemma_graph()`
 
     pr_alpha:
 optional `alpha` parameter for the PageRank algorithm
@@ -769,7 +828,7 @@ debugging flag
                 pass
             finally:
                 node.neighbors = neighbors
-                nx_node["neighbors"] = neighbors
+                nx_node["hood"] = neighbors
 
         # restack
         ranks: typing.List[ float ] = self._restack_ranks(

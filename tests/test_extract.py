@@ -25,6 +25,7 @@ Run an extract with the Werner Herzog blurb.
     text: str = """
 Werner Herzog is a remarkable filmmaker and intellectual originally from Germany, the son of Dietrich Herzog.
     """
+
     tg: textgraphs.TextGraphs = textgraphs.TextGraphs(  # pylint: disable=C0103
         factory = textgraphs.PipelineFactory(),
     )

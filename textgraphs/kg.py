@@ -998,10 +998,10 @@ the constructed `Node` object
             graph.nodes[link.iri] = Node(
                 len(graph.nodes),
                 link.iri,
-                link.span,
                 link.kg_ent.descrip,
                 rel,
                 NodeEnum.IRI,
+                span = link.span,
                 label = link.iri,
                 length = link.length,
                 count = 1,

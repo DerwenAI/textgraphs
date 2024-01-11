@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request, workflow_dispatch]
+on: [pull_request, workflow_dispatch]
 
 jobs:
 #  pre-commit:
@@ -31,8 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e .
-          pip install git+https://github.com/thunlp/OpenNRE
-          pip install pre-commit pytest
+          pip install -r requirements-dev.txt
 
       - name: Run tests
         run: |

@@ -7,11 +7,56 @@ Utility functions for the `TextGraphs` library.
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
+import enum
 import math
 import typing
 
 import numpy as np  # type: ignore  # pylint: disable=E0401
 import pandas as pd  # type: ignore  # pylint: disable=E0401
+
+
+######################################################################
+## class definitions
+
+class EnumBase (enum.IntEnum):
+    """
+A mixin for Enum codecs.
+    """
+
+    @property
+    def decoder (
+        self
+        ) -> typing.List[ str ]:
+        """
+Property used for codec.
+        """
+        return [ "xyzzy" ]
+
+
+    @classmethod
+    def decode (
+        cls,
+        text: str,
+        ) -> enum.IntEnum:
+        """
+Codec for loading from a string.
+
+    text:
+string representation for the input value being decoded
+        """
+        return cls[text.strip().upper()]
+
+
+    def __str__ (
+        self
+        ) -> str:
+        """
+Codec for representing as a string.
+
+    returns:
+decoded string representation of the enumerated value
+        """
+        return self.decoder[self.value]
 
 
 ######################################################################
