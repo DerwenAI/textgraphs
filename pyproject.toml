@@ -75,6 +75,7 @@ dependencies = [
     "pyinstrument >= 4.6",
     "pyvis >= 0.3",
     "qwikidata >= 0.4",
+    "rdflib >= 7.0",
     "spacy >= 3.7",
     "spacy-dbpedia-spotlight >= 0.2.6",
     "span_marker >= 1.5",

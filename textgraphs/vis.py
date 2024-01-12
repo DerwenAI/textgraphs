@@ -117,7 +117,7 @@ debugging flag
             if node.kind in [ NodeEnum.IRI ]:
                 nx_node["title"] = node.text
             else:
-                nx_node["title"] = nx_node["key"]
+                nx_node["title"] = nx_node["lemma"]
 
             if node.kind in [ NodeEnum.CHU, NodeEnum.IRI ]:
                 nx_node["value"] = 0.0

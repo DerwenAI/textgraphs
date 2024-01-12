@@ -44,13 +44,13 @@ class LinkedEntity:  # pylint: disable=R0902
     """
 A data class representing one linked entity.
     """
-    span: spacy.tokens.span.Span
+    span: typing.Optional[ spacy.tokens.span.Span ]
     iri: str
     length: int
     rel: str
     prob: float
     token_id: int
-    kg_ent: KGSearchHit
+    kg_ent: typing.Optional[ KGSearchHit ]
     count: int = 1
 
 

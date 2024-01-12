@@ -12,6 +12,7 @@ the next paragraph, to ease memory requirements.
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
+from collections import OrderedDict
 import abc
 import asyncio
 import functools
@@ -55,6 +56,9 @@ class KnowledgeGraph (Component):
     """
 Base class for a _knowledge graph_ interface.
     """
+    NER_MAP: typing.Dict[ str, dict ] = OrderedDict({})
+    NS_PREFIX: typing.Dict[ str, str ] = OrderedDict({})
+
 
     def augment_pipe (
         self,
