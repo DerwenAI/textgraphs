@@ -12,7 +12,7 @@ then extract ranked phrases using a `textgraph` algorithm.
     
 ---
 #### [`infer_relations_async` method](#textgraphs.TextGraphs.infer_relations_async)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L545)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L633)
 
 ```python
 infer_relations_async(pipe, debug=False)
@@ -36,10 +36,10 @@ a list of the inferred `Edge` objects
 
 ---
 #### [`__init__` method](#textgraphs.TextGraphs.__init__)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L70)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L73)
 
 ```python
-__init__(factory=None)
+__init__(factory=None, iri_base="https://github.com/DerwenAI/textgraphs/ns/")
 ```
 Constructor.
 
@@ -50,7 +50,7 @@ optional `PipelineFactory` used to configure components
 
 ---
 #### [`create_pipeline` method](#textgraphs.TextGraphs.create_pipeline)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L90)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L96)
 
 ```python
 create_pipeline(text_input)
@@ -68,7 +68,7 @@ a configured pipeline
 
 ---
 #### [`create_render` method](#textgraphs.TextGraphs.create_render)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L109)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L115)
 
 ```python
 create_render()
@@ -82,7 +82,7 @@ a configured `RenderPyVis` object for generating graph visualizations
 
 ---
 #### [`collect_graph_elements` method](#textgraphs.TextGraphs.collect_graph_elements)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L301)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L374)
 
 ```python
 collect_graph_elements(pipe, text_id=0, para_id=0, debug=False)
@@ -109,7 +109,7 @@ debugging flag
 
 ---
 #### [`construct_lemma_graph` method](#textgraphs.TextGraphs.construct_lemma_graph)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L384)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L467)
 
 ```python
 construct_lemma_graph(debug=False)
@@ -127,7 +127,7 @@ debugging flag
 
 ---
 #### [`perform_entity_linking` method](#textgraphs.TextGraphs.perform_entity_linking)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L443)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L526)
 
 ```python
 perform_entity_linking(pipe, debug=False)
@@ -146,7 +146,7 @@ debugging flag
 
 ---
 #### [`infer_relations` method](#textgraphs.TextGraphs.infer_relations)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L609)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L697)
 
 ```python
 infer_relations(pipe, debug=False)
@@ -168,7 +168,7 @@ a list of the inferred `Edge` objects
 
 ---
 #### [`calc_phrase_ranks` method](#textgraphs.TextGraphs.calc_phrase_ranks)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L797)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L885)
 
 ```python
 calc_phrase_ranks(pr_alpha=0.85, debug=False)
@@ -191,7 +191,7 @@ debugging flag
 
 ---
 #### [`get_phrases` method](#textgraphs.TextGraphs.get_phrases)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L844)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L932)
 
 ```python
 get_phrases()
@@ -207,7 +207,7 @@ extracted entities
 
 ---
 #### [`get_phrases_as_df` method](#textgraphs.TextGraphs.get_phrases_as_df)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L877)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L965)
 
 ```python
 get_phrases_as_df()
@@ -218,6 +218,23 @@ Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 
   * *returns* : `pandas.core.frame.DataFrame`  
 a `pandas.DataFrame` of the extracted entities
+
+
+
+---
+#### [`extract_rdf` method](#textgraphs.TextGraphs.extract_rdf)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/doc.py#L982)
+
+```python
+extract_rdf(lang="en")
+```
+Extract the entities and relations which have IRIs as RDF triples.
+
+  * `lang` : `str`  
+language identifier
+
+  * *returns* : `str`  
+RDF triples N3 (Turtle) format as a string
 
 
 
@@ -352,12 +369,15 @@ a JSON representation of the exported _lemma graph_ in
 [*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/graph.py#L286)
 
 ```python
-load_lemma_graph(json_str)
+load_lemma_graph(json_str, debug=False)
 ```
 Load from a JSON string in
 a JSON representation of the exported _lemma graph_ in
 [_node-link_](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html)
 format
+
+  * `debug` : `bool`  
+debugging flag
 
 
 
@@ -462,10 +482,10 @@ expensive operations with `spaCy`
     
 ---
 #### [`__init__` method](#textgraphs.PipelineFactory.__init__)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L430)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L434)
 
 ```python
-__init__(spacy_model="en_core_web_sm", ner=None, kg=<textgraphs.pipe.KnowledgeGraph object at 0x125e693c0>, infer_rels=[])
+__init__(spacy_model="en_core_web_sm", ner=None, kg=<textgraphs.pipe.KnowledgeGraph object at 0x1220d1960>, infer_rels=[])
 ```
 Constructor which instantiates the `spaCy` pipelines:
 
@@ -491,7 +511,7 @@ a list of components for inferring relations
 
 ---
 #### [`create_pipeline` method](#textgraphs.PipelineFactory.create_pipeline)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L504)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L508)
 
 ```python
 create_pipeline(text_input)
@@ -512,7 +532,7 @@ Manage parsing of a document, which is assumed to be paragraph-sized.
     
 ---
 #### [`__init__` method](#textgraphs.Pipeline.__init__)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L212)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L216)
 
 ```python
 __init__(text_input, tok_pipe, ner_pipe, aux_pipe, kg, infer_rels)
@@ -541,7 +561,7 @@ a list of components for inferring relations
 
 ---
 #### [`get_lemma_key` classmethod](#textgraphs.Pipeline.get_lemma_key)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L263)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L267)
 
 ```python
 get_lemma_key(span, placeholder=False)
@@ -561,7 +581,7 @@ a composed lemma key
 
 ---
 #### [`get_ent_lemma_keys` method](#textgraphs.Pipeline.get_ent_lemma_keys)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L304)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L308)
 
 ```python
 get_ent_lemma_keys()
@@ -575,7 +595,7 @@ the lemma keys within an extracted entity
 
 ---
 #### [`link_noun_chunks` method](#textgraphs.Pipeline.link_noun_chunks)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L317)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L321)
 
 ```python
 link_noun_chunks(nodes, debug=False)
@@ -595,7 +615,7 @@ a list of identified noun chunks which are novel
 
 ---
 #### [`iter_entity_pairs` method](#textgraphs.Pipeline.iter_entity_pairs)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L369)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L373)
 
 ```python
 iter_entity_pairs(pipe_graph, max_skip, debug=True)
@@ -622,7 +642,7 @@ Abstract base class for a `spaCy` pipeline component.
     
 ---
 #### [`augment_pipe` method](#textgraphs.Component.augment_pipe)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L40)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L41)
 
 ```python
 augment_pipe(factory)
@@ -684,7 +704,7 @@ Base class for a _knowledge graph_ interface.
     
 ---
 #### [`augment_pipe` method](#textgraphs.KnowledgeGraph.augment_pipe)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L59)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L63)
 
 ```python
 augment_pipe(factory)
@@ -698,7 +718,7 @@ a `PipelineFactory` used to configure components
 
 ---
 #### [`remap_ner` method](#textgraphs.KnowledgeGraph.remap_ner)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L72)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L76)
 
 ```python
 remap_ner(label)
@@ -715,7 +735,7 @@ an IRI for the named entity
 
 ---
 #### [`normalize_prefix` method](#textgraphs.KnowledgeGraph.normalize_prefix)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L88)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L92)
 
 ```python
 normalize_prefix(iri, debug=False)
@@ -735,7 +755,7 @@ the compact IRI representation, using an RDF namespace prefix
 
 ---
 #### [`perform_entity_linking` method](#textgraphs.KnowledgeGraph.perform_entity_linking)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L109)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L113)
 
 ```python
 perform_entity_linking(graph, pipe, debug=False)
@@ -755,7 +775,7 @@ debugging flag
 
 ---
 #### [`resolve_rel_iri` method](#textgraphs.KnowledgeGraph.resolve_rel_iri)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L131)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L135)
 
 ```python
 resolve_rel_iri(rel, lang="en", debug=False)
@@ -795,10 +815,10 @@ Manage access to WikiMedia-related APIs.
     
 ---
 #### [`__init__` method](#textgraphs.KGWikiMedia.__init__)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L148)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L147)
 
 ```python
-__init__(spotlight_api="https://api.dbpedia-spotlight.org/en", dbpedia_search_api="https://lookup.dbpedia.org/api/search", dbpedia_sparql_api="https://dbpedia.org/sparql", wikidata_api="https://www.wikidata.org/w/api.php", ner_map=OrderedDict([('CARDINAL', {'iri': 'http://dbpedia.org/resource/Cardinal_number', 'definition': 'Numerals that do not fall under another type'}), ('DATE', {'iri': 'http://dbpedia.org/ontology/date', 'definition': 'Absolute or relative dates or periods'}), ('EVENT', {'iri': 'http://dbpedia.org/ontology/Event', 'definition': 'Named hurricanes, battles, wars, sports events, etc.'}), ('FAC', {'iri': 'http://dbpedia.org/ontology/Infrastructure', 'definition': 'Buildings, airports, highways, bridges, etc.'}), ('GPE', {'iri': 'http://dbpedia.org/ontology/Country', 'definition': 'Countries, cities, states'}), ('LANGUAGE', {'iri': 'http://dbpedia.org/ontology/Language', 'definition': 'Any named language'}), ('LAW', {'iri': 'http://dbpedia.org/ontology/Law', 'definition': 'Named documents made into laws '}), ('LOC', {'iri': 'http://dbpedia.org/ontology/Place', 'definition': 'Non-GPE locations, mountain ranges, bodies of water'}), ('MONEY', {'iri': 'http://dbpedia.org/resource/Money', 'definition': 'Monetary values, including unit'}), ('NORP', {'iri': 'http://dbpedia.org/ontology/nationality', 'definition': 'Nationalities or religious or political groups'}), ('ORDINAL', {'iri': 'http://dbpedia.org/resource/Ordinal_number', 'definition': 'Ordinal number, i.e., first, second, etc.'}), ('ORG', {'iri': 'http://dbpedia.org/ontology/Organisation', 'definition': 'Companies, agencies, institutions, etc.'}), ('PERCENT', {'iri': 'http://dbpedia.org/resource/Percentage', 'definition': 'Percentage'}), ('PERSON', {'iri': 'http://dbpedia.org/ontology/Person', 'definition': 'People, including fictional'}), ('PRODUCT', {'iri': 'http://dbpedia.org/ontology/product', 'definition': 'Vehicles, weapons, foods, etc. (Not services)'}), ('QUANTITY', {'iri': 'http://dbpedia.org/resource/Quantity', 'definition': 'Measurements, as of weight or distance'}), ('TIME', {'iri': 'http://dbpedia.org/ontology/time', 'definition': 'Times smaller than a day'}), ('WORK OF ART', {'iri': 'http://dbpedia.org/resource/Work_of_art', 'definition': 'Titles of books, songs, etc.'})]), ns_prefix=OrderedDict([('dbc', 'http://dbpedia.org/resource/Category:'), ('dbt', 'http://dbpedia.org/resource/Template:'), ('dbr', 'http://dbpedia.org/resource/'), ('yago', 'http://dbpedia.org/class/yago/'), ('dbd', 'http://dbpedia.org/datatype/'), ('dbo', 'http://dbpedia.org/ontology/'), ('dbp', 'http://dbpedia.org/property/'), ('units', 'http://dbpedia.org/units/'), ('dbpedia-commons', 'http://commons.dbpedia.org/resource/'), ('dbpedia-wikicompany', 'http://dbpedia.openlinksw.com/wikicompany/'), ('dbpedia-wikidata', 'http://wikidata.dbpedia.org/resource/'), ('wd', 'http://www.wikidata.org/'), ('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'), ('schema', 'https://schema.org/'), ('owl', 'http://www.w3.org/2002/07/owl#')]), min_alias=0.8, min_similarity=0.9)
+__init__(spotlight_api="https://api.dbpedia-spotlight.org/en", dbpedia_search_api="https://lookup.dbpedia.org/api/search", dbpedia_sparql_api="https://dbpedia.org/sparql", wikidata_api="https://www.wikidata.org/w/api.php", ner_map=OrderedDict([('CARDINAL', {'iri': 'http://dbpedia.org/resource/Cardinal_number', 'definition': 'Numerals that do not fall under another type'}), ('DATE', {'iri': 'http://dbpedia.org/ontology/date', 'definition': 'Absolute or relative dates or periods'}), ('EVENT', {'iri': 'http://dbpedia.org/ontology/Event', 'definition': 'Named hurricanes, battles, wars, sports events, etc.'}), ('FAC', {'iri': 'http://dbpedia.org/ontology/Infrastructure', 'definition': 'Buildings, airports, highways, bridges, etc.'}), ('GPE', {'iri': 'http://dbpedia.org/ontology/Country', 'definition': 'Countries, cities, states'}), ('LANGUAGE', {'iri': 'http://dbpedia.org/ontology/Language', 'definition': 'Any named language'}), ('LAW', {'iri': 'http://dbpedia.org/ontology/Law', 'definition': 'Named documents made into laws '}), ('LOC', {'iri': 'http://dbpedia.org/ontology/Place', 'definition': 'Non-GPE locations, mountain ranges, bodies of water'}), ('MONEY', {'iri': 'http://dbpedia.org/resource/Money', 'definition': 'Monetary values, including unit'}), ('NORP', {'iri': 'http://dbpedia.org/ontology/nationality', 'definition': 'Nationalities or religious or political groups'}), ('ORDINAL', {'iri': 'http://dbpedia.org/resource/Ordinal_number', 'definition': 'Ordinal number, i.e., first, second, etc.'}), ('ORG', {'iri': 'http://dbpedia.org/ontology/Organisation', 'definition': 'Companies, agencies, institutions, etc.'}), ('PERCENT', {'iri': 'http://dbpedia.org/resource/Percentage', 'definition': 'Percentage'}), ('PERSON', {'iri': 'http://dbpedia.org/ontology/Person', 'definition': 'People, including fictional'}), ('PRODUCT', {'iri': 'http://dbpedia.org/ontology/product', 'definition': 'Vehicles, weapons, foods, etc. (Not services)'}), ('QUANTITY', {'iri': 'http://dbpedia.org/resource/Quantity', 'definition': 'Measurements, as of weight or distance'}), ('TIME', {'iri': 'http://dbpedia.org/ontology/time', 'definition': 'Times smaller than a day'}), ('WORK OF ART', {'iri': 'http://dbpedia.org/resource/Work_of_art', 'definition': 'Titles of books, songs, etc.'})]), ns_prefix=OrderedDict([('dbc', 'http://dbpedia.org/resource/Category:'), ('dbt', 'http://dbpedia.org/resource/Template:'), ('dbr', 'http://dbpedia.org/resource/'), ('yago', 'http://dbpedia.org/class/yago/'), ('dbd', 'http://dbpedia.org/datatype/'), ('dbo', 'http://dbpedia.org/ontology/'), ('dbp', 'http://dbpedia.org/property/'), ('units', 'http://dbpedia.org/units/'), ('dbpedia-commons', 'http://commons.dbpedia.org/resource/'), ('dbpedia-wikicompany', 'http://dbpedia.openlinksw.com/wikicompany/'), ('dbpedia-wikidata', 'http://wikidata.dbpedia.org/resource/'), ('wd', 'http://www.wikidata.org/'), ('wd_ent', 'http://www.wikidata.org/entity/'), ('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'), ('schema', 'https://schema.org/'), ('owl', 'http://www.w3.org/2002/07/owl#')]), min_alias=0.8, min_similarity=0.9)
 ```
 Constructor.
 
@@ -830,7 +850,7 @@ minimum label similarity threshold for accepting linked entities
 
 ---
 #### [`augment_pipe` method](#textgraphs.KGWikiMedia.augment_pipe)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L202)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L201)
 
 ```python
 augment_pipe(factory)
@@ -844,7 +864,7 @@ a `PipelineFactory` used to configure components
 
 ---
 #### [`remap_ner` method](#textgraphs.KGWikiMedia.remap_ner)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L220)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L219)
 
 ```python
 remap_ner(label)
@@ -861,7 +881,7 @@ an IRI for the named entity
 
 ---
 #### [`normalize_prefix` method](#textgraphs.KGWikiMedia.normalize_prefix)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L249)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/kg.py#L248)
 
 ```python
 normalize_prefix(iri, debug=False)
@@ -1028,7 +1048,7 @@ Abstract base class for a _relation extraction_ model wrapper.
     
 ---
 #### [`gen_triples_async` method](#textgraphs.InferRel.gen_triples_async)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L184)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L188)
 
 ```python
 gen_triples_async(pipe, queue, debug=False)
@@ -1048,7 +1068,7 @@ debugging flag
 
 ---
 #### [`gen_triples` method](#textgraphs.InferRel.gen_triples)
-[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L162)
+[*\[source\]*](https://github.com/DerwenAI/textgraphs/blob/main/textgraphs/pipe.py#L166)
 
 ```python
 gen_triples(pipe, debug=False)

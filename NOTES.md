@@ -13,7 +13,7 @@ TODO:
 
 
   * link entities for lemmas, noun chunks using MediaWiki lookups?
-  * default semantics: `owl:Thing`, `skos:related`
+  * default semantics: `skos:related`
 
   * also eval community detection to condense nodes using k-medoids?
   https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
