@@ -328,7 +328,7 @@ debugging flag
 
         # second pass: use KG search on entities which weren't linked by Spotlight
         iter_ents = self._link_kg_search_entities(
-            graph,
+            pipe,
             debug = debug,
         )
 
@@ -913,7 +913,7 @@ candidates linked entities
 
     def _link_kg_search_entities (
         self,
-        graph: SimpleGraph,
+        pipe: Pipeline,
         *,
         debug: bool = False,
         ) -> typing.Iterator[ LinkedEntity ]:
@@ -924,15 +924,19 @@ _entity linking_.
     graph:
 source graph
 
+    pipe:
+configured pipeline for the current document
+
     debug:
 debugging flag
 
     yields:
 search hits
         """
-        node_list: list = list(graph.nodes.values())
+        #node_list: list = list(graph.nodes.values())
+        #for i, node in enumerate(node_list):
 
-        for i, node in enumerate(node_list):
+        for i, node in enumerate(pipe.tokens):  # pylint: disable=R1702
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
                 kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                     node.text,
@@ -946,7 +950,7 @@ search hits
                         node.length,
                         "dbpedia",
                         kg_ent.prob,  # type: ignore
-                        i,
+                        i, # FUCK this should be a token_id, not a node_id
                         kg_ent,  # type: ignore
                     )
 
