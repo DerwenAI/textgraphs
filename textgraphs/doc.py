@@ -25,6 +25,7 @@ import networkx as nx  # pylint: disable=E0401
 import numpy as np  # pylint: disable=E0401
 import pandas as pd  # pylint: disable=E0401
 import pulp  # pylint: disable=E0401
+import rdflib  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 import transformers  # pylint: disable=E0401
 import urllib3  # pylint: disable=E0401
@@ -38,7 +39,7 @@ from .vis import RenderPyVis
 
 
 ######################################################################
-## fix the borked libraries
+## repair the libraries which are borked:
 
 # workaround: determine whether this is loading into a Jupyter
 # notebook, to allow for `tqdm` progress bars
@@ -66,11 +67,14 @@ class TextGraphs (SimpleGraph):
 Construct a _lemma graph_ from the unstructured text source,
 then extract ranked phrases using a `textgraph` algorithm.
     """
+    IRI_BASE: str = "https://github.com/DerwenAI/textgraphs/ns/"
+
 
     def __init__ (
         self,
         *,
         factory: typing.Optional[ PipelineFactory ] = None,
+        iri_base: str = IRI_BASE,
         ) -> None:
         """
 Constructor.
@@ -79,6 +83,8 @@ Constructor.
 optional `PipelineFactory` used to configure components
         """
         super().__init__()
+
+        self.iri_base = iri_base
 
         # initialize the pipeline factory
         if factory is not None:
@@ -226,6 +232,73 @@ extracted entities represented as `Node` objects in the graph
                 )
 
 
+    def _make_class_link (
+        self,
+        node: Node,
+        pipe: Pipeline,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Private helper method to construct a link to an entity's class.
+
+    node:
+recognized entity to be linked
+
+    pipe:
+configured pipeline for this document
+
+    debug:
+debugging flag
+        """
+        if debug:
+            print("link:", node.label)
+
+        # special case of `make_node()`
+        if node.label in self.nodes:
+            dst: Node = self.nodes[node.label]
+            dst.count += 1
+
+        else:
+            # find class IRI metadata
+            class_meta: typing.List[ str ] = [
+                meta["definition"]
+                for meta in pipe.kg.NER_MAP.values()
+                if meta["iri"] == node.label
+            ]
+
+            dst = Node(
+                len(self.nodes),
+                node.label,  # type: ignore
+                class_meta[0],
+                str(rdflib.RDF.type),
+                NodeEnum.IRI,
+                label = node.label,
+                length = node.length,
+                count = 1,
+            )
+
+            self.nodes[node.label] = dst  # type: ignore
+
+        node.annotated = True
+
+        # construct a directed edge between them
+        edge: Edge = self.make_edge(  # type: ignore
+            node,
+            dst,
+            RelEnum.IRI,
+            str(rdflib.RDF.type),
+            node.weight,
+            debug = debug,
+        )
+
+        if debug:
+            ic(edge)
+
+        if edge is not None:
+            pipe.edges.append(edge)
+
+
     def _overlay_noun_chunks (
         self,
         pipe: Pipeline,
@@ -345,7 +418,17 @@ debugging flag
                 ic(sent_nodes)
 
             for node in sent_nodes:
-                node.label = pipe.kg.remap_ner(node.label)
+                # re-map from OntoTypes4 to a formal IRI, if possible
+                # then link the inferred class
+                if node.kind == NodeEnum.ENT:
+                    node.label = pipe.kg.remap_ner(node.label)
+
+                    if node.label is not None and node.label.startswith("http"):
+                        self._make_class_link(
+                            node,
+                            pipe,
+                            debug = debug,
+                        )
 
                 # link parse elements, based on the token's head
                 head_idx: int = node.span.head.i  # type: ignore
@@ -392,9 +475,6 @@ elements. This gets represented in `NetworkX` as a directed graph
 with parallel edges.
 
 Make sure to call beforehand: `TextGraphs.collect_graph_elements()`
-
-    kg:
-knowledge graph used for entity linking
 
     debug:
 debugging flag
@@ -465,6 +545,11 @@ debugging flag
             pipe,
             debug = debug,
         )
+
+        # by default, link the baseline semantics
+        for node in pipe.tokens:
+            if node.kind == NodeEnum.LEM and node.label is None:
+                node.label = str(rdflib.OWL.Thing)
 
 
     ######################################################################
@@ -889,3 +974,96 @@ Make sure to call beforehand: `TextGraphs.calc_phrase_ranks()`
 a `pandas.DataFrame` of the extracted entities
         """
         return pd.DataFrame.from_dict(self.get_phrases())
+
+
+    ######################################################################
+    ## knowledge graph abstraction layer
+
+    def extract_rdf (  # pylint: disable=R0914
+        self,
+        *,
+        lang: str = "en",
+        ) -> str:
+        """
+Extract the entities and relations which have IRIs as RDF triples.
+
+    lang:
+language identifier
+
+    returns:
+RDF triples N3 (Turtle) format as a string
+        """
+        node_list: typing.List[ Node ] = list(self.nodes.values())
+        node_keys: typing.List[ str ] = list(self.nodes.keys())
+        ref_dict: typing.Dict[ int, rdflib.URIRef ] = {}
+        rdf_graph: rdflib.Graph = rdflib.Graph()
+
+        # extract entities as RDF
+        for node_id, node in enumerate(self.nodes.values()):
+            if node.kind in [ NodeEnum.ENT, NodeEnum.LEM ]:
+                iri: str = f"{self.iri_base}entity/{node.key.lower().replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
+                subj: rdflib.URIRef = rdflib.URIRef(iri)
+                ref_dict[node_id] = subj
+
+                rdf_graph.add((
+                    subj,
+                    rdflib.SKOS.prefLabel,
+                    rdflib.Literal(node.text, lang = lang),
+                ))
+
+                if node.kind == NodeEnum.ENT and node.annotated:
+                    cls_obj: rdflib.URIRef = rdflib.URIRef(node.label)
+                    cls_id: int = node_keys.index(node.label)  # type: ignore
+                    ref_dict[cls_id] = cls_obj
+
+                    rdf_graph.add((
+                        subj,
+                        rdflib.RDF.type,
+                        cls_obj,
+                    ))
+
+            elif node.kind == NodeEnum.IRI:
+                subj = rdflib.URIRef(node.key)
+                ref_dict[node_id] = subj
+
+                desc = rdflib.Literal(node.text, lang = "en")
+
+                rdf_graph.add((
+                    subj,
+                    rdflib.SKOS.prefLabel,
+                    desc,
+                ))
+
+        # extract relations as RDF
+        for edge in self.edges.values():
+            if edge.kind == RelEnum.INF:
+                if edge.src_node in ref_dict:
+                    subj = ref_dict.get(edge.src_node)
+                else:
+                    src_node: Node = node_list[edge.src_node]
+                    subj = rdflib.URIRef(src_node.label)
+                    ref_dict[edge.src_node] = subj
+
+                if edge.dst_node in ref_dict:
+                    obj: rdflib.URIRef = ref_dict.get(edge.dst_node)
+                else:
+                    dst_node: Node = node_list[edge.dst_node]
+                    obj = rdflib.URIRef(dst_node.label)
+                    ref_dict[edge.dst_node] = obj
+
+                rdf_graph.add((
+                    subj,
+                    rdflib.URIRef(edge.rel),
+                    obj,
+                ))
+
+        # serialize as RDF triples
+        for prefix, iri in self.factory.kg.NS_PREFIX.items():
+            rdf_graph.bind(prefix, rdflib.Namespace(iri))
+
+        n3_str: str = rdf_graph.serialize(
+            format = "n3",
+            base = self.iri_base,
+        )
+
+        return n3_str

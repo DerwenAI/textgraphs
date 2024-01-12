@@ -30,6 +30,7 @@ from bs4 import BeautifulSoup  # pylint: disable=E0401
 from icecream import ic  # pylint: disable=E0401
 from qwikidata.linked_data_interface import get_entity_dict_from_api  # pylint: disable=E0401
 import markdown2  # pylint: disable=E0401
+import rdflib  # pylint: disable=E0401
 import requests  # type: ignore  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
@@ -48,9 +49,6 @@ class KGWikiMedia (KnowledgeGraph):  # pylint: disable=R0902,R0903
     """
 Manage access to WikiMedia-related APIs.
     """
-    REL_ISA: str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-    REL_SAME: str = "http://www.w3.org/2002/07/owl#sameAs"
-
     NER_MAP: typing.Dict[ str, dict ] = OrderedDict({
         "CARDINAL": {
             "iri": "http://dbpedia.org/resource/Cardinal_number",
@@ -139,6 +137,7 @@ Manage access to WikiMedia-related APIs.
         "dbpedia-wikicompany": "http://dbpedia.openlinksw.com/wikicompany/",
         "dbpedia-wikidata": "http://wikidata.dbpedia.org/resource/",
         "wd": "http://www.wikidata.org/",
+        "wd_ent": "http://www.wikidata.org/entity/",
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
         "schema": "https://schema.org/",
         "owl": "http://www.w3.org/2002/07/owl#",
@@ -273,12 +272,13 @@ the compact IRI representation, using an RDF namespace prefix
             ns_parse: urllib.parse.ParseResult = urllib.parse.urlparse(ns_fqdn)
 
             if debug:
-                ic(prefix, ns_parse.netloc, ns_parse.path)
+                ic(prefix, ns_parse.netloc, ns_parse.path, ns_parse.fragment)
 
             if iri_parse.netloc == ns_parse.netloc and iri_parse.path.startswith(ns_parse.path):
-                slug: str = iri_parse.path.replace(ns_parse.path, "")
+                if len(iri_parse.fragment) > 0:
+                    return f"{prefix}:{iri_parse.fragment}"
 
-                # return normalized IRI
+                slug: str = iri_parse.path.replace(ns_parse.path, "")
                 return f"{prefix}:{slug}"
 
         # normalization failed
@@ -315,7 +315,7 @@ debugging flag
                 graph,
                 pipe,
                 link,
-                self.REL_ISA,
+                str(rdflib.RDF.type),
                 debug = debug,
             )
 
@@ -328,7 +328,7 @@ debugging flag
 
         # second pass: use KG search on entities which weren't linked by Spotlight
         iter_ents = self._link_kg_search_entities(
-            graph,
+            pipe,
             debug = debug,
         )
 
@@ -337,7 +337,7 @@ debugging flag
                 graph,
                 pipe,
                 link,
-                self.REL_ISA,
+                str(rdflib.RDF.type),
                 debug = debug,
             )
 
@@ -913,7 +913,7 @@ candidates linked entities
 
     def _link_kg_search_entities (
         self,
-        graph: SimpleGraph,
+        pipe: Pipeline,
         *,
         debug: bool = False,
         ) -> typing.Iterator[ LinkedEntity ]:
@@ -924,15 +924,19 @@ _entity linking_.
     graph:
 source graph
 
+    pipe:
+configured pipeline for the current document
+
     debug:
 debugging flag
 
     yields:
 search hits
         """
-        node_list: list = list(graph.nodes.values())
+        #node_list: list = list(graph.nodes.values())
+        #for i, node in enumerate(node_list):
 
-        for i, node in enumerate(node_list):
+        for i, node in enumerate(pipe.tokens):  # pylint: disable=R1702
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
                 kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
                     node.text,
@@ -946,7 +950,7 @@ search hits
                         node.length,
                         "dbpedia",
                         kg_ent.prob,  # type: ignore
-                        i,
+                        i, # FUCK this should be a token_id, not a node_id
                         kg_ent,  # type: ignore
                     )
 
@@ -998,7 +1002,7 @@ the constructed `Node` object
             graph.nodes[link.iri] = Node(
                 len(graph.nodes),
                 link.iri,
-                link.kg_ent.descrip,
+                link.kg_ent.descrip,  # type: ignore
                 rel,
                 NodeEnum.IRI,
                 span = link.span,
@@ -1065,7 +1069,7 @@ debugging flag
 the constructed `Edge` object
         """
         wd_ent: typing.Optional[ KGSearchHit ] = self.wikidata_search(  # type: ignore
-            link.kg_ent.label,
+            link.kg_ent.label,  # type: ignore
             debug = debug,
         )
 
@@ -1076,7 +1080,7 @@ the constructed `Edge` object
             wd_link: LinkedEntity = LinkedEntity(
                 link.span,
                 wd_ent.iri,
-                len(link.span),
+                len(link.span),  # type: ignore
                 "wikidata",
                 wd_ent.prob,
                 link.token_id,
@@ -1092,7 +1096,7 @@ the constructed `Edge` object
                 graph,
                 pipe,
                 wd_link,
-                self.REL_ISA,
+                str(rdflib.RDF.type),
                 debug = debug,
             )
 
@@ -1101,7 +1105,7 @@ the constructed `Edge` object
                 src_node,
                 dst_node,
                 RelEnum.IRI,
-                self.REL_SAME,
+                str(rdflib.OWL.sameAs),
                 wd_link.prob,
                 debug = debug,
             )

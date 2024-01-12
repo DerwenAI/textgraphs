@@ -16,7 +16,7 @@ from icecream import ic  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
 import spacy  # pylint: disable=E0401
 
-from .elem import Edge, Node, NodeEnum, RelEnum
+from .elem import Edge, LinkedEntity, Node, NodeEnum, RelEnum
 
 
 ######################################################################
@@ -283,26 +283,40 @@ format
         )
 
 
-    def load_lemma_graph (
+    def load_lemma_graph (  # pylint: disable=R0914
         self,
         json_str: str,
+        *,
+        debug: bool = False,
         ) -> None:
         """
 Load from a JSON string in
 a JSON representation of the exported _lemma graph_ in
 [_node-link_](https://networkx.org/documentation/stable/reference/readwrite/json_graph.html)
 format
+
+    debug:
+debugging flag
         """
         dat: dict = json.loads(json_str)
         tokens: typing.List[ Node ] = []
+        to_link: typing.Dict[ str, str ] = {}
 
         # deserialize the nodes
         for nx_node in dat.get("nodes"):  # type: ignore
+            if debug:
+                ic(nx_node)
+
             label: typing.Optional[ str ] = None
             kind: NodeEnum = NodeEnum.decode(nx_node["kind"])  # type: ignore
 
             if kind in [ NodeEnum.ENT ]:
-                label = nx_node["label"]
+                if nx_node["iri"] is not None:
+                    label = nx_node["iri"]
+                else:
+                    label = nx_node["label"]
+            elif kind in [ NodeEnum.IRI ]:
+                label = nx_node["iri"]
 
             node: Node = self.make_node(
                 tokens,
@@ -321,11 +335,39 @@ format
             node.loc = eval(nx_node["loc"])  # pylint: disable=W0123
             node.count = int(nx_node["count"])
             node.neighbors = int(nx_node["hood"])
+            node.annotated = nx_node["anno"]
+
+            # note which `Node` objects need to have entities linked
+            if kind == NodeEnum.ENT and nx_node["iri"] is not None:
+                to_link[node.key] = nx_node["iri"]
+
+            if debug:
+                ic(node)
+
+        # re-link the entities
+        for src_key, cls_key in to_link.items():
+            src_node: Node = self.nodes.get(src_key)  # type: ignore
+            cls_node: Node = self.nodes.get(cls_key)  # type: ignore
+
+            src_node.entity.append(
+                LinkedEntity(
+                    cls_node.span,
+                    cls_node.label,  # type: ignore
+                    cls_node.length,
+                    cls_node.pos,
+                    cls_node.weight,
+                    0,
+                    None,
+                )
+            )
 
         # deserialize the edges
         node_list: typing.List[ Node ] = list(self.nodes.values())
 
         for nx_edge in dat.get("links"):  # type: ignore
+            if debug:
+                ic(nx_edge)
+
             edge: Edge = self.make_edge(  # type: ignore
                 node_list[nx_edge["source"]],
                 node_list[nx_edge["target"]],
@@ -336,3 +378,6 @@ format
             )
 
             edge.count = int(nx_edge["count"])
+
+            if debug:
+                ic(edge)
