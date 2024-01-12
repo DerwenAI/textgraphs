@@ -933,9 +933,6 @@ debugging flag
     yields:
 search hits
         """
-        #node_list: list = list(graph.nodes.values())
-        #for i, node in enumerate(node_list):
-
         for i, node in enumerate(pipe.tokens):  # pylint: disable=R1702
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
                 kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
@@ -950,7 +947,7 @@ search hits
                         node.length,
                         "dbpedia",
                         kg_ent.prob,  # type: ignore
-                        i, # FUCK this should be a token_id, not a node_id
+                        i,
                         kg_ent,  # type: ignore
                     )
 
