@@ -52,75 +52,93 @@ Manage access to WikiMedia-related APIs.
     NER_MAP: typing.Dict[ str, dict ] = OrderedDict({
         "CARDINAL": {
             "iri": "http://dbpedia.org/resource/Cardinal_number",
-            "definition": "Numerals that do not fall under another type"
+            "definition": "Numerals that do not fall under another type",
+            "label": "cardinal number",
         },
         "DATE": {
             "iri": "http://dbpedia.org/ontology/date",
-            "definition": "Absolute or relative dates or periods"
+            "definition": "Absolute or relative dates or periods",
+            "label": "date",
         },
         "EVENT": {
             "iri": "http://dbpedia.org/ontology/Event",
-            "definition": "Named hurricanes, battles, wars, sports events, etc."
+            "definition": "Named hurricanes, battles, wars, sports events, etc.",
+            "label": "event",
         },
         "FAC": {
             "iri": "http://dbpedia.org/ontology/Infrastructure",
-            "definition": "Buildings, airports, highways, bridges, etc."
+            "definition": "Buildings, airports, highways, bridges, etc.",
+            "label": "infrastructure",
         },
         "GPE": {
             "iri": "http://dbpedia.org/ontology/Country",
-            "definition": "Countries, cities, states"
+            "definition": "Countries, cities, states",
+            "label": "country",
         },
         "LANGUAGE": {
             "iri": "http://dbpedia.org/ontology/Language",
-            "definition": "Any named language"
+            "definition": "Any named language",
+            "label": "language",
         },
         "LAW": {
             "iri": "http://dbpedia.org/ontology/Law",
-            "definition": "Named documents made into laws "
+            "definition": "Named documents made into laws",
+            "label": "law",
         },
         "LOC": {
             "iri": "http://dbpedia.org/ontology/Place",
-            "definition": "Non-GPE locations, mountain ranges, bodies of water"
+            "definition": "Non-GPE locations, mountain ranges, bodies of water",
+            "label": "place",
         },
         "MONEY": {
             "iri": "http://dbpedia.org/resource/Money",
-            "definition": "Monetary values, including unit"
+            "definition": "Monetary values, including unit",
+            "label": "money",
         },
         "NORP": {
             "iri": "http://dbpedia.org/ontology/nationality",
-            "definition": "Nationalities or religious or political groups"
+            "definition": "Nationalities or religious or political groups",
+            "label": "nationality",
         },
         "ORDINAL": {
             "iri": "http://dbpedia.org/resource/Ordinal_number",
-            "definition": "Ordinal number, i.e., first, second, etc."
+            "definition": "Ordinal number, i.e., first, second, etc.",
+            "label": "ordinal number",
         },
         "ORG": {
             "iri": "http://dbpedia.org/ontology/Organisation",
-            "definition": "Companies, agencies, institutions, etc."
+            "definition": "Companies, agencies, institutions, etc.",
+            "label": "organization",
         },
         "PERCENT": {
             "iri": "http://dbpedia.org/resource/Percentage",
-            "definition": "Percentage"
+            "definition": "Percentage",
+            "label": "percentage",
         },
         "PERSON": {
             "iri": "http://dbpedia.org/ontology/Person",
-            "definition": "People, including fictional"
+            "definition": "People, including fictional",
+            "label": "person",
         },
         "PRODUCT": {
             "iri": "http://dbpedia.org/ontology/product",
-            "definition": "Vehicles, weapons, foods, etc. (Not services)"
+            "definition": "Vehicles, weapons, foods, etc. (Not services)",
+            "label": "product",
         },
         "QUANTITY": {
             "iri": "http://dbpedia.org/resource/Quantity",
-            "definition": "Measurements, as of weight or distance"
+            "definition": "Measurements, as of weight or distance",
+            "label": "quantity",
         },
         "TIME": {
             "iri": "http://dbpedia.org/ontology/time",
-            "definition": "Times smaller than a day"
+            "definition": "Times smaller than a day",
+            "label": "time",
         },
         "WORK OF ART": {
             "iri": "http://dbpedia.org/resource/Work_of_art",
-            "definition": "Titles of books, songs, etc."
+            "definition": "Titles of books, songs, etc.",
+            "label": "work of art",
         },
     })
 
@@ -252,7 +270,7 @@ an IRI for the named entity
         debug: bool = False,
         ) -> str:
         """
-Normalize the given IRI to use the standard DBPedia namespace prefixes.
+Normalize the given IRI using the standard DBPedia namespace prefixes.
 
     iri:
 input IRI, in fully-qualified domain representation
@@ -933,9 +951,6 @@ debugging flag
     yields:
 search hits
         """
-        #node_list: list = list(graph.nodes.values())
-        #for i, node in enumerate(node_list):
-
         for i, node in enumerate(pipe.tokens):  # pylint: disable=R1702
             if node.kind in [ NodeEnum.ENT ] and len(node.entity) < 1:
                 kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
@@ -950,7 +965,7 @@ search hits
                         node.length,
                         "dbpedia",
                         kg_ent.prob,  # type: ignore
-                        i, # FUCK this should be a token_id, not a node_id
+                        i,
                         kg_ent,  # type: ignore
                     )
 
@@ -1006,7 +1021,7 @@ the constructed `Node` object
                 rel,
                 NodeEnum.IRI,
                 span = link.span,
-                label = link.iri,
+                label = link.kg_ent.label,  # type: ignore
                 length = link.length,
                 count = 1,
             )

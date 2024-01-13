@@ -394,17 +394,31 @@ Also recognize that for a parse graph of a paragraph in the English language, th
             st.subheader("download the results", divider = "rainbow")
             st.markdown(
                 """
-Download a serialized <em>lemma graph</em> in
-<a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a> format, suitable for import to Neo4j, NetworkX, KùzuDB, etc.
+Download a serialized <em>lemma graph</em> in multiple formats:
+<ul>
+  <li>
+    <a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a>: suitable for import to Neo4j, NetworkX, KùzuDB, etc.
+  </li>
+  <li>
+    <a href="https://www.w3.org/TR/turtle/" target="_blank"><em>Turtle/N3</em></a>: W3C semantic graph representation, based on RDF, OWL, SKOS, etc.
+  </li>
+</ul>
                 """,
                 unsafe_allow_html = True,
             )
 
             st.download_button(
-                label = "download",
+                label = "download node-link",
                 data = tg.dump_lemma_graph(),
                 file_name = "lemma_graph.json",
                 mime = "application/json",
+            )
+
+            st.download_button(
+                label = "download RDF",
+                data = tg.extract_rdf(),
+                file_name = "lemma_graph.ttl",
+                mime = "text/turtle",
             )
 
 
