@@ -2,7 +2,7 @@
 *~
 chromedriver
 lemma.json
-lemma.rdf
+lemma.ttl
 examples/tmp.*.html
 paper.md
 vis.html
