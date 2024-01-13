@@ -21,6 +21,8 @@ import textgraphs  # pylint: disable=C0413
 
 
 def test_load_minimal (
+    *,
+    debug: bool = False,
     ) -> None:
     """
 Construct a _lemma graph_ from a minimal example, then compare
@@ -49,8 +51,14 @@ See Spot run.
 
     obs_graph: dict = json.loads(tg.dump_lemma_graph())
 
+    if debug:
+        print(obs_graph)
+
     # compare
     diff: deepdiff.diff.DeepDiff = deepdiff.DeepDiff(exp_graph, obs_graph)
+
+    if debug:
+        print(diff)
 
     if len(diff) > 0:
         print(json.dumps(json.loads(diff.to_json()), indent = 2))
@@ -59,4 +67,4 @@ See Spot run.
 
 
 if __name__ == "__main__":
-    test_load_minimal()
+    test_load_minimal(debug = True)

@@ -261,8 +261,8 @@ debugging flag
 
         else:
             # find class IRI metadata
-            class_meta: typing.List[ str ] = [
-                meta["definition"]
+            class_meta: typing.List[typing.Dict[ str, str ]] = [
+                meta
                 for meta in pipe.kg.NER_MAP.values()
                 if meta["iri"] == node.label
             ]
@@ -270,11 +270,11 @@ debugging flag
             dst = Node(
                 len(self.nodes),
                 node.label,  # type: ignore
-                class_meta[0],
+                class_meta[0]["definition"],
                 str(rdflib.RDF.type),
                 NodeEnum.IRI,
-                label = node.label,
-                length = node.length,
+                label = class_meta[0]["label"],
+                length = len(class_meta[0]["label"].split(" ")),
                 count = 1,
             )
 
@@ -1001,37 +1001,42 @@ RDF triples N3 (Turtle) format as a string
         # extract entities as RDF
         for node_id, node in enumerate(self.nodes.values()):
             if node.kind in [ NodeEnum.ENT, NodeEnum.LEM ]:
-                iri: str = f"{self.iri_base}entity/{node.key.lower().replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
-                subj: rdflib.URIRef = rdflib.URIRef(iri)
-                ref_dict[node_id] = subj
-
-                rdf_graph.add((
-                    subj,
-                    rdflib.SKOS.prefLabel,
-                    rdflib.Literal(node.text, lang = lang),
-                ))
-
-                if node.kind == NodeEnum.ENT and node.annotated:
-                    cls_obj: rdflib.URIRef = rdflib.URIRef(node.label)
-                    cls_id: int = node_keys.index(node.label)  # type: ignore
-                    ref_dict[cls_id] = cls_obj
+                if node.pos not in [ "VERB" ]:
+                    iri: str = f"{self.iri_base}entity/{node.key.lower().replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
+                    subj: rdflib.URIRef = rdflib.URIRef(iri)
+                    ref_dict[node_id] = subj
 
                     rdf_graph.add((
                         subj,
-                        rdflib.RDF.type,
-                        cls_obj,
+                        rdflib.SKOS.prefLabel,
+                        rdflib.Literal(node.text, lang = lang),
                     ))
+
+                    if node.kind == NodeEnum.ENT and node.annotated:
+                        cls_obj: rdflib.URIRef = rdflib.URIRef(node.label)
+                        cls_id: int = node_keys.index(node.label)  # type: ignore
+                        ref_dict[cls_id] = cls_obj
+
+                        rdf_graph.add((
+                            subj,
+                            rdflib.RDF.type,
+                            cls_obj,
+                        ))
 
             elif node.kind == NodeEnum.IRI:
                 subj = rdflib.URIRef(node.key)
                 ref_dict[node_id] = subj
 
-                desc = rdflib.Literal(node.text, lang = "en")
-
                 rdf_graph.add((
                     subj,
                     rdflib.SKOS.prefLabel,
-                    desc,
+                    rdflib.Literal(node.label, lang = lang),
+                ))
+
+                rdf_graph.add((
+                    subj,
+                    rdflib.SKOS.definition,
+                    rdflib.Literal(node.text, lang = lang),
                 ))
 
         # extract relations as RDF

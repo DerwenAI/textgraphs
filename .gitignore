@@ -2,7 +2,9 @@
 *~
 chromedriver
 lemma.json
+lemma.rdf
 examples/tmp.*.html
+paper.md
 vis.html
 gor.html
 txg.tgz

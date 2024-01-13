@@ -112,6 +112,7 @@ debugging flag
             nx_node["shape"] = NODE_STYLES[node.kind].shape
             nx_node["color"] = NODE_STYLES[node.kind].color
 
+            nx_node["kind"] = str(node.kind)
             nx_node["size"] = nx_node["count"]
 
             if node.kind in [ NodeEnum.IRI ]:
@@ -136,6 +137,10 @@ debugging flag
         # build the network
         pv_graph: pyvis.network.Network = pyvis.network.Network()
         pv_graph.from_nx(self.graph.lemma_graph)
+
+        for pv_node in pv_graph.nodes:
+            if pv_node["kind"] == str(NodeEnum.IRI):
+                pv_node["label"] = self.kg.normalize_prefix(pv_node["lemma"])
 
         for pv_edge in pv_graph.get_edges():
             edge_key = ( pv_edge["from"], pv_edge["to"], )

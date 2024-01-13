@@ -119,6 +119,7 @@ the constructed `Node` object
 
         if not linked:
             # construct a placeholder node (stopwords)
+            # NB: omit locations
             self.nodes[key] = Node(
                 len(self.nodes),
                 key,
@@ -126,14 +127,13 @@ the constructed `Node` object
                 span.pos_,
                 kind,
                 span = span,
-                loc = [ location ],
                 length = length,
             )
 
         elif key in self.nodes:
             # link to previously constructed entity node
-            self.nodes[key].loc.append(location)
             self.nodes[key].count += 1
+            self.nodes[key].loc.append(location)
 
         # construct a new node for entity or lemma
         else:
@@ -247,13 +247,20 @@ format
             nx_node = self.lemma_graph.nodes[node.node_id]
             nx_node["name"] = node.text
             nx_node["kind"] = str(node.kind)
-            nx_node["iri"] = node.label
             nx_node["subobj"] = node.sub_obj
             nx_node["pos"] = node.pos
             nx_node["loc"] = str(node.loc)
             nx_node["length"] = node.length
             nx_node["hood"] = node.neighbors
             nx_node["anno"] = node.annotated
+
+            # juggle the serialized IRIs
+            if node.kind in [ NodeEnum.IRI ]:
+                nx_node["iri"] = node.key
+            elif node.label is not None and node.label.startswith("http"):
+                nx_node["iri"] = node.label
+            else:
+                nx_node["iri"] = None
 
         # emulate a node-link format serialization, using the
         # default `NetworkX.node_link_data()` property names
@@ -307,15 +314,10 @@ debugging flag
             if debug:
                 ic(nx_node)
 
-            label: typing.Optional[ str ] = None
             kind: NodeEnum = NodeEnum.decode(nx_node["kind"])  # type: ignore
+            label: typing.Optional[ str ] = nx_node["label"]
 
-            if kind in [ NodeEnum.ENT ]:
-                if nx_node["iri"] is not None:
-                    label = nx_node["iri"]
-                else:
-                    label = nx_node["label"]
-            elif kind in [ NodeEnum.IRI ]:
+            if kind in [ NodeEnum.ENT ] and nx_node["iri"] is not None:
                 label = nx_node["iri"]
 
             node: Node = self.make_node(
