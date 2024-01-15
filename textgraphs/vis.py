@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# pylint: disable=R0801
 
 """
 Visualization methods based on `PyVis`, `wordcloud`, and so on.
@@ -112,7 +113,6 @@ debugging flag
             nx_node["shape"] = NODE_STYLES[node.kind].shape
             nx_node["color"] = NODE_STYLES[node.kind].color
 
-            nx_node["kind"] = str(node.kind)
             nx_node["size"] = nx_node["count"]
 
             if node.kind in [ NodeEnum.IRI ]:

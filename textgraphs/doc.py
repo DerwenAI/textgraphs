@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# pylint: disable=C0302
+# pylint: disable=C0302,R0801
 
 """
 Implementation of an LLM-augmented `textgraph` algorithm for
@@ -493,6 +493,7 @@ debugging flag
             nx_node["lemma"] = node_key
             nx_node["count"] = node.count
             nx_node["weight"] = node.weight
+            nx_node["kind"] = str(node.kind)
 
             if node.kind in [ NodeEnum.DEP ]:
                 nx_node["label"] = ""
@@ -1089,7 +1090,7 @@ _lemma_key_ for a parsed entity, the full IRI for a linked entity
         uri: str = str(uri_ref)
 
         if uri.startswith(self.iri_base):
-            return uri.replace(self.iri_base, "").replace("entity/", "")
+            return uri.replace(self.iri_base, "").replace("entity/", "").replace("_", ".")
 
         return uri
 
@@ -1171,6 +1172,9 @@ debugging flag
 
                 if "descrip" in node_dat:
                     node.text = node_dat["descrip"]
+
+                if kind == NodeEnum.ENT:
+                    node.text = node_dat["label"]
 
                 if debug:
                     ic(node)
