@@ -1,6 +1,6 @@
 TODO:
 
-  * load RDF, to bootstrap/iterate analysis
+  * demo: load RDF, to bootstrap/iterate analysis
     - use `skos:broader` for structural represenation of synonyms
 
   * download ZIP: KuzuDB node-link

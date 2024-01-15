@@ -397,7 +397,7 @@ Also recognize that for a parse graph of a paragraph in the English language, th
 Download a serialized <em>lemma graph</em> in multiple formats:
 <ul>
   <li>
-    <a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a>: suitable for import to Neo4j, NetworkX, KùzuDB, etc.
+    <a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a>: JSON data suitable for import to Neo4j, NetworkX, KùzuDB, etc.
   </li>
   <li>
     <a href="https://www.w3.org/TR/turtle/" target="_blank"><em>Turtle/N3</em></a>: W3C semantic graph representation, based on RDF, OWL, SKOS, etc.

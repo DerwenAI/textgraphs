@@ -14,9 +14,11 @@ running methods on `Pipeline` objects, typically per paragraph.
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
+from collections import defaultdict
 import asyncio
 import logging
 import os
+import re
 import sys
 import typing
 
@@ -1002,7 +1004,7 @@ RDF triples N3 (Turtle) format as a string
         for node_id, node in enumerate(self.nodes.values()):
             if node.kind in [ NodeEnum.ENT, NodeEnum.LEM ]:
                 if node.pos not in [ "VERB" ]:
-                    iri: str = f"{self.iri_base}entity/{node.key.lower().replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
+                    iri: str = f"{self.iri_base}entity/{node.key.replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
                     subj: rdflib.URIRef = rdflib.URIRef(iri)
                     ref_dict[node_id] = subj
 
@@ -1072,3 +1074,125 @@ RDF triples N3 (Turtle) format as a string
         )
 
         return n3_str
+
+
+    def denormalize_iri (
+        self,
+        uri_ref: rdflib.term.URIRef,
+        ) -> str:
+        """
+Discern between a parsed entity and a linked entity.
+
+    returns:
+_lemma_key_ for a parsed entity, the full IRI for a linked entity
+        """
+        uri: str = str(uri_ref)
+
+        if uri.startswith(self.iri_base):
+            return uri.replace(self.iri_base, "").replace("entity/", "")
+
+        return uri
+
+
+    def load_bootstrap_ttl (  # pylint: disable=R0912,R0914
+        self,
+        ttl_str: str,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Parse a TTL string with an RDF semantic graph representation to load
+bootstrap definitions for the _lemma graph_ prior to parsing, e.g.,
+for synonyms.
+
+    ttl_str:
+RDF triples in TTL (Turtle/N3) format
+
+    debug:
+debugging flag
+        """
+        rdf_graph: rdflib.Graph = rdflib.Graph()
+        rdf_graph.parse(data = ttl_str)
+
+        rdf_nodes: typing.Dict[ str, dict ] = defaultdict(dict)
+        rdf_edges: typing.Set[ tuple ] = set()
+
+        # parse the node data, tally the edges
+        for subj, pred, obj in rdf_graph:
+            uri: str = self.denormalize_iri(subj)
+
+            if pred == rdflib.SKOS.prefLabel:
+                rdf_nodes[uri]["label"] = str(obj)
+            elif pred == rdflib.SKOS.definition:
+                rdf_nodes[uri]["descrip"] = str(obj)
+
+            elif pred == rdflib.RDF.type:
+                dst: str = str(obj)
+                rdf_nodes[dst]["ref"] = True
+                rdf_nodes[uri]["type"] = dst
+
+            else:
+                src: str = uri
+                rdf_nodes[src]["ref"] = True
+
+                dst = self.denormalize_iri(obj)
+                rdf_nodes[dst]["ref"] = True
+
+                rdf_edges.add(( str(pred), src, dst, ))
+
+        # construct the nodes
+        for uri, node_dat in rdf_nodes.items():
+            if "ref" in node_dat:
+                if debug:
+                    ic(uri, node_dat)
+
+                kind: NodeEnum = NodeEnum.ENT
+
+                if re.search(r"http[s]*://", uri) is not None:
+                    kind = NodeEnum.IRI
+
+                node: Node = self.make_node(
+                    [],
+                    uri,
+                    None,
+                    kind,
+                    0,
+                    0,
+                    0,
+                    label = node_dat["label"],
+                    length = len(node_dat["label"].split(" ")),
+                )
+
+                node.count = 0
+                node.loc = []
+
+                if "type" in node_dat:
+                    node.pos = node_dat["type"]
+
+                if "descrip" in node_dat:
+                    node.text = node_dat["descrip"]
+
+                if debug:
+                    ic(node)
+
+        # construct the edges
+        node_list: typing.List[ Node ] = list(self.nodes.values())
+
+        for rel, src, dst in rdf_edges:
+            src_node: Node = self.nodes[src]
+            dst_node: Node = self.nodes[dst]
+
+            if debug:
+                print(rel, node_list.index(src_node), node_list.index(dst_node))
+
+            edge: Edge = self.make_edge(  # type: ignore
+                src_node,
+                dst_node,
+                RelEnum.IRI,
+                rel,
+                1.0,
+                debug = debug,
+            )
+
+            if debug:
+                ic(edge)
