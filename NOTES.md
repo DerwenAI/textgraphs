@@ -1,9 +1,5 @@
 TODO:
 
-  * load RDF, to bootstrap/iterate analysis
-    - use `skos:broader` for structural represenation of synonyms
-
-  * download ZIP: KuzuDB node-link
     - https://neo4j.com/docs/getting-started/data-import/csv-import/
 
   * link entities for lemmas, noun chunks using MediaWiki lookups?

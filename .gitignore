@@ -3,6 +3,7 @@
 chromedriver
 lemma.json
 lemma.ttl
+lemma.zip
 examples/tmp.*.html
 paper.md
 vis.html

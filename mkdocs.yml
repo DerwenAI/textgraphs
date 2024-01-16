@@ -19,6 +19,7 @@ nav:
     - Tutorial:
         - Example Usage: ex0_0.md
         - Replicating "InGram": ex1_0.md
+        - Using Bootstrap Definitions: ex2_0.md
 
     - Technical Reference:
         - Package Reference: ref.md

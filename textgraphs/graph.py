@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# pylint: disable=R0801
 
 """
 This class implements a generic, in-memory graph data structure used
@@ -134,6 +135,11 @@ the constructed `Node` object
             # link to previously constructed entity node
             self.nodes[key].count += 1
             self.nodes[key].loc.append(location)
+
+            # reset the span, if this node was loaded from a
+            # previous pipeline or from bootstrap definitions
+            if self.nodes[key].span is None:
+                self.nodes[key].span = span
 
         # construct a new node for entity or lemma
         else:

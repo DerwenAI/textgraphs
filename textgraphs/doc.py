@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# pylint: disable=C0302
+# pylint: disable=C0302,R0801
 
 """
 Implementation of an LLM-augmented `textgraph` algorithm for
@@ -14,11 +14,18 @@ running methods on `Pipeline` objects, typically per paragraph.
 see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/main/README.md
 """
 
+from collections import defaultdict
 import asyncio
+import csv
 import logging
 import os
+import pathlib
+import re
+import shutil
 import sys
+import tempfile
 import typing
+import zipfile
 
 from icecream import ic  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
@@ -491,6 +498,7 @@ debugging flag
             nx_node["lemma"] = node_key
             nx_node["count"] = node.count
             nx_node["weight"] = node.weight
+            nx_node["kind"] = str(node.kind)
 
             if node.kind in [ NodeEnum.DEP ]:
                 nx_node["label"] = ""
@@ -979,7 +987,7 @@ a `pandas.DataFrame` of the extracted entities
     ######################################################################
     ## knowledge graph abstraction layer
 
-    def extract_rdf (  # pylint: disable=R0914
+    def export_rdf (  # pylint: disable=R0914
         self,
         *,
         lang: str = "en",
@@ -1002,7 +1010,7 @@ RDF triples N3 (Turtle) format as a string
         for node_id, node in enumerate(self.nodes.values()):
             if node.kind in [ NodeEnum.ENT, NodeEnum.LEM ]:
                 if node.pos not in [ "VERB" ]:
-                    iri: str = f"{self.iri_base}entity/{node.key.lower().replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
+                    iri: str = f"{self.iri_base}entity/{node.key.replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
                     subj: rdflib.URIRef = rdflib.URIRef(iri)
                     ref_dict[node_id] = subj
 
@@ -1072,3 +1080,262 @@ RDF triples N3 (Turtle) format as a string
         )
 
         return n3_str
+
+
+    def denormalize_iri (
+        self,
+        uri_ref: rdflib.term.URIRef,
+        ) -> str:
+        """
+Discern between a parsed entity and a linked entity.
+
+    returns:
+_lemma_key_ for a parsed entity, the full IRI for a linked entity
+        """
+        uri: str = str(uri_ref)
+
+        if uri.startswith(self.iri_base):
+            return uri.replace(self.iri_base, "").replace("entity/", "").replace("_", ".")
+
+        return uri
+
+
+    def load_bootstrap_ttl (  # pylint: disable=R0912,R0914
+        self,
+        ttl_str: str,
+        *,
+        debug: bool = False,
+        ) -> None:
+        """
+Parse a TTL string with an RDF semantic graph representation to load
+bootstrap definitions for the _lemma graph_ prior to parsing, e.g.,
+for synonyms.
+
+    ttl_str:
+RDF triples in TTL (Turtle/N3) format
+
+    debug:
+debugging flag
+        """
+        rdf_graph: rdflib.Graph = rdflib.Graph()
+        rdf_graph.parse(data = ttl_str)
+
+        rdf_nodes: typing.Dict[ str, dict ] = defaultdict(dict)
+        rdf_edges: typing.Set[ tuple ] = set()
+
+        # parse the node data, tally the edges
+        for subj, pred, obj in rdf_graph:
+            uri: str = self.denormalize_iri(subj)
+
+            if pred == rdflib.SKOS.prefLabel:
+                rdf_nodes[uri]["label"] = str(obj)
+            elif pred == rdflib.SKOS.definition:
+                rdf_nodes[uri]["descrip"] = str(obj)
+
+            elif pred == rdflib.RDF.type:
+                dst: str = str(obj)
+                rdf_nodes[dst]["ref"] = True
+                rdf_nodes[uri]["type"] = dst
+
+            else:
+                src: str = uri
+                rdf_nodes[src]["ref"] = True
+
+                dst = self.denormalize_iri(obj)
+                rdf_nodes[dst]["ref"] = True
+
+                rdf_edges.add(( str(pred), src, dst, ))
+
+        # construct the nodes
+        for uri, node_dat in rdf_nodes.items():
+            if "ref" in node_dat:
+                if debug:
+                    ic(uri, node_dat)
+
+                kind: NodeEnum = NodeEnum.ENT
+
+                if re.search(r"http[s]*://", uri) is not None:
+                    kind = NodeEnum.IRI
+
+                node: Node = self.make_node(
+                    [],
+                    uri,
+                    None,
+                    kind,
+                    0,
+                    0,
+                    0,
+                    label = node_dat["label"],
+                    length = len(node_dat["label"].split(" ")),
+                )
+
+                node.count = 0
+                node.loc = []
+
+                if "type" in node_dat:
+                    node.pos = node_dat["type"]
+
+                if "descrip" in node_dat:
+                    node.text = node_dat["descrip"]
+
+                if kind == NodeEnum.ENT:
+                    node.text = node_dat["label"]
+
+                if debug:
+                    ic(node)
+
+        # construct the edges
+        node_list: typing.List[ Node ] = list(self.nodes.values())
+
+        for rel, src, dst in rdf_edges:
+            src_node: Node = self.nodes[src]
+            dst_node: Node = self.nodes[dst]
+
+            if debug:
+                print(rel, node_list.index(src_node), node_list.index(dst_node))
+
+            edge: Edge = self.make_edge(  # type: ignore
+                src_node,
+                dst_node,
+                RelEnum.IRI,
+                rel,
+                1.0,
+                debug = debug,
+            )
+
+            if debug:
+                ic(edge)
+
+
+    def export_kuzu (  # pylint: disable=R0912,R0914
+        self,
+        *,
+        zip_name: str = "lemma.zip",
+        debug: bool = False,
+        ) -> str:
+        """
+Export a labeled property graph for KùzuDB (openCypher).
+        """
+        subdir: str = "cyp"
+        zip_dir: tempfile.TemporaryDirectory = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        incl_nodes: set = set()
+
+        with zipfile.ZipFile(
+                zip_name,
+                mode = "w",
+                compression = zipfile.ZIP_DEFLATED,
+                compresslevel = 9,
+        ) as zip_fp:
+            # write the nodes table
+            nodes_path: pathlib.Path = pathlib.Path(zip_dir.name) / "nodes.csv"
+
+            with open(nodes_path, "w", encoding = "utf-8") as fp:  # pylint: disable=C0103
+                writer = csv.writer(fp)
+
+                for node in self.nodes.values():
+                    # juggle the serialized IRIs
+                    iri: typing.Optional[ str ] = None
+
+                    if node.kind in [ NodeEnum.ENT, NodeEnum.LEM ]:
+                        if node.pos not in [ "VERB" ]:
+                            iri = f"{self.iri_base}entity/{node.key.replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
+                    elif node.kind == NodeEnum.IRI:
+                        iri = node.key
+
+                    if iri is not None:
+                        incl_nodes.add(node.node_id)
+
+                        node_row: list = [
+                            node.node_id,
+                            iri,
+                            node.weight,
+                            str(node.kind),
+                            node.key,
+                            node.label,
+                            node.text,
+                            node.pos,
+                            node.length,
+                            node.count,
+                        ]
+
+                        if debug:
+                            ic(node_row)
+
+                        writer.writerow(node_row)
+
+            zip_fp.write(
+                nodes_path,
+                arcname = subdir + "/" + nodes_path.name,
+            )
+
+            # write the edges table
+            edges_path: pathlib.Path = pathlib.Path(zip_dir.name) / "edges.csv"
+
+            with open(edges_path, "w", encoding = "utf-8") as fp:  # pylint: disable=C0103
+                writer = csv.writer(fp)
+
+                for edge in self.edges.values():
+                    if edge.src_node in incl_nodes and edge.dst_node in incl_nodes:
+                        edge_row: list = [
+                            edge.src_node,
+                            edge.dst_node,
+                            edge.rel,
+                            edge.prob,
+                            str(edge.kind),
+                            edge.count,
+                        ]
+
+                        if debug:
+                            ic(edge_row)
+
+                        writer.writerow(edge_row)
+
+            zip_fp.write(
+                edges_path,
+                arcname = subdir + "/" + edges_path.name,
+            )
+
+            # write the `demo.py` script
+            demo_str: str = """
+# minimal dependencies
+import kuzu
+import shutil
+
+# clear space for tables
+DB_DIR: str = "db"
+shutil.rmtree(DB_DIR, ignore_errors = True)
+
+# instantiate KùzuDB connection
+db = kuzu.Database(DB_DIR)
+conn = kuzu.Connection(db)
+
+# define table schema
+conn.execute(
+    "CREATE NODE TABLE subobj(id INT64, iri STRING, prob FLOAT, kind STRING, lemma STRING, label STRING, descrip STRING, pos STRING, length INT16, count INT16, PRIMARY KEY (id))"
+)
+conn.execute(
+    "CREATE REL TABLE triple(FROM subobj TO subobj, pred STRING, prob FLOAT, kind STRING, count INT16)"
+)
+
+# load data into tables
+conn.execute('COPY subobj FROM "nodes.csv"')
+conn.execute('COPY triple FROM "edges.csv"')
+
+# run a simple Cypher query
+query: str = "MATCH (s:subobj) RETURN s.id, s.iri;"
+results = conn.execute(query)
+
+while results.has_next():
+    print(results.get_next())
+            """
+
+            zip_fp.writestr(
+                subdir + "/demo.py",
+                demo_str,
+            )
+
+            if debug:
+                zip_fp.printdir()
+
+        shutil.rmtree(zip_dir.name)
+        return zip_name
