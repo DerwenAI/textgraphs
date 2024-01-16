@@ -106,6 +106,7 @@ demo = [
     "ipywidgets >= 8.1",
     "jupyterlab_execute_time >= 3.1",
     "jupyterlab >= 4.0",
+    "kuzu >= 0.1",
     "sense2vec >= 2.0",
     "spacy-entity-linker >= 1.0",
     "streamlit < 1.29",

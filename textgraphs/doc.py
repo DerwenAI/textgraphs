@@ -16,11 +16,16 @@ see copyright/license https://huggingface.co/spaces/DerwenAI/textgraphs/blob/mai
 
 from collections import defaultdict
 import asyncio
+import csv
 import logging
 import os
+import pathlib
 import re
+import shutil
 import sys
+import tempfile
 import typing
+import zipfile
 
 from icecream import ic  # pylint: disable=E0401
 import networkx as nx  # pylint: disable=E0401
@@ -982,7 +987,7 @@ a `pandas.DataFrame` of the extracted entities
     ######################################################################
     ## knowledge graph abstraction layer
 
-    def extract_rdf (  # pylint: disable=R0914
+    def export_rdf (  # pylint: disable=R0914
         self,
         *,
         lang: str = "en",
@@ -1200,3 +1205,137 @@ debugging flag
 
             if debug:
                 ic(edge)
+
+
+    def export_kuzu (  # pylint: disable=R0912,R0914
+        self,
+        *,
+        zip_name: str = "lemma.zip",
+        debug: bool = False,
+        ) -> str:
+        """
+Export a labeled property graph for KùzuDB (openCypher).
+        """
+        subdir: str = "cyp"
+        zip_dir: tempfile.TemporaryDirectory = tempfile.TemporaryDirectory()  # pylint: disable=R1732
+        incl_nodes: set = set()
+
+        with zipfile.ZipFile(
+                zip_name,
+                mode = "w",
+                compression = zipfile.ZIP_DEFLATED,
+                compresslevel = 9,
+        ) as zip_fp:
+            # write the nodes table
+            nodes_path: pathlib.Path = pathlib.Path(zip_dir.name) / "nodes.csv"
+
+            with open(nodes_path, "w", encoding = "utf-8") as fp:  # pylint: disable=C0103
+                writer = csv.writer(fp)
+
+                for node in self.nodes.values():
+                    # juggle the serialized IRIs
+                    iri: typing.Optional[ str ] = None
+
+                    if node.kind in [ NodeEnum.ENT, NodeEnum.LEM ]:
+                        if node.pos not in [ "VERB" ]:
+                            iri = f"{self.iri_base}entity/{node.key.replace(' ', '_').replace('.', '_')}"  # pylint: disable=C0301
+                    elif node.kind == NodeEnum.IRI:
+                        iri = node.key
+
+                    if iri is not None:
+                        incl_nodes.add(node.node_id)
+
+                        node_row: list = [
+                            node.node_id,
+                            iri,
+                            node.weight,
+                            str(node.kind),
+                            node.key,
+                            node.label,
+                            node.text,
+                            node.pos,
+                            node.length,
+                            node.count,
+                        ]
+
+                        if debug:
+                            ic(node_row)
+
+                        writer.writerow(node_row)
+
+            zip_fp.write(
+                nodes_path,
+                arcname = subdir + "/" + nodes_path.name,
+            )
+
+            # write the edges table
+            edges_path: pathlib.Path = pathlib.Path(zip_dir.name) / "edges.csv"
+
+            with open(edges_path, "w", encoding = "utf-8") as fp:  # pylint: disable=C0103
+                writer = csv.writer(fp)
+
+                for edge in self.edges.values():
+                    if edge.src_node in incl_nodes and edge.dst_node in incl_nodes:
+                        edge_row: list = [
+                            edge.src_node,
+                            edge.dst_node,
+                            edge.rel,
+                            edge.prob,
+                            str(edge.kind),
+                            edge.count,
+                        ]
+
+                        if debug:
+                            ic(edge_row)
+
+                        writer.writerow(edge_row)
+
+            zip_fp.write(
+                edges_path,
+                arcname = subdir + "/" + edges_path.name,
+            )
+
+            # write the `demo.py` script
+            demo_str: str = """
+# minimal dependencies
+import kuzu
+import shutil
+
+# clear space for tables
+DB_DIR: str = "db"
+shutil.rmtree(DB_DIR, ignore_errors = True)
+
+# instantiate KùzuDB connection
+db = kuzu.Database(DB_DIR)
+conn = kuzu.Connection(db)
+
+# define table schema
+conn.execute(
+    "CREATE NODE TABLE subobj(id INT64, iri STRING, prob FLOAT, kind STRING, lemma STRING, label STRING, descrip STRING, pos STRING, length INT16, count INT16, PRIMARY KEY (id))"
+)
+conn.execute(
+    "CREATE REL TABLE triple(FROM subobj TO subobj, pred STRING, prob FLOAT, kind STRING, count INT16)"
+)
+
+# load data into tables
+conn.execute('COPY subobj FROM "nodes.csv"')
+conn.execute('COPY triple FROM "edges.csv"')
+
+# run a simple Cypher query
+query: str = "MATCH (s:subobj) RETURN s.id, s.iri;"
+results = conn.execute(query)
+
+while results.has_next():
+    print(results.get_next())
+            """
+
+            zip_fp.writestr(
+                subdir + "/demo.py",
+                demo_str,
+            )
+
+            if debug:
+                zip_fp.printdir()
+
+        shutil.rmtree(zip_dir.name)
+        return zip_name

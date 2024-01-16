@@ -1,6 +1,5 @@
 TODO:
 
-  * download ZIP: KuzuDB node-link
     - https://neo4j.com/docs/getting-started/data-import/csv-import/
 
   * link entities for lemmas, noun chunks using MediaWiki lookups?
