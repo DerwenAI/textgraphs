@@ -430,7 +430,7 @@ debugging flag
                 if node.kind == NodeEnum.ENT:
                     node.label = pipe.kg.remap_ner(node.label)
 
-                    if node.label is not None and node.label.startswith("http"):
+                    if node.label is not None and re.search(r"http[s]*://", node.label) is not None:
                         self._make_class_link(
                             node,
                             pipe,
@@ -1152,16 +1152,16 @@ debugging flag
                 if debug:
                     ic(uri, node_dat)
 
-                kind: NodeEnum = NodeEnum.ENT
+                node_kind: NodeEnum = NodeEnum.ENT
 
                 if re.search(r"http[s]*://", uri) is not None:
-                    kind = NodeEnum.IRI
+                    node_kind = NodeEnum.IRI
 
                 node: Node = self.make_node(
                     [],
                     uri,
                     None,
-                    kind,
+                    node_kind,
                     0,
                     0,
                     0,
@@ -1178,7 +1178,7 @@ debugging flag
                 if "descrip" in node_dat:
                     node.text = node_dat["descrip"]
 
-                if kind == NodeEnum.ENT:
+                if node_kind == NodeEnum.ENT:
                     node.text = node_dat["label"]
 
                 if debug:
@@ -1194,10 +1194,15 @@ debugging flag
             if debug:
                 print(rel, node_list.index(src_node), node_list.index(dst_node))
 
+            edge_kind: RelEnum = RelEnum.IRI
+
+            if rel == str(rdflib.SKOS.broader):
+                edge_kind = RelEnum.SYN
+
             edge: Edge = self.make_edge(  # type: ignore
                 src_node,
                 dst_node,
-                RelEnum.IRI,
+                edge_kind,
                 rel,
                 1.0,
                 debug = debug,
@@ -1215,6 +1220,12 @@ debugging flag
         ) -> str:
         """
 Export a labeled property graph for KùzuDB (openCypher).
+
+    debug:
+debugging flag
+
+    returns:
+name of the generated ZIP file
         """
         subdir: str = "cyp"
         zip_dir: tempfile.TemporaryDirectory = tempfile.TemporaryDirectory()  # pylint: disable=R1732
@@ -1338,4 +1349,5 @@ while results.has_next():
                 zip_fp.printdir()
 
         shutil.rmtree(zip_dir.name)
+
         return zip_name
