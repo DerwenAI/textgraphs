@@ -395,41 +395,56 @@ Also recognize that for a parse graph of a paragraph in the English language, th
             st.markdown(
                 """
 Download a serialized <em>lemma graph</em> in multiple formats:
-<ul>
-  <li>
-    <a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a>: JSON data suitable for import to Neo4j, NetworkX, etc.
-  </li>
-  <li>
-    <a href="https://www.w3.org/TR/turtle/" target="_blank"><em>Turtle/N3</em></a>: W3C semantic graph representation, based on RDF, OWL, SKOS, etc.
-  </li>
-  <li>
-    <a href="https://opencypher.org/" target="_blank"><em>openCypher</em></a>: ZIP file of a labeled property graph in <a href="https://kuzudb.com/" target="_blank"><em>KùzuDB</em></a>
-  </li>
-</ul>
                 """,
                 unsafe_allow_html = True,
             )
 
-            st.download_button(
-                label = "download node-link",
-                data = tg.dump_lemma_graph(),
-                file_name = "lemma_graph.json",
-                mime = "application/json",
-            )
+            col1, col2, col3 = st.columns(3)
 
-            st.download_button(
-                label = "download RDF",
-                data = tg.export_rdf(),
-                file_name = "lemma_graph.ttl",
-                mime = "text/turtle",
-            )
+            with col1:
+                st.download_button(
+                    label = "download node-link",
+                    data = tg.dump_lemma_graph(),
+                    file_name = "lemma_graph.json",
+                    mime = "application/json",
+                )
 
-            st.download_button(
-                label = "download KùzuDB",
-                data = tg.export_kuzu(zip_name = "lemma.zip"),
-                file_name = "lemma.zip",
-                mime = "application/x-zip-compressed",
-            )
+                st.markdown(
+                    """
+<a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html" target="_blank"><em>node-link</em></a>: JSON data suitable for import to <a href="https://neo4j.com/docs/getting-started/data-import/csv-import/" target="_blank"><em>Neo4j</em></a>, <a href="https://networkx.org/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_graph.html#networkx.readwrite.json_graph.node_link_graph" target="_blank"><em>NetworkX</em></a>, etc.
+                    """,
+                    unsafe_allow_html = True,
+                )
+
+            with col2:
+                st.download_button(
+                    label = "download RDF",
+                    data = tg.export_rdf(),
+                    file_name = "lemma_graph.ttl",
+                    mime = "text/turtle",
+                )
+
+                st.markdown(
+                    """
+<a href="https://www.w3.org/TR/turtle/" target="_blank"><em>Turtle/N3</em></a>: W3C semantic graph representation, based on RDF, OWL, SKOS, etc.
+                    """,
+                    unsafe_allow_html = True,
+                )
+
+            with col3:
+                st.download_button(
+                    label = "download KùzuDB",
+                    data = tg.export_kuzu(zip_name = "lemma_graph.zip"),
+                    file_name = "lemma.zip",
+                    mime = "application/x-zip-compressed",
+                )
+
+                st.markdown(
+                    """
+<a href="https://opencypher.org/" target="_blank"><em>openCypher</em></a>: ZIP file of a labeled property graph in <a href="https://kuzudb.com/" target="_blank"><em>KùzuDB</em></a>
+                    """,
+                    unsafe_allow_html = True,
+                )
 
 
             ## WIP

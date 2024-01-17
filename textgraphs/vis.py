@@ -88,10 +88,10 @@ source graph to be visualized
 knowledge graph used for entity linking
         """
         self.graph: SimpleGraph = graph
-        self.kg: KnowledgeGraph = kg  #pylint: disable=C0103
+        self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
 
 
-    def render_lemma_graph (
+    def render_lemma_graph (  # pylint: disable=R0912
         self,
         *,
         debug: bool = True,
@@ -155,6 +155,10 @@ debugging flag
                 pv_edge["arrows"] = "to" # type: ignore
                 pv_edge["color"] = "hsl(289, 17%, 49%)"  # type: ignore
                 pv_edge["width"] = 3  # type: ignore
+            elif edge_info[0] in [ RelEnum.SYN ]:  # type: ignore
+                pv_edge["arrows"] = "from" # type: ignore
+                pv_edge["color"] = "hsl(55, 17%, 49%)"  # type: ignore
+                pv_edge["width"] = 2  # type: ignore
 
         return pv_graph
 
