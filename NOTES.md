@@ -16,7 +16,6 @@ TODO:
   * reify GOR, then use FastRP to generate embeddings?
     - https://github.com/Knorreman/fastRP
 
-
   * eval community detection to condense nodes using k-medoids?
     - https://medium.com/neo4j/clustering-graph-data-with-k-medoids-3b6a67ea0873
 
@@ -25,6 +24,9 @@ TODO:
 
 
   * SPARQL the DBPedia/Wikidata equivs
+
+  * other NER/RE:
+    - https://github.com/dwadden/dygiepp?tab=readme-ov-file#pretrained-models
 
   * check out https://github.com/wikipedia2vec/wikipedia2vec
 

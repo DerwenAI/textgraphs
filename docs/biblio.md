@@ -39,6 +39,13 @@ URLs are listed.
 *JMLR* (2017–11–17)
 > We introduce two new formalisms for modeling structured data, and show that they can both capture rich structure and scale to big data. The first, hinge-loss Markov random fields (HL-MRFs), is a new kind of probabilistic graphical model that generalizes different approaches to convex inference.
 
+### barrière2016elsf
+
+["Entities, Labels, and Surface Forms"](https://doi.org/10.1007/978-3-319-41337-2_2)  
+**Caroline Barrière**  
+_Springer_ (2016-11-19)
+> We will look into a first obstacle toward this seemingly simple IE goal: the fact that entities do not have normalized names. Instead, entities can be referred to by many different surface forms.
+
 ## – C –
 
 ### cabot2023redfm
@@ -105,6 +112,13 @@ Morgan and Claypool (pre-print 2020)
 **Jaejun Lee**, **Chanyoung Chung**, **Joyce Jiyoung Whang**  
 _ICML_ (2023–08–17)
 > In this paper, we propose an INductive knowledge GRAph eMbedding method, InGram, that can generate embeddings of new relations as well as new entities at inference time.
+
+### loganlpgs19
+
+["Barack's Wife Hillary: Using Knowledge-Graphs for Fact-Aware Language Modeling"](https://arxiv.org/abs/1906.07241)  
+**Robert L. Logan IV**, **Nelson F. Liu**, **Matthew E. Peters**, **Matt Gardner**, **Sameer Singh**  
+_ACL_ (2019-06-20)
+> We introduce the knowledge graph language model (KGLM), a neural language model with mechanisms for selecting and copying facts from a knowledge graph that are relevant to the context.
 
 ## – M –
 

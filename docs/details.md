@@ -31,14 +31,16 @@ For more details about this approach, see the recent talks:
 
 ## Related Work
 
-Other good tutorials (during 2023) which include related material:
+Other good tutorials (circa 2023-ish) which include related material:
 
-  * ["Natural Intelligence is All You Need™"](https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4)
-  **Vincent Warmerdam**, PyData Amsterdam (2023-09-15)
-  * ["How to Convert Any Text Into a Graph of Concepts"](https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a)
-  **Rahul Nayak**, _Towards Data Science_ (2023-11-09)
-  * ["Extracting Relation from Sentence using LLM"](https://medium.com/@nizami_muhammad/extracting-relation-from-sentence-using-llm-597d0c0310a8)
-  **Muhammad Nizami** _Medium_ (2023-11-15)
+  * ["Natural Intelligence is All You Need™"](https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4)  
+**Vincent Warmerdam**, PyData Amsterdam (2023-09-15)
+
+  * ["How to Convert Any Text Into a Graph of Concepts"](https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a)  
+**Rahul Nayak**, _Towards Data Science_ (2023-11-09)
+
+  * ["Extracting Relation from Sentence using LLM"](https://medium.com/@nizami_muhammad/extracting-relation-from-sentence-using-llm-597d0c0310a8)  
+**Muhammad Nizami** _Medium_ (2023-11-15)
 
 
 ## Methods
