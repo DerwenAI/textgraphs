@@ -1,5 +1,5 @@
 site_name: TextGraphs
-site_description: TextGraphs + LLMs + Graph ML
+site_description: Explore uses of large language models (LLMs) in semi-automated knowledge graph (KG) construction from unstructured text sources, with human-in-the-loop (HITL) affordances to incorporate guidance from domain experts.
 site_url: https://github.com/DerwenAI/textgraphs
 site_author: TextGraphs contributors, with Derwen, Inc.
 
@@ -9,22 +9,44 @@ repo_name: DerwenAI/textgraphs
 copyright: Source code and documentation are <strong><a href="https://github.com/DerwenAI/textgraphs/blob/main/LICENSE" target="_blank">licensed</a></strong> under an MIT License; Copyright &copy; 2023-2024 <strong><a href="https://derwen.ai/" target="_blank">Derwen, Inc.</a></strong>
 
 nav:
-    - Home: index.md
+    - Home:
+        - Overview: index.md
+        - Getting Started: start.md
 
-    - User Guide:
-        - TL;DR: tldr.md
-        - Implementation Details: details.md
-        - Build Instructions: build.md
+    - Project Report:
+        - Introduction:
+            - Abstract: abstract.md
+            - Project Objectives: objectives.md
+            - Natural Language Processing: nlp.md
+            - Graph Representation: graph.md
+            - Related Work: related.md
+        - Contributions:
+            - Lemma Graph: lemma.md
+            - Probabilistic Graph Features: prob.md
+            - Graph Levels of Detail: glod.md
+            - Topological Transforms: topo.md
+        - Methods:
+            - Stepwise Description: methods.md
+            - Implementation Details: details.md
+            - Leveraging Domain Expertise: hitl.md
+            - Data-First Strategy: strategy.md
+        - Conclusions: conclude.md
+
+    - Research Guides:
+        - Acknowledgements: ack.md
+        - Bibliography: biblio.md
+        - Glossary: glossary.md
+        - Appendix:
+            - ML OSS Evaluation Rubric: rubric.md
 
     - Tutorial:
+        - Syllabus: tutorial.md
         - Example Usage: ex0_0.md
         - Replicating "InGram": ex1_0.md
         - Using Bootstrap Definitions: ex2_0.md
-
     - Technical Reference:
+        - Build Instructions: build.md
         - Package Reference: ref.md
-
-    - Bibliography: biblio.md
 
 theme:
   name: material

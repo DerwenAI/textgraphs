@@ -1,5 +1,7 @@
 # Bibliography
 
+<img src="../assets/nouns/biblio.png" alt="books by b a r z i n from the Noun Project" />
+
 Where possible, the bibliography entries use conventions at
 <https://www.bibsonomy.org/>
 for [*citation keys*](https://bibdesk.sourceforge.io/manual/BibDeskHelp_2.html).
@@ -21,7 +23,7 @@ URLs are listed.
 ["SpanMarker for Named Entity Recognition"](https://raw.githubusercontent.com/tomaarsen/SpanMarkerNER/main/thesis.pdf)  
 **Tom Aarsen**  
 *Radboud University* (2023-06-01)
-> A span-level Named Entity Recognition (NER) model that aims to improve performance while reducing computational requirements. SpanMarker leverages special marker tokens and utilizes BERT-style encoders with position IDs and attention mask matrices to capture contextual information effectively
+> A span-level Named Entity Recognition (NER) model that aims to improve performance while reducing computational requirements. SpanMarker leverages special marker tokens and utilizes BERT-style encoders with position IDs and attention mask matrices to capture contextual information effectively.
 
 ### aue07dbpedia
 
@@ -46,6 +48,13 @@ URLs are listed.
 _Springer_ (2016-11-19)
 > We will look into a first obstacle toward this seemingly simple IE goal: the fact that entities do not have normalized names. Instead, entities can be referred to by many different surface forms.
 
+### besta2024topo
+
+["Topologies of Reasoning: Demystifying Chains, Trees, and Graphs of Thoughts"](https://arxiv.org/abs/2401.14295)  
+**Maciej Besta**, **Florim Memedi**, **Zhenyu Zhang**, **Robert Gerstenberger**, **Nils Blach**, **Piotr Nyczyk**, **Marcin Copik**, **Grzegorz Kwasniewski**, **Jurgen Müller**, **Lukas Gianinazzi**, **Ales Kubicek**, **Hubert Niewiadomski**, **Onur Mutlu**, **Torsten Hoefler**
+_ETH Zurich_ (2024-01-25)
+> Introducing a blueprint and an accompanying taxonomy of prompting schemes, focusing on the underlying structure of reasoning.
+
 ## – C –
 
 ### cabot2023redfm
@@ -64,6 +73,14 @@ _ACL_ (2023-06-19)
 _ISWC_ (2014-10-19)
 > We introduce new RDF exports that connect Wikidata to the Linked Data Web. We explain the data model of Wikidata and discuss its encoding in RDF. Moreover, we introduce several partial exports that provide more selective or simplified views on the data.
 
+## – F –
+
+### feng2023kuzu
+
+["KÙZU Graph Database Management System"](https://www.cidrdb.org/cidr2023/papers/p48-jin.pdf)  
+**Xiyang Feng**, **Guodong Jin**, **Ziyi Chen**, **Chang Liu**, **Semih Salihoğlu**  
+_CIDR_ (2023-01-08)
+> We present Kùzu, a new GDBMS we are developing at University of Waterloo that aims to integrate state-of-art storage, indexing, and query processing techniques to highly optimize for this feature set.
 
 ## – G –
 
@@ -75,6 +92,13 @@ preprint (2023–10–06)
 > ULTRA builds relational representations as a function conditioned on their interactions. Such a conditioning strategy allows a pre-trained ULTRA model to inductively generalize to any unseen KG with any relation vocabulary and to be fine-tuned on any graph.
 
 ## – H –
+
+### hagberg2008
+
+["Exploring network structure, dynamics, and function using NetworkX"](https://conference.scipy.org/proceedings/SciPy2008/paper_2/)  
+**Aric A. Hagberg**, **Daniel A. Schult**, **Pieter J. Swart**  
+_SciPy2008_ (2008-08-19)
+> NetworkX is a Python language package for exploration and analysis of networks and network algorithms. The core package provides data structures for representing many types of networks, or graphs, including simple graphs, directed graphs, and graphs with parallel edges and self loops.
 
 ### hahnr88
 
@@ -96,6 +120,13 @@ Morgan and Claypool (pre-print 2020)
 **Xu Han**, **Tianyu Gao**, **Yuan Yao**, **Deming Ye**, **Zhiyuan Liu**, **Maosong Sun**  
 *EMNLP* (2019-11-03)
 > OpenNRE is an open-source and extensible toolkit that provides a unified framework to implement neural models for relation extraction (RE).
+
+### hartig14
+
+["Reconciliation of RDF* and Property Graphs"](https://arxiv.org/abs/1409.3288)  
+**Olaf Hartig**  
+_CoRR_ (2014-11-14)
+> The document proposes a formalization of the PG model and introduces well-defined transformations between PGs and RDF.
 
 ### honnibal2020spacy
 
@@ -122,6 +153,13 @@ _ACL_ (2019-06-20)
 
 ## – M –
 
+### martonsv17
+
+["Formalising openCypher Graph Queries in Relational Algebra"](https://doi.org/10.1007/978-3-319-66917-5_13)  
+**József Marton**, **Gábor Szárnyas**, **Dániel Varró**  
+_ADBIS_ (2017-08-25)
+> We present a formal specification for openCypher, a high-level declarative graph query language with an ongoing standardisation effort.
+
 ### mihalcea04textrank
 
 ["TextRank: Bringing Order into Text"](https://www.aclweb.org/anthology/W04-3252/)  
@@ -145,6 +183,31 @@ _ACL_ (2019-06-20)
 *Derwen* (2023-11-12)
 > How can we work with graph data in more abstracted, aggregate perspectives? While we can run queries on graph data to compute aggregate measures, we don’t have programmatic means of “zooming out” to consider a large graph the way that one zooms out when using an online map.
 
+## - Q -
+
+### qin2023sgr
+
+["Semantic Random Walk for Graph Representation Learning in Attributed Graphs"](https://arxiv.org/abs/2305.06531)  
+**Meng Qin**  
+*Hong Kong University of Science and Technology* (2023-05-11)
+> We introduced a novel SGR method to generally formulate the network embedding in attributed graphs as a high-order proximity based embedding task of an auxilairy weighted graph with heterogeneous entities.
+
+### qin2024irwe
+
+["IRWE: Inductive Random Walk for Joint Inference of Identity and Position Network Embedding"](https://arxiv.org/abs/2401.00651)  
+**Meng Qin**, **Dit-Yan Yeung**  
+*Hong Kong University of Science and Technology* (2024-01-01)
+> Since nodes in a community should be densely connected, nodes within the same community are more likely to be reached via RWs compared with those in different communities. Therefore, nodes with similar positions (e.g., in the same community) are highly believed to have similar RW statistics.
+
+## - R -
+
+### ramage2009rwt
+
+["Random walks for text semantic similarity"](https://dl.acm.org/doi/10.5555/1708124.1708131)  
+**Daniel Ramage**, **Anna Rafferty**, **Christopher Manning**  
+_ACL-IJCNLP_ (2009-09-07)
+> Our algorithm aggregates local relatedness information via a random walk over a graph constructed from an underlying lexical resource. The stationary distribution of the graph walk forms a “semantic signature” that can be compared to another such distribution to get a relatedness score for texts.
+
 ## – W –
 
 ### warmerdam2023pydata
@@ -153,6 +216,13 @@ _ACL_ (2019-06-20)
 **Vincent Warmerdam**  
 *PyData Amsterdam* (2023-09-15)
 > In this talk I will try to show you what might happen if you allow yourself the creative freedom to rethink and reinvent common practices once in a while. As it turns out, in order to do that, natural intelligence is all you need. And we may start needing a lot of it in the near future.
+
+### wen2023mindmap
+
+["MindMap: Knowledge Graph Prompting Sparks Graph of Thoughts in Large Language Models"](https://arxiv.org/abs/2308.09729)  
+**Yilin Wen**, **Zifeng Wang**, **Jimeng Sun**
+_arXiv_ (2023-08-17)
+> We build a prompting pipeline that endows LLMs with the capability of comprehending KG inputs and inferring with a combined implicit knowledge and the retrieved external knowledge.
 
 ### wolf2020transformers
 
