@@ -1,5 +1,7 @@
 # Conclusions
 
+**DRAFT** (WIP)
+
 `TextGraphs` library provides a highly configurable and extensible open source Python library for the integration and evaluation of several LLM components. This has been built with attention to allowing for concurrency and parallelism for high-performance computing on distributed systems.
 
   - HF space: <https://huggingface.co/spaces/DerwenAI/textgraphs>
@@ -51,4 +53,5 @@ Note that reproducibility rates are abysmally low for open source which accompan
 Few project install correctly, and fewer still run without exceptions.
 Even among the better available OSS project for a given research topic (e.g., _graph embeddings_, _relation extraction_) tend to not have been maintained for years. Of the projects which run, few reproduce their published results, and most are oriented toward command-line (CLI) use to prove specific benchmarks claims.
 These tend to be difficult to rework into production-quality libraries, due to concerns about performance, security, licensing, etc.
+
 As an outcome of this inquiry, this project presents a rubric for evaluating research papers and their associated code, based on reproducibility and eventual usefulness in software implementations.

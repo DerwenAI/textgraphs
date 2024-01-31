@@ -7,7 +7,7 @@
 Install from [PyPi](https://pypi.python.org/pypi/textgraphs):
 
 ```bash
-python3 -m pip install -u textgraphs
+python3 -m pip install -U textgraphs
 ```
 
 ## Sample Usage

@@ -13,37 +13,37 @@ nav:
         - Overview: index.md
         - Getting Started: start.md
 
-    - Project Report:
+    - Project Report (DRAFT):
         - Introduction:
             - Abstract: abstract.md
             - Project Objectives: objectives.md
             - Natural Language Processing: nlp.md
             - Graph Representation: graph.md
             - Related Work: related.md
-        - Contributions:
+        - Definitions:
             - Lemma Graph: lemma.md
             - Probabilistic Graph Features: prob.md
             - Graph Levels of Detail: glod.md
             - Topological Transforms: topo.md
         - Methods:
-            - Stepwise Description: methods.md
+            - Technical Approach: methods.md
             - Implementation Details: details.md
             - Leveraging Domain Expertise: hitl.md
             - Data-First Strategy: strategy.md
         - Conclusions: conclude.md
-
-    - Research Guides:
-        - Acknowledgements: ack.md
-        - Bibliography: biblio.md
-        - Glossary: glossary.md
-        - Appendix:
-            - ML OSS Evaluation Rubric: rubric.md
+        - Research Guides:
+            - Acknowledgements: ack.md
+            - Bibliography: biblio.md
+            - Glossary: glossary.md
+            - Appendix:
+                - ML OSS Evaluation Rubric: rubric.md
 
     - Tutorial:
         - Syllabus: tutorial.md
         - Example Usage: ex0_0.md
         - Replicating "InGram": ex1_0.md
         - Using Bootstrap Definitions: ex2_0.md
+
     - Technical Reference:
         - Build Instructions: build.md
         - Package Reference: ref.md

@@ -1,5 +1,7 @@
 # Introduction
 
+**DRAFT** (WIP)
+
 The primary goal of this project is to improve semi-automated KG construction from large collections of unstructured text sources, while leveraging feedback from domain experts and maintaining quality checks for the aggregated results.
 
 Typical downstream use cases for these KGs include collecting data for industrial optimization use cases based on _operations research_, as mechanisms enabling structured LLM reasoning [#besta2024topo](biblio.md#besta2024topo), and potentially new methods of integrating KG linked data directly into LLM inference [#wen2023mindmap](biblio.md#wen2023mindmap)

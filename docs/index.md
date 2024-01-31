@@ -4,6 +4,11 @@
 
 Welcome to the **TextGraphs** library...
 
+  - demo: <https://huggingface.co/spaces/DerwenAI/textgraphs>
+  - code: <https://github.com/DerwenAI/textgraphs>
+  - bibliography: <https://derwen.ai/docs/txg/biblio>
+
+
 ## Overview
 
 _Explore uses of large language models (LLMs) in semi-automated knowledge graph (KG) construction from unstructured text sources, with human-in-the-loop (HITL) affordances to incorporate guidance from domain experts._
@@ -23,14 +28,10 @@ To address challenges in this problem, this project considers improved means of 
 In addition, a range of methods are considered for filtering and selecting elements of the output stream, re-composing them into KGs.
 This has a side-effect of providing steps toward better pattern identification and variable abstraction layers for graph data, for _graph levels of detail_ (GLOD).
 
-While many papers aim to evaluate benchmarks, this line of inquiry focuses on integration:
+Many papers aim to evaluate benchmarks, in contrast this line of inquiry focuses on integration:
 means of combining multiple complementary research projects;
 how to evaluate the outcomes of other projects to assess their potential usefulness in production-quality libraries;
 and suggested directions for improving the LLM-based components of NLP workflows used to construct KGs.
-
-  - demo: <https://huggingface.co/spaces/DerwenAI/textgraphs>
-  - code: <https://github.com/DerwenAI/textgraphs>
-  - bibliography: <https://derwen.ai/docs/txg/biblio>
 
 
 ## Index Terms

@@ -11,6 +11,5 @@ Other projects have investigated related lines of inquiry, such as:
 **Muhammad Nizami** _Medium_ (2023-11-15)
 
   * ["Deep NLP on SF Literature"](https://github.com/kkrishna24/deep_nlp_on_sf_literature)  
-  **Krishna Krishna** _GitHub_ (2024-01-25)
-
+  **Krishna Tripathi** _GitHub_ (2024-01-25)  
 which goes the additional step of using these results to rework training data and train models

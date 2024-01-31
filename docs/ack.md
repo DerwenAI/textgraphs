@@ -4,8 +4,8 @@
 
 Contributors:
 
-  - Zahid, Nihatha, et al., @ BASF
+  - Jürgen Müller, Zahid Abul-Basher, Nihatha Lathiff, et al., @ BASF
+  - open source sponsors for Derwen.ai
   - perspectives from the KùzuDB.com team
   - perspectives from the Argilla.io team
-  - open source sponsors for Derwen.ai
-  - feedback and suggestions from participants at the [Dagstuhl Seminar 24061](https://www.dagstuhl.de/24061)
+  - feedback and suggestions from participants at [Dagstuhl Seminar 24061](https://www.dagstuhl.de/24061)
