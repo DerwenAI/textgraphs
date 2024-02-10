@@ -6,7 +6,8 @@ Welcome to the **TextGraphs** library...
 
   - demo: <https://huggingface.co/spaces/DerwenAI/textgraphs>
   - code: <https://github.com/DerwenAI/textgraphs>
-  - bibliography: <https://derwen.ai/docs/txg/biblio>
+  - biblio: <https://derwen.ai/docs/txg/biblio>
+  - DOI: 10.5281/zenodo.10431783
 
 
 ## Overview

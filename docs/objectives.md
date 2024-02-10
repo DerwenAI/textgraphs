@@ -12,7 +12,7 @@ A set of questions follows from this line of inquiry:
 
 **RQ1**: can workflows be defined which integrate LLM-based components and generate _composable elements_ for KGs, while managing the quality of the generated results?
 
-**RQ2**: can topological analysis and decomposition of graph data help inform better ways to generating graph elements, e.g., by leveraging patterns within graphs (motif) and graph abstraction layers?
+**RQ2**: can topological analysis and decomposition of graph data help inform better ways to generating graph elements, e.g., by leveraging patterns within graphs (network motifs) and graph abstraction layers?
 
 **RQ3**: where might it be possible to improve data quality for -- training data, benchmarks, evals, etc. -- then iterate to train more effective LLM-based components?
 

@@ -25,7 +25,7 @@ URLs are listed.
 *Radboud University* (2023-06-01)
 > A span-level Named Entity Recognition (NER) model that aims to improve performance while reducing computational requirements. SpanMarker leverages special marker tokens and utilizes BERT-style encoders with position IDs and attention mask matrices to capture contextual information effectively.
 
-### aue07dbpedia
+### auer07dbpedia
 
 ["DBpedia: A Nucleus for a Web of Open Data"](https://doi.org/10.1007/978-3-540-76298-0_52)  
 **Sören Auer**, **Christian Bizer**, **Georgi Kobilarov**, **Jens Lehmann**, **Richard Cyganiak**, **Zachary Ives**  

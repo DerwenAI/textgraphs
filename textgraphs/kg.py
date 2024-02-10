@@ -888,41 +888,46 @@ candidates linked entities
                     ic(ent.start, tok_idx)
 
                 if ent.start == tok_idx:
-                    if debug:
-                        ic(ent.text, ent.start, len(ent))
-                        ic(ent.kb_id_, ent._.dbpedia_raw_result["@similarityScore"])
-                        ic(ent._.dbpedia_raw_result)
-
-                    prob: float = float(ent._.dbpedia_raw_result["@similarityScore"])
-                    count: int = int(ent._.dbpedia_raw_result["@support"])
-
-                    if tok.pos == "PROPN" and prob >= self.min_similarity:
-                        kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
-                            ent.text,
-                            debug = debug,
-                        )
-
+                    try:
                         if debug:
-                            ic(kg_ent)
+                            ic(ent.text, ent.start, len(ent))
+                            ic(ent.kb_id_, ent._.dbpedia_raw_result["@similarityScore"])
+                            ic(ent._.dbpedia_raw_result)
 
-                        if kg_ent is not None and kg_ent.prob > self.min_alias:  # type: ignore
-                            iri: str = ent.kb_id_
+                        prob: float = float(ent._.dbpedia_raw_result["@similarityScore"])
+                        count: int = int(ent._.dbpedia_raw_result["@support"])
 
-                            dbp_link: LinkedEntity = LinkedEntity(
-                                ent,
-                                iri,
-                                len(ent),
-                                "dbpedia",
-                                prob,
-                                i,
-                                kg_ent,  # type: ignore
-                                count = count,
+                        if tok.pos == "PROPN" and prob >= self.min_similarity:
+                            kg_ent: typing.Optional[ KGSearchHit ] = self.dbpedia_search_entity(  # type: ignore  # pylint: disable=C0301
+                                ent.text,
+                                debug = debug,
                             )
 
                             if debug:
-                                ic("found", dbp_link)
+                                ic(kg_ent)
 
-                            yield dbp_link
+                            if kg_ent is not None and kg_ent.prob > self.min_alias:  # type: ignore
+                                iri: str = ent.kb_id_
+
+                                dbp_link: LinkedEntity = LinkedEntity(
+                                    ent,
+                                    iri,
+                                    len(ent),
+                                    "dbpedia",
+                                    prob,
+                                    i,
+                                    kg_ent,  # type: ignore
+                                    count = count,
+                                )
+
+                                if debug:
+                                    ic("found", dbp_link)
+
+                                yield dbp_link
+
+                    except Exception as ex:  # pylint: disable=W0718
+                        ic(ex)
+                        traceback.print_exc()
 
                     ent_idx += 1
 

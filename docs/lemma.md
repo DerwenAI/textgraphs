@@ -3,7 +3,9 @@
 This project introduces the notion of a _lemma graph_ as an intermediate representation.
 Effectively, this provides a kind of cache during the processing of each "chunk" of text.
 Think of the end result as "enhanced tokenization" for text used to generate graph data elements.
-Other projects such as [#wen2023mindmap](biblio.md#wen2023mindmap) might call this an evidence graph.
+Other projects might call this by different names:
+an "evidence graph" in [#wen2023mindmap](biblio.md#wen2023mindmap)
+or a "dynamically growing local KG" in [#loganlpgs19](biblio.md#loganlpgs19).
 
 The lemma graph collects metadata from NLP parsing, entity linking, etc., which generally get discarded in many applications.
 Therefore the lemma graph becomes rather "noisy", and in most cases would be too big to store across the analysis of a large corpus.

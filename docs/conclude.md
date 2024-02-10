@@ -4,12 +4,6 @@
 
 `TextGraphs` library provides a highly configurable and extensible open source Python library for the integration and evaluation of several LLM components. This has been built with attention to allowing for concurrency and parallelism for high-performance computing on distributed systems.
 
-  - HF space: <https://huggingface.co/spaces/DerwenAI/textgraphs>
-  - repo: <https://github.com/DerwenAI/textgraphs>
-  - docs: <https://derwen.ai/docs/txg/>
-  - biblio: <https://derwen.ai/docs/txg/biblio/>
-  - DOI: 10.5281/zenodo.10431783
-
 TODO:
 
   - leverage co-reference
@@ -21,16 +15,16 @@ While the papers in this area compare against benchmarks, their training dataset
 This precludes downstream use of the inferred relations for semantic inference.
 Ultimately, how can better training data be developed -- e.g., for relation extraction -- to improve large models used in constructing/augmenting knowledge graphs?
 
-Observation: 
+## Questions for Follow Up Research
+
 Many existing projects produce results which are **descriptive, but not computable**.
 However, given recent innovations, such as _DPO_, there appear to be many opportunities for reworking the training datasets used in
 NRE and RE models, following the pattern of `Notus`
 
+**R1**: we have demonstrated how to leverage LLM components while emphasizing HITL (domain experts) and quality of results
 
-**R1**: demonstrated how to leverage LLM components while emphasizing HITL (domain experts) and quality of results
 
-
-**R2**: suggested areas where investments in data quality 
+**R2**: we have suggested areas where investments in data quality 
 may provide substantial gains
 
 One key take-away from this project is that the model deployments are relatively haphazard across a wide spectrum of performance: some of the open source dependencies use efficient frameworks such as Hugging Face `transformers` to load models, while others use ad-hoc approaches which are much less performant. 
@@ -43,7 +37,7 @@ However, a more effective approach would be to make investments in data quality 
 Data-first iterations on the model dependencies can alleviate much of this problem.
 
 
-**R3**: proposed rubric for evaluating/rating ML open source 
+**R3**: we have proposed a rubric for evaluating/rating ML open source 
 w.r.t. production use cases
 
 This project integrates available open source projects across a wide range of NLP topics.
@@ -55,3 +49,5 @@ Even among the better available OSS project for a given research topic (e.g., _g
 These tend to be difficult to rework into production-quality libraries, due to concerns about performance, security, licensing, etc.
 
 As an outcome of this inquiry, this project presents a rubric for evaluating research papers and their associated code, based on reproducibility and eventual usefulness in software implementations.
+
+The views expressed are those of the authors and do not reflect the official policy or position of the funding organizations.
