@@ -1,5 +1,3 @@
-# Implementation Details
-
 This project Implements an LLM-augmented `textgraph` algorithm for
 constructing a _lemma graph_ from raw, unstructured text source.
 
@@ -21,27 +19,13 @@ This library integrates code from:
   * [`PyTextRank`](https://github.com/DerwenAI/pytextrank/)
 
 
-For more details about this approach, see the recent talks:
+For more background about early efforts which led to this line of inquiry, see the recent talks:
 
   * ["Language, Graphs, and AI in Industry"](https://derwen.ai/s/mqqm)
   **Paco Nathan**, K1st World (2023-10-11)  ([video](https://derwen.ai/s/4h2kswhrm3gc))
   * ["Language Tools for Creators"](https://derwen.ai/s/rhvg)
   **Paco Nathan**, FOSSY (2023-07-13)
 
-
-## Related Work
-
-Other good tutorials (during 2023) which include related material:
-
-  * ["Natural Intelligence is All You Need™"](https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4)
-  **Vincent Warmerdam**, PyData Amsterdam (2023-09-15)
-  * ["How to Convert Any Text Into a Graph of Concepts"](https://towardsdatascience.com/how-to-convert-any-text-into-a-graph-of-concepts-110844f22a1a)
-  **Rahul Nayak**, _Towards Data Science_ (2023-11-09)
-  * ["Extracting Relation from Sentence using LLM"](https://medium.com/@nizami_muhammad/extracting-relation-from-sentence-using-llm-597d0c0310a8)
-  **Muhammad Nizami** _Medium_ (2023-11-15)
-
-
-## Methods
 
 The `TextGraphs` library shows integrations of several of these kinds
 of components, complemented with use of graph queries, graph algorithms,
@@ -78,18 +62,3 @@ can be condensed into relatively refined knowledge graph elements.
 
 Note that while the `spaCy` library for NLP plays a central role, the
 `TextGraphs` library is not intended to become a `spaCy` pipeline.
-
-
-## Lemma Graph
-
-With going into lots of detail, the tokenization used in many NLP
-projects and related LLM research tends to throw away valuable data.
-What might result from leveraging that data instead?
-
-Based on what was learned, this work introduces the notion of using a
-_lemma graph_ which captures the intermediate results from parsed raw
-text.
-This is intended as a preliminary step prior to HITL feedback.
-
-Elements extracted from _lemma graphs_ can be used downstream to
-construct or augment knowledge graphs.

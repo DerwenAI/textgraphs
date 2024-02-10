@@ -16,7 +16,7 @@ packages = [ "textgraphs" ]
 
 [tool.setuptools_scm]
 
-# empty is fine
+# required section; empty contents is fine
 
 
 [project.urls]
