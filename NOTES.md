@@ -1,5 +1,11 @@
 TODO:
 
+  * can we build a causal graph of the provenance?
+    - https://www.pywhy.org/dowhy/v0.11.1/
+
+  * target publications:
+    - https://drops.dagstuhl.de/entities/issue/TGDK-volume-1-issue-1
+
   * impl a _semantic random walk_ from a source KG
 
   * link entities for lemmas, noun chunks using MediaWiki lookups?

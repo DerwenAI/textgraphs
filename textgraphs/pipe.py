@@ -251,8 +251,14 @@ a list of components for inferring relations
         # `ner_doc` provides the merged-entity spans from NER
         self.ner_doc: spacy.tokens.Doc = ner_pipe(self.text)
 
-        # `aux_doc` e.g.,  span re-indexing for Spotlight entity linking
-        self.aux_doc: spacy.tokens.Doc = aux_pipe(self.text)
+        # `aux_doc` e.g., re-indexing spans for Spotlight entity linking
+        # NB: this is optional, in case the Spotlight service is down
+        self.aux_doc: typing.Optional[ spacy.tokens.Doc ] = None
+
+        try:
+            self.aux_doc = aux_pipe(self.text)
+        except Exception as ex:  # pylint: disable=W0718
+            ic(ex)
 
         self.kg: KnowledgeGraph = kg  # pylint: disable=C0103
         self.infer_rels: typing.List[ InferRel ] = infer_rels

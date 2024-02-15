@@ -848,7 +848,7 @@ LIMIT 1000
     ######################################################################
     ## entity linking
 
-    def _link_spotlight_entities (  # pylint: disable=R0914
+    def _link_spotlight_entities (  # pylint: disable=R0912,R0914
         self,
         pipe: Pipeline,
         *,
@@ -867,7 +867,10 @@ debugging flag
     yields:
 candidates linked entities
         """
-        ents: typing.List[ spacy.tokens.span.Span ] = list(pipe.aux_doc.ents)
+        ents: typing.List[ spacy.tokens.span.Span ] = []
+
+        if pipe.aux_doc is not None:
+            list(pipe.aux_doc.ents)
 
         if debug:
             ic(ents)
