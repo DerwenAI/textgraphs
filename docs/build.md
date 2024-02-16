@@ -28,6 +28,12 @@ and to configure that locally:
 pre-commit install --hook-type pre-commit
 ```
 
+Also make sure you have [`git-lfs`](https://git-lfs.com/) installed:
+
+```
+git lfs install
+```
+
 
 ## Test Coverage
 

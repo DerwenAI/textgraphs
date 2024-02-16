@@ -1,5 +1,9 @@
 TODO:
 
+  * RAG example
+    - https://docs.llamaindex.ai/en/latest/examples/index_structs/knowledge_graph/KuzuGraphDemo.html#query-with-embeddings
+
+
   * can we build a causal graph of the provenance?
     - https://www.pywhy.org/dowhy/v0.11.1/
 
@@ -13,9 +17,6 @@ TODO:
 
   * eval clustering/community detection for GOR?
     - https://github.com/MengLiuPurdue/LocalGraphClustering
-
-  * RAG example
-    - https://docs.llamaindex.ai/en/latest/examples/index_structs/knowledge_graph/KuzuGraphDemo.html#query-with-embeddings
 
   * extend GOR to replicate NodePiece/ULTRA ?
 
