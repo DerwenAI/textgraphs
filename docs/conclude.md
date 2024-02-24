@@ -15,7 +15,10 @@ While the papers in this area compare against benchmarks, their training dataset
 This precludes downstream use of the inferred relations for semantic inference.
 Ultimately, how can better training data be developed -- e.g., for relation extraction -- to improve large models used in constructing/augmenting knowledge graphs?
 
-## Questions for Follow Up Research
+
+## Questions for Follow-Up Research
+
+The views expressed herein are those of the authors and do not reflect the official policy or position of the funding organizations.
 
 Many existing projects produce results which are **descriptive, but not computable**.
 However, given recent innovations, such as _DPO_, there appear to be many opportunities for reworking the training datasets used in
@@ -24,20 +27,7 @@ NRE and RE models, following the pattern of `Notus`
 **R1**: we have demonstrated how to leverage LLM components while emphasizing HITL (domain experts) and quality of results
 
 
-**R2**: we have suggested areas where investments in data quality 
-may provide substantial gains
-
-One key take-away from this project is that the model deployments are relatively haphazard across a wide spectrum of performance: some of the open source dependencies use efficient frameworks such as Hugging Face `transformers` to load models, while others use ad-hoc approaches which are much less performant. 
-
-Granted, use of LLMs and other deep learning models is expected to increase computational requirements substantially.
-Given the integration of APIs, the compute, memory, and network requirements for running the `TextGraphs` library in product can be quite large. 
-Software engineering optimizations can reduce these requirements substantially through use of hardware acceleration, localized services, proxy/caching, and concurrency.
-
-However, a more effective approach would be to make investments in data quality (training datasets, benchmarks, evals, etc.) for gains within the core technologies used here: NER, RE, etc.
-Data-first iterations on the model dependencies can alleviate much of this problem.
-
-
-**R3**: we have proposed a rubric for evaluating/rating ML open source 
+**R2**: we have proposed a rubric for evaluating/rating ML open source 
 w.r.t. production use cases
 
 This project integrates available open source projects across a wide range of NLP topics.
@@ -50,4 +40,15 @@ These tend to be difficult to rework into production-quality libraries, due to c
 
 As an outcome of this inquiry, this project presents a rubric for evaluating research papers and their associated code, based on reproducibility and eventual usefulness in software implementations.
 
-The views expressed are those of the authors and do not reflect the official policy or position of the funding organizations.
+
+**R3**: we have suggested areas where investments in data quality 
+may provide substantial gains
+
+One key take-away from this project is that the model deployments are relatively haphazard across a wide spectrum of performance: some of the open source dependencies use efficient frameworks such as Hugging Face `transformers` to load models, while others use ad-hoc approaches which are much less performant. 
+
+Granted, use of LLMs and other deep learning models is expected to increase computational requirements substantially.
+Given the integration of APIs, the compute, memory, and network requirements for running the `TextGraphs` library in product can be quite large. 
+Software engineering optimizations can reduce these requirements substantially through use of hardware acceleration, localized services, proxy/caching, and concurrency.
+
+However, a more effective approach would be to make investments in data quality (training datasets, benchmarks, evals, etc.) for gains within the core technologies used here: NER, RE, etc.
+Data-first iterations on the model dependencies can alleviate much of this problem.

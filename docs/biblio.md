@@ -22,14 +22,21 @@ URLs are listed.
 
 ["SpanMarker for Named Entity Recognition"](https://raw.githubusercontent.com/tomaarsen/SpanMarkerNER/main/thesis.pdf)  
 **Tom Aarsen**  
-*Radboud University* (2023-06-01)
+_Radboud University_ (2023-06-01)
 > A span-level Named Entity Recognition (NER) model that aims to improve performance while reducing computational requirements. SpanMarker leverages special marker tokens and utilizes BERT-style encoders with position IDs and attention mask matrices to capture contextual information effectively.
+
+### allen2023kellm
+
+["Knowledge Engineering using Large Language Models"](https://arxiv.org/abs/2310.00637)  
+**Bradley P. Allen**, **Lise Stork**, **Paul Groth**  
+_TGDK_ (2023-10-01)
+> Here, we outline the potential role of LLMs in knowledge engineering, identifying two central directions: 1) creating hybrid neuro-symbolic knowledge systems; and 2) enabling knowledge engineering in natural language.
 
 ### auer07dbpedia
 
 ["DBpedia: A Nucleus for a Web of Open Data"](https://doi.org/10.1007/978-3-540-76298-0_52)  
 **Sören Auer**, **Christian Bizer**, **Georgi Kobilarov**, **Jens Lehmann**, **Richard Cyganiak**, **Zachary Ives**  
-*ISWC* (2007-11-11)
+_ISWC_ (2007-11-11)
 > DBpedia is a community effort to extract structured information from Wikipedia and to make this information available on the Web. DBpedia allows you to ask sophisticated queries against datasets derived from Wikipedia and to link other datasets on the Web to Wikipedia data.
 
 ## – B –
@@ -38,7 +45,7 @@ URLs are listed.
 
 ["Hinge-Loss Markov Random Fields and Probabilistic Soft Logic"](https://arxiv.org/abs/1505.04406)  
 **Stephen Bach**, **Matthias Broecheler**, **Bert Huang**, **Lise Getoor**  
-*JMLR* (2017–11–17)
+_JMLR_ (2017–11–17)
 > We introduce two new formalisms for modeling structured data, and show that they can both capture rich structure and scale to big data. The first, hinge-loss Markov random fields (HL-MRFs), is a new kind of probabilistic graphical model that generalizes different approaches to convex inference.
 
 ### barrière2016elsf
@@ -63,6 +70,15 @@ _ETH Zurich_ (2024-01-25)
 **Pere-Lluís Huguet Cabot**, **Simone Tedeschi**, **Axel-Cyrille Ngonga Ngomo**, **Roberto Navigli**  
 _ACL_ (2023-06-19)
 > Relation Extraction (RE) is a task that identifies relationships between entities in a text, enabling the acquisition of relational facts and bridging the gap between natural language and structured knowledge. However, current RE models often rely on small datasets with low coverage of relation types, particularly when working with languages other than English. In this paper, we address the above issue and provide two new resources that enable the training and evaluation of multilingual RE systems.
+
+## – D –
+
+### dong2023pvldb
+
+["Generations of Knowledge Graphs: The Crazy Ideas and the Business Impact"](https://arxiv.org/abs/2308.14217)  
+**Xin Luna Dong**  
+_PVLDB_ (2023-09-27)
+> We describe three generations of knowledge graphs: entity-based KGs, which have been supporting general search and question answering (e.g., at Google and Bing); text-rich KGs, which have been supporting search and recommendations for products, bio-informatics, etc. (e.g., at Amazon and Alibaba); and the emerging integration of KGs and LLMs, which we call dual neural KGs.
 
 ## – E –
 
@@ -91,6 +107,20 @@ _CIDR_ (2023-01-08)
 preprint (2023–10–06)
 > ULTRA builds relational representations as a function conditioned on their interactions. Such a conditioning strategy allows a pre-trained ULTRA model to inductively generalize to any unseen KG with any relation vocabulary and to be fine-tuned on any graph.
 
+### gelling2023bgdm
+
+["Bridging graph data models: RDF, RDF-star, and property graphs as directed acyclic graphs"](https://arxiv.org/abs/2304.13097)  
+**Ewout Gelling**, **George Fletcher**, **Michael Schmidt**  
+_Eindhoven U_ (2023-04-25)
+> We introduce a novel unifying graph data model called Statement Graphs, which combines the traits of both RDF and LPG and achieves interoperability at different levels: it (a) provides the ability to manage RDF and LPG data as a single, interconnected graph, (b) supports querying over the integrated graph using any RDF or LPG query language, while (c) clearing the way for graph stack independent data exchange mechanisms and formats.
+
+### guitton2024gal
+
+["Graphs and Language"](https://guitton.co/posts/graphs-and-language)  
+**Louis Guitton**  
+_guitton.co_ (2024-02-15)
+> A rising tide lifts all boats, and the recent advances in LLMs are no exception. In this blog post, we will explore how Knowledge Graphs can benefit from LLMs, and vice versa.
+
 ## – H –
 
 ### hagberg2008
@@ -111,14 +141,14 @@ _ACM SIGOIS_ 9:2 (1988-04-01)
 
 [_Graph Representation Learning_](https://www.cs.mcgill.ca/~wlh/grl_book/)  
 **William Hamilton**  
-Morgan and Claypool (pre-print 2020)
+_Morgan and Claypool_ (pre-print 2020)
 > A brief but comprehensive introduction to graph representation learning, including methods for embedding graph data, graph neural networks, and deep generative models of graphs.
 
 ### hangyyls19
 
 ["OpenNRE: An Open and Extensible Toolkit for Neural Relation Extraction"](https://doi.org/10.18653/v1/D19-3029)  
 **Xu Han**, **Tianyu Gao**, **Yuan Yao**, **Deming Ye**, **Zhiyuan Liu**, **Maosong Sun**  
-*EMNLP* (2019-11-03)
+_EMNLP_ (2019-11-03)
 > OpenNRE is an open-source and extensible toolkit that provides a unified framework to implement neural models for relation extraction (RE).
 
 ### hartig14
@@ -128,11 +158,18 @@ Morgan and Claypool (pre-print 2020)
 _CoRR_ (2014-11-14)
 > The document proposes a formalization of the PG model and introduces well-defined transformations between PGs and RDF.
 
+### hofer2023construction
+
+["Construction of Knowledge Graphs: State and Challenges"](https://arxiv.org/abs/2302.11509)  
+**Marvin Hofer**, **Daniel Obraczka**, **Alieh Saeedi**, **Hanna Köpcke**, **Erhard Rahm**  
+preprint (2023-10-11)
+> We first discuss the main graph models for KGs and introduce the major requirements for future KG construction pipelines.
+
 ### honnibal2020spacy
 
 ["spaCy: Industrial-strength Natural Language Processing in Python"](https://doi.org/10.5281/zenodo.1212303)  
 **Matthew Honnibal**, **Ines Montani**, **Sofie Van Landeghem**, **Adriane Boyd**  
-*Explosion AI* (2016-10-18)
+_Explosion AI_ (2016-10-18)
 > spaCy is a library for advanced Natural Language Processing in Python and Cython. It's built on the very latest research, and was designed from day one to be used in real products.
 
 ## – L –
@@ -164,7 +201,7 @@ _ADBIS_ (2017-08-25)
 
 ["TextRank: Bringing Order into Text"](https://www.aclweb.org/anthology/W04-3252/)  
 **Rada Mihalcea**, **Paul Tarau**  
-*EMNLP* pp. 404-411 (2004-07-25)  
+_EMNLP_ (2004-07-25)  
 > In this paper, the authors introduce TextRank, a graph-based ranking model for text processing, and show how this model can be successfully used in natural language applications.
 
 ## – N –
@@ -173,33 +210,42 @@ _ADBIS_ (2017-08-25)
 
 ["PyTextRank, a Python implementation of TextRank for phrase extraction and summarization of text documents"](https://doi.org/10.5281/zenodo.4637885)  
 **Paco Nathan**, et al.  
-*Derwen* (2016-10-03)
+_Derwen_ (2016-10-03)
 > Python implementation of TextRank algorithms ("textgraphs") for phrase extraction
 
 ### nathan2023glod
 
 ["Graph Levels of Detail"](https://blog.derwen.ai/graph-levels-of-detail-ea4226abba55)  
 **Paco Nathan**  
-*Derwen* (2023-11-12)
+_Derwen_ (2023-11-12)
 > How can we work with graph data in more abstracted, aggregate perspectives? While we can run queries on graph data to compute aggregate measures, we don’t have programmatic means of “zooming out” to consider a large graph the way that one zooms out when using an online map.
 
-## - Q -
+## – P –
+
+### picco2023zshot
+
+["Zshot: An Open-source Framework for Zero-Shot Named Entity Recognition and Relation Extraction"](https://arxiv.org/abs/2307.13497)  
+**Gabriele Picco**, **Marcos Martínez Galindo**, **Alberto Purpura**, **Leopold Fuchs**, **Vanessa López**, **Hoang Thanh Lam**
+_ACL_ (2023-07-25)
+>  Our primary objective is to provide a platform that allows researchers to compare different stateof-the-art ZSL methods with standard benchmark datasets.
+
+## – Q –
 
 ### qin2023sgr
 
 ["Semantic Random Walk for Graph Representation Learning in Attributed Graphs"](https://arxiv.org/abs/2305.06531)  
 **Meng Qin**  
-*Hong Kong University of Science and Technology* (2023-05-11)
+_Hong Kong University of Science and Technology_ (2023-05-11)
 > We introduced a novel SGR method to generally formulate the network embedding in attributed graphs as a high-order proximity based embedding task of an auxilairy weighted graph with heterogeneous entities.
 
 ### qin2024irwe
 
 ["IRWE: Inductive Random Walk for Joint Inference of Identity and Position Network Embedding"](https://arxiv.org/abs/2401.00651)  
 **Meng Qin**, **Dit-Yan Yeung**  
-*Hong Kong University of Science and Technology* (2024-01-01)
+_Hong Kong University of Science and Technology_ (2024-01-01)
 > Since nodes in a community should be densely connected, nodes within the same community are more likely to be reached via RWs compared with those in different communities. Therefore, nodes with similar positions (e.g., in the same community) are highly believed to have similar RW statistics.
 
-## - R -
+## – R –
 
 ### ramage2009rwt
 
@@ -214,19 +260,19 @@ _ACL-IJCNLP_ (2009-09-07)
 
 ["Natural Intelligence is All You Need™"](https://youtu.be/C9p7suS-NGk?si=7Ohq3BV654ia2Im4)  
 **Vincent Warmerdam**  
-*PyData Amsterdam* (2023-09-15)
+_PyData Amsterdam_ (2023-09-15)
 > In this talk I will try to show you what might happen if you allow yourself the creative freedom to rethink and reinvent common practices once in a while. As it turns out, in order to do that, natural intelligence is all you need. And we may start needing a lot of it in the near future.
 
 ### wen2023mindmap
 
 ["MindMap: Knowledge Graph Prompting Sparks Graph of Thoughts in Large Language Models"](https://arxiv.org/abs/2308.09729)  
 **Yilin Wen**, **Zifeng Wang**, **Jimeng Sun**
-_arXiv_ (2023-08-17)
+_UIUC_ (2023-08-17)
 > We build a prompting pipeline that endows LLMs with the capability of comprehending KG inputs and inferring with a combined implicit knowledge and the retrieved external knowledge.
 
 ### wolf2020transformers
 
 ["Transformers: State-of-the-Art Natural Language Processing"](https://doi.org/10.18653/v1/2020.emnlp-demos.6)  
 **Thomas Wolf**, **Lysandre Debut**, **Victor Sanh**, **Julien Chaumond**, **Clement Delangue**, **Anthony Moi**, **Pierric Cistac**, **Tim Rault**, **Remi Louf**, **Morgan Funtowicz**, **Joe Davison**, **Sam Shleifer**, **Patrick von Platen**, **Clara Ma**, **Yacine Jernite**, **Julien Plu**, **Canwen Xu**, **Teven Le Scao**, **Sylvain Gugger**, **Mariama Drame**, **Quentin Lhoest**, **Alexander Rush**  
-*EMNLP* (2020-11-16)
+_EMNLP_ (2020-11-16)
 > The library consists of carefully engineered state-of-the art Transformer architectures under a unified API. Backing this library is a curated collection of pretrained models made by and available for the community.

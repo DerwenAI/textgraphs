@@ -6,8 +6,9 @@ While many papers proceed from a graph-theoretic definition `G = (V, E)` these t
 Industry analysts sometimes point to these two concerns being represented by competiting approaches, namely 
 _labeled property graphs_ (LPG) representation versus
 _semantic web standards_ defined by the World Wide Web Consortium (W3C).
-Efforts are in progress to harmonize both of these needs within the same graphs, such as [#hartig14](biblio.md#hartig14) for eventual standards.
-However, with some discipline in data modeling practices, both of these criteria can be met within current graph frameworks, provided that:
+Efforts are in progress to harmonize both of these needs within the same graphs, such as
+[#gelling2023bgdm](biblio.md#gelling2023bgdm) and [#hartig14](biblio.md#hartig14), which are on track toward eventual standards.
+Given some discipline in data modeling practices, both criteria can be met within current graph frameworks provided that:
 
   * nodes and edges each have specific labels which serve as IRIs that map to a set of controlled vocabularies
   * nodes and edges each have properties, which include probabilities from the point of generation
